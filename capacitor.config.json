@@ -1,0 +1,19 @@
+{
+  "appId": "com.geoapp.mobile",
+  "appName": "GéoApp",
+  "webDir": "build",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#667eea"
+    }
+  }
+}

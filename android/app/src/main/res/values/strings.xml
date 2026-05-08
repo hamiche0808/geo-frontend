@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GéoApp</string>
+    <string name="title_activity_main">GéoApp</string>
+    <string name="package_name">com.geoapp.mobile</string>
+    <string name="custom_url_scheme">com.geoapp.mobile</string>
+</resources>
