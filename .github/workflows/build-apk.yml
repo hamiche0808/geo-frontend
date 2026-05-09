@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,8 +49,30 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: geo-app-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ github.run_number }}"
+          name: "GeoLoc APK v${{ github.run_number }}"
+          body: |
+            ## 📱 GeoLoc APK
+            
+            **Version :** v${{ github.run_number }}
+            **Date :** ${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
+            
+            ### Installation
+            1. Téléchargez le fichier APK ci-dessous
+            2. Ouvrez-le sur votre téléphone Android
+            3. Autorisez l'installation d'applications provenant de sources inconnues
+            4. Profitez de GeoLoc !
+            
+            *Application web wrapped avec Capacitor. Données : OpenStreetMap · OpenRouteService · Open-Meteo · api.gouv.fr*
+          artifact: geo-app-apk
+          makeLatest: true
+          replacesArtifacts: true
