@@ -50,11 +50,25 @@ jobs:
       - name: Copy web build
         run: npx cap copy
 
+      - name: Check SDK
+        run: |
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "SDK platforms installed:"
+          ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms dir"
+          echo "Build tools installed:"
+          ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "No build-tools dir"
+
       - name: Build APK
         run: |
           cd android
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee /tmp/gradle-output.txt | tail -200
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "## ⛔ Gradle build FAILED" >> $GITHUB_STEP_SUMMARY
+            tail -100 /tmp/gradle-output.txt >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
