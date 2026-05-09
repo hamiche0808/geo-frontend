@@ -27,20 +27,7 @@ jobs:
           ls -la package.json package-lock.json
 
       - name: Install dependencies
-        id: npm-install
-        run: |
-          npm install --legacy-peer-deps --no-audit --no-fund 2>&1 || {
-            echo "npm install failed. Checking environment..."
-            echo "Node: $(node -v)"
-            echo "Npm: $(npm -v)"
-            echo "Disk space:"
-            df -h / 2>/dev/null || true
-            echo "Memory:"
-            free -h 2>/dev/null || true
-            echo "npm cache:"
-            npm cache ls 2>&1 | head -5 || true
-            exit 1
-          }
+        run: npm install --legacy-peer-deps --no-audit --no-fund 2>&1
 
       - name: Build frontend
         run: npm run build
