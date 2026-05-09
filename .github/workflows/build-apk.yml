@@ -63,10 +63,16 @@ jobs:
         run: |
           cd android
           echo "sdk.dir=$ANDROID_HOME" > local.properties
+          chmod +x gradlew
+          echo "## Gradle version:" >> $GITHUB_STEP_SUMMARY
+          ./gradlew --version 2>&1 | head -10 >> $GITHUB_STEP_SUMMARY
+          echo "Running assembleDebug..." >> $GITHUB_STEP_SUMMARY
           ./gradlew assembleDebug --stacktrace 2>&1 | tee /tmp/gradle-output.txt | tail -200
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
             echo "## ⛔ Gradle build FAILED" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
             tail -100 /tmp/gradle-output.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
