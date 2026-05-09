@@ -842,6 +842,21 @@ function App() {
   // ===== Pages légales =====
   const [legalPage, setLegalPage] = useState(null); // 'terms' | 'privacy' | null
 
+  // ===== Admin (messages) =====
+  const urlParams = new URLSearchParams(window.location.search);
+  const adminToken = urlParams.get('admin');
+  const [showAdmin, setShowAdmin] = useState(!!adminToken);
+  const [adminMessages, setAdminMessages] = useState([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+  useEffect(() => {
+    if (showAdmin && adminToken) {
+      setAdminLoading(true);
+      axios.get(`${API}/api/admin/messages?token=${adminToken}`)
+        .then(res => { setAdminMessages(res.data.messages || []); setAdminLoading(false); })
+        .catch(err => { setAdminLoading(false); alert('Erreur admin: ' + (err.response?.data?.detail || err.message)); });
+    }
+  }, [showAdmin, adminToken]);
+
   // ===== Formulaire de contact =====
   const [showContact, setShowContact] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -1542,6 +1557,40 @@ function App() {
           Données : OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
         </p>
       </footer>
+
+      {/* Admin panel (messages) */}
+      {showAdmin && (
+        <div className="legal-overlay" onClick={() => setShowAdmin(false)}>
+          <div className="legal-modal contact-modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '700px'}}>
+            <button className="legal-close" onClick={() => setShowAdmin(false)}>✕</button>
+            <h2>📋 Messages de contact</h2>
+            <p style={{marginBottom: '15px', opacity: 0.7}}>
+              <a href={`${API}/api/admin/messages?token=${adminToken}`} target="_blank" rel="noreferrer">
+                API JSON
+              </a>
+            </p>
+            {adminLoading ? (
+              <p>Chargement...</p>
+            ) : adminMessages.length === 0 ? (
+              <p>Aucun message pour le moment.</p>
+            ) : (
+              <div style={{maxHeight: '60vh', overflowY: 'auto'}}>
+                {adminMessages.slice().reverse().map(msg => (
+                  <div key={msg.id} style={{
+                    background: '#f5f5f5', borderRadius: '8px', padding: '12px', marginBottom: '10px',
+                    borderLeft: '4px solid var(--wl-accent, #4CAF50)'
+                  }}>
+                    <small style={{opacity: 0.6}}>#{msg.id} — {msg.date}</small>
+                    <p><strong>{msg.name || 'Anonyme'}</strong> &lt;{msg.email}&gt;</p>
+                    <p><em>Sujet : {msg.subject}</em></p>
+                    <p style={{whiteSpace: 'pre-wrap', marginTop: '6px'}}>{msg.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Modale contact */}
       {showContact && (
