@@ -1550,8 +1550,7 @@ function App() {
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
-          <a href="https://github.com/hamiche0808/geo-app" target="_blank" rel="noopener noreferrer" className="footer-link">💻 GitHub</a>
-          <a href="https://github.com/hamiche0808/geo-frontend/releases/latest/download/app-debug.apk" target="_blank" rel="noopener noreferrer" className="footer-link">📱 Android APK</a>
+          <span className="footer-link" style={{cursor:'default', opacity:0.7}}>📱 Installez l'app via Chrome (PWA)</span>
         </div>
         <p className="footer-note">
           Données : OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
