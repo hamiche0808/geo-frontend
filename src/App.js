@@ -1556,6 +1556,9 @@ function App() {
         <p className="footer-note">
           Données : OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
         </p>
+        <p className="footer-note" style={{marginTop:'6px', fontWeight:'500'}}>
+          Créé par <strong>Hamiche</strong> © {new Date().getFullYear()}
+        </p>
       </footer>
 
       {/* Modale paramètres */}
