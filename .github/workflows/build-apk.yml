@@ -50,18 +50,63 @@ jobs:
       - name: Copy web build
         run: npx cap copy
 
-      - name: Build APK
+      - name: Generate keystore (for Play Store signing)
+        id: keystore
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "No KEYSTORE_BASE64 secret set. Generating a development keystore..."
+            keytool -genkey -v -keystore $HOME/geoloc-keystore.jks \
+              -alias geoloc -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass geoloc123 -keypass geoloc123 \
+              -dname "CN=GeoLoc, OU=Dev, O=GeoLoc, L=Paris, ST=France, C=FR"
+            echo "KEY_PASS=geoloc123" >> $GITHUB_OUTPUT
+            echo "Keystore generated at $HOME/geoloc-keystore.jks"
+          else
+            echo "Using KEYSTORE_BASE64 secret..."
+            echo "$KEYSTORE_BASE64" | base64 --decode > $HOME/geoloc-keystore.jks
+            echo "KEY_PASS=from-secret" >> $GITHUB_OUTPUT
+          fi
+          cp $HOME/geoloc-keystore.jks android/app/geoloc-keystore.jks
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Build APK (release signed)
         run: |
           cd android
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1
+          ./gradlew assembleRelease --stacktrace 2>&1
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'geoloc123' }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'geoloc' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'geoloc123' }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
 
-      - name: Upload APK as artifact
+      - name: Build APK (debug - for sideloading)
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace 2>&1
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+
+      - name: Upload Debug APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: geo-app-apk
+          name: geo-app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Release APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: geo-app-release
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Upload keystore (for Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: geoloc-keystore
+          path: android/app/geoloc-keystore.jks
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -69,18 +114,27 @@ jobs:
           tag: "v${{ github.run_number }}"
           name: "GeoLoc APK v${{ github.run_number }}"
           body: |
-            ## 📱 GeoLoc APK
+            ## 📱 GeoLoc APK v${{ github.run_number }}
             
-            **Version :** v${{ github.run_number }}
             **Date :** ${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
             
-            ### Installation
-            1. Téléchargez le fichier APK ci-dessous
+            ### 📥 Téléchargement
+            - **APK Debug** (sideloading) : `app-debug.apk` (pièce jointe ci-dessous)
+            - **APK Release** (Play Store) : `app-release-unsigned.apk` (doit être signée avec le keystore joint aux artefacts)
+            
+            ### 📱 Installation directe
+            1. Téléchargez `app-debug.apk`
             2. Ouvrez-le sur votre téléphone Android
             3. Autorisez l'installation d'applications provenant de sources inconnues
-            4. Profitez de GeoLoc !
+            
+            ### 🏪 Play Store
+            Pour publier sur le Play Store :
+            1. Récupérez le keystore dans les artefacts du workflow (`geoloc-keystore`)
+            2. Ajoutez `KEYSTORE_BASE64` (base64 du keystore) dans les secrets GitHub
+            3. Ajoutez `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` dans les secrets
+            4. Le prochain build produira une APK release signée prête pour le Play Store
             
             *Application web wrapped avec Capacitor. Données : OpenStreetMap · OpenRouteService · Open-Meteo · api.gouv.fr*
-          artifacts: "android/app/build/outputs/apk/debug/app-debug.apk"
+          artifacts: "android/app/build/outputs/apk/debug/app-debug.apk,android/app/build/outputs/apk/release/app-release-unsigned.apk"
           makeLatest: true
           replacesArtifacts: true
