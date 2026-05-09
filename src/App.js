@@ -84,7 +84,7 @@ function FitBoundsOnChange({ markers, routeCoords }) {
   return null;
 }
 
-// ========== Composant d'autocomplétion réutilisable ==========
+// ========== Composant d'autocomplétion réutilisable (villes + adresses) ==========
 function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
   const [input, setInput] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
@@ -101,9 +101,17 @@ function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
       if (debounce.current) clearTimeout(debounce.current);
       debounce.current = setTimeout(async () => {
         try {
-          const resp = await axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=15`);
-          setSuggestions(resp.data || []);
-          setShow(resp.data?.length > 0);
+          // Appeler les DEUX endpoints en parallèle : villes + adresses
+          const [cityResp, addrResp] = await Promise.all([
+            axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] })),
+            axios.get(`${API}/api/geocode?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] }))
+          ]);
+          const cities = (cityResp.data || []).map(c => ({ ...c, _type: 'city' }));
+          const addresses = (addrResp.data || []).map(a => ({ ...a, _type: 'address' }));
+          // Fusion : villes d'abord, puis adresses
+          const merged = [...cities, ...addresses].slice(0, 15);
+          setSuggestions(merged);
+          setShow(merged.length > 0);
         } catch { setSuggestions([]); }
       }, 200);
     } else { setSuggestions([]); setShow(false); }
@@ -123,9 +131,21 @@ function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
       {show && suggestions.length > 0 && (
         <ul className="suggestions">
           {suggestions.map((s, idx) => (
-            <li key={idx} onMouseDown={() => { setInput(s.city); setShow(false); onSelect(s); }}>
-              <span className="suggestion-city">{s.city}</span>
-              <span className="suggestion-code">{s.postal_code}</span>
+            <li key={idx} onMouseDown={() => {
+              setInput(s._type === 'address' ? (s.short_address || s.display_name) : s.city);
+              setShow(false);
+              onSelect(s);
+            }}>
+              <span className="suggestion-city">
+                {s._type === 'address' ? '📍 ' : '🏙️ '}
+                {s._type === 'address' ? (s.short_address || s.display_name) : s.city}
+              </span>
+              <span className="suggestion-code">
+                {s._type === 'address' ? `${s.city} · ${s.postal_code}` : s.postal_code}
+              </span>
+              {s._type === 'address' && s.street && (
+                <span className="suggestion-street">{s.display_name?.split(',')[0]}</span>
+              )}
             </li>
           ))}
         </ul>
@@ -350,18 +370,46 @@ function App() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
         try {
-          const resp = await axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=15`);
-          setSuggestions(resp.data || []);
-          setShowSuggestions(resp.data?.length > 0);
+          // Appeler les DEUX endpoints en parallèle : villes + adresses
+          const [cityResp, addrResp] = await Promise.all([
+            axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] })),
+            axios.get(`${API}/api/geocode?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] }))
+          ]);
+          const cities = (cityResp.data || []).map(c => ({ ...c, _type: 'city' }));
+          const addresses = (addrResp.data || []).map(a => ({ ...a, _type: 'address' }));
+          const merged = [...cities, ...addresses].slice(0, 15);
+          setSuggestions(merged);
+          setShowSuggestions(merged.length > 0);
         } catch { setSuggestions([]); }
       }, 200);
     } else { setSuggestions([]); setShowSuggestions(false); }
   };
 
   const selectSuggestion = async (item) => {
-    setSearchInput(item.city);
+    setSearchInput(item.city || item.display_name?.split(',')[0] || '');
     setShowSuggestions(false);
     setLoading(true);
+    
+    // Si c'est une adresse complète, utiliser directement les coordonnées
+    if (item._type === 'address') {
+      const addrLocation = {
+        city: item.city || item.display_name?.split(',')[0] || '',
+        postal_code: item.postal_code || '',
+        country: item.country || '',
+        country_code: item.country_code || 'FR',
+        latitude: item.latitude,
+        longitude: item.longitude,
+        department: item.department || '',
+        region: item.region || '',
+        population: 0,
+        display_name: item.display_name || ''
+      };
+      setLocation(addrLocation);
+      fetchWeather(item.latitude, item.longitude);
+      setLoading(false);
+      return;
+    }
+    
     try {
       const url = `${API}/api/location/${encodeURIComponent(item.postal_code)}?country=${item.country_code || country}`;
       const resp = await axios.get(url);
@@ -378,6 +426,28 @@ function App() {
   const handleDistanceCity = async (cityData, side) => {
     const data = cityData;
     const countryForLookup = side === 'A' ? (countryA || 'FR') : (countryB || 'FR');
+    
+    // Si c'est une adresse complète, on a déjà les coordonnées exactes
+    if (data._type === 'address') {
+      const addrData = {
+        city: data.city || data.display_name?.split(',')[0] || '',
+        postal_code: data.postal_code || '',
+        country: data.country || countryForLookup,
+        country_code: data.country_code || countryForLookup,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        department: data.department || '',
+        region: data.region || '',
+        population: 0,
+        display_name: data.display_name || '',
+        is_address: true
+      };
+      if (side === 'A') setCityA(addrData);
+      else setCityB(addrData);
+      return;
+    }
+    
+    // Sinon, ville normale : chercher les détails via l'API
     try {
       const url = `${API}/api/location/${encodeURIComponent(data.postal_code)}?country=${data.country_code || countryForLookup}`;
       const resp = await axios.get(url);
@@ -433,6 +503,28 @@ function App() {
     const newWp = [...waypoints];
     const newWpC = [...waypointCountries];
     const lookupCountry = cityData.country_code || waypointCountries[idx] || 'FR';
+    
+    // Si c'est une adresse complète, on a déjà les coordonnées exactes
+    if (cityData._type === 'address') {
+      newWp[idx] = {
+        city: cityData.city || cityData.display_name?.split(',')[0] || '',
+        postal_code: cityData.postal_code || '',
+        country: cityData.country || lookupCountry,
+        country_code: cityData.country_code || lookupCountry,
+        latitude: cityData.latitude,
+        longitude: cityData.longitude,
+        department: cityData.department || '',
+        region: cityData.region || '',
+        population: 0,
+        display_name: cityData.display_name || '',
+        is_address: true
+      };
+      newWpC[idx] = lookupCountry;
+      setWaypoints(newWp);
+      setWaypointCountries(newWpC);
+      return;
+    }
+    
     try {
       const url = `${API}/api/location/${encodeURIComponent(cityData.postal_code)}?country=${lookupCountry}`;
       const resp = await axios.get(url);
@@ -673,8 +765,13 @@ function App() {
                   <ul className="suggestions">
                     {suggestions.map((s, idx) => (
                       <li key={idx} onMouseDown={() => selectSuggestion(s)}>
-                        <span className="suggestion-city">{s.city}</span>
-                        <span className="suggestion-code">{s.postal_code}</span>
+                        <span className="suggestion-city">
+                          {s._type === 'address' ? '📍 ' : '🏙️ '}
+                          {s._type === 'address' ? (s.short_address || s.display_name?.split(',')[0]) : s.city}
+                        </span>
+                        <span className="suggestion-code">
+                          {s._type === 'address' ? `${s.city || ''} · ${s.postal_code || ''}` : s.postal_code}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -779,11 +876,17 @@ function App() {
           )}
           {/* Villes visitées */}
           <div className="route-stops">
-            <span className="stop-chip">{cityA?.city}</span>
+            <span className="stop-chip" title={cityA?.display_name || cityA?.city}>
+              {cityA?.is_address ? (cityA.display_name?.split(',')[0] || cityA.city) : cityA?.city}
+            </span>
             {waypoints.filter(w => w && w.city).map((wp, idx) => (
-              <span key={idx} className="stop-chip stop-chip-wp">{wp.city}</span>
+              <span key={idx} className="stop-chip stop-chip-wp" title={wp.display_name || wp.city}>
+                {wp.is_address ? (wp.display_name?.split(',')[0] || wp.city) : wp.city}
+              </span>
             ))}
-            <span className="stop-chip">{cityB?.city}</span>
+            <span className="stop-chip" title={cityB?.display_name || cityB?.city}>
+              {cityB?.is_address ? (cityB.display_name?.split(',')[0] || cityB.city) : cityB?.city}
+            </span>
           </div>
           <p className="coords">
             {routeCoords ? 'Route calculée' : 'Vol d\'oiseau'}
@@ -877,12 +980,23 @@ function App() {
       {/* Résultat recherche */}
       {mode === 'search' && location && (
         <div className="result-info">
-          <h2>{location.city} <span className="postal-code">({location.postal_code})</span></h2>
-          <p className="country-name">{location.country}</p>
+          {location.display_name ? (
+            <>
+              <h2>{location.display_name.split(',')[0]}</h2>
+              <p className="address-full">{location.display_name}</p>
+              <p className="country-name">{location.country}</p>
+            </>
+          ) : (
+            <>
+              <h2>{location.city} <span className="postal-code">({location.postal_code})</span></h2>
+              <p className="country-name">{location.country}</p>
+            </>
+          )}
           <div className="details">
             {location.department && <span className="detail-badge">📍 {location.department}</span>}
             {location.region && <span className="detail-badge">🗺️ {location.region}</span>}
             {location.population > 0 && <span className="detail-badge">👥 {location.population.toLocaleString()} hab.</span>}
+            {location.is_address && <span className="detail-badge address-badge">📍 Adresse précise</span>}
           </div>
           {weather && weather.current && !weather.error && (
             <>

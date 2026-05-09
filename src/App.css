@@ -1172,3 +1172,37 @@ body.dark-mode .btn-qr { background: transparent; }
   font-size: 0.85em;
   color: var(--text-secondary);
 }
+
+/* ===== Adresses complètes ===== */
+.address-full {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  margin: 4px 0;
+  word-break: break-word;
+}
+
+.address-badge {
+  background: #e67e22 !important;
+  color: white !important;
+}
+
+.suggestion-street {
+  display: block;
+  font-size: 0.75em;
+  color: #999;
+  margin-top: 2px;
+}
+
+body.dark-mode .suggestion-street {
+  color: #888;
+}
+
+.city-input-wrapper .suggestions li {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.city-input-wrapper .suggestions li .suggestion-code {
+  font-size: 0.8em;
+}
