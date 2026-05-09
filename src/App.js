@@ -137,7 +137,7 @@ function FitBoundsOnChange({ markers, routeCoords }) {
 }
 
 // ========== Composant d'autocomplétion réutilisable (villes + adresses) ==========
-function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
+const CityInput = React.memo(function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
   const [input, setInput] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
   const [show, setShow] = useState(false);
@@ -234,7 +234,7 @@ function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
       )}
     </div>
   );
-}
+});
 
 // ========== Application principale ==========
 function App() {
