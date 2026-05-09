@@ -1344,6 +1344,93 @@ body.dark-mode .suggestion-street {
   line-height: 1.5;
 }
 
+/* ===== Formulaire de contact ===== */
+.contact-modal {
+  max-width: 500px;
+}
+
+.contact-form {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.contact-label {
+  display: block;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: var(--text);
+  margin: 10px 0 4px;
+}
+
+.contact-input, .contact-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95em;
+  background: var(--card-bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.contact-input:focus, .contact-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.contact-submit {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.contact-submit:hover {
+  opacity: 0.9;
+}
+
+.contact-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.contact-error {
+  color: #e74c3c;
+  font-size: 0.9em;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.contact-success {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.contact-success-icon {
+  font-size: 3em;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.contact-success p {
+  font-size: 1.1em;
+  color: var(--text);
+}
+
 /* ===== White-label vars ===== */
 :root {
   --wl-primary: initial;

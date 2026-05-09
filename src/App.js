@@ -101,15 +101,45 @@ function CityInput({ label, value, onChange, onSelect, country, placeholder }) {
       if (debounce.current) clearTimeout(debounce.current);
       debounce.current = setTimeout(async () => {
         try {
-          // Appeler les DEUX endpoints en parallèle : villes + adresses
-          const [cityResp, addrResp] = await Promise.all([
+          // Appeler les endpoints en parallèle : villes + adresses + (France → API gouvernementale)
+          const promises = [
             axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] })),
             axios.get(`${API}/api/geocode?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] }))
-          ]);
+          ];
+          // Pour la France, ajouter l'API gouvernementale (meilleure qualité)
+          const isFrance = country === 'FR';
+          if (isFrance) {
+            promises.push(
+              axios.get(`${API}/api/geocode-fr?q=${encodeURIComponent(v)}&limit=10`).catch(() => ({ data: [] }))
+            );
+          }
+          const results = await Promise.all(promises);
+          const cityResp = results[0];
+          const addrResp = results[1];
+          const gouvResp = isFrance ? results[2] : null;
+
           const cities = (cityResp.data || []).map(c => ({ ...c, _type: 'city' }));
           const addresses = (addrResp.data || []).map(a => ({ ...a, _type: 'address' }));
-          // Fusion : villes d'abord, puis adresses
-          const merged = [...cities, ...addresses].slice(0, 15);
+          // Normaliser les résultats de l'API gouvernementale française
+          let gouvAddresses = [];
+          if (gouvResp && gouvResp.data) {
+            gouvAddresses = (gouvResp.data || []).map(a => ({
+              ...a,
+              _type: 'address',
+              _source: 'gouv',
+              display_name: a.label,
+              short_address: a.address || a.label,
+              postal_code: a.postcode,
+              country_code: 'FR',
+              country: 'France',
+              street: a.street || a.address,
+              house_number: a.housenumber,
+              department: (a.context && a.context.split(',')[1] ? a.context.split(',')[1].trim() : ''),
+              region: (a.context && a.context.split(',')[2] ? a.context.split(',')[2].trim() : '')
+            }));
+          }
+          // Fusion : adresses françaises (gouvernement) en premier, puis Nominatim, puis villes
+          const merged = [...gouvAddresses, ...addresses, ...cities].slice(0, 15);
           setSuggestions(merged);
           setShow(merged.length > 0);
         } catch { setSuggestions([]); }
@@ -386,14 +416,45 @@ function App() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
         try {
-          // Appeler les DEUX endpoints en parallèle : villes + adresses
-          const [cityResp, addrResp] = await Promise.all([
+          // Appeler les endpoints en parallèle : villes + adresses + (France → API gouvernementale)
+          const promises = [
             axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] })),
             axios.get(`${API}/api/geocode?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] }))
-          ]);
+          ];
+          // Pour la France, ajouter l'API gouvernementale (meilleure qualité)
+          const isFrance = country === 'FR';
+          if (isFrance) {
+            promises.push(
+              axios.get(`${API}/api/geocode-fr?q=${encodeURIComponent(v)}&limit=10`).catch(() => ({ data: [] }))
+            );
+          }
+          const results = await Promise.all(promises);
+          const cityResp = results[0];
+          const addrResp = results[1];
+          const gouvResp = isFrance ? results[2] : null;
+
           const cities = (cityResp.data || []).map(c => ({ ...c, _type: 'city' }));
           const addresses = (addrResp.data || []).map(a => ({ ...a, _type: 'address' }));
-          const merged = [...cities, ...addresses].slice(0, 15);
+          // Normaliser les résultats de l'API gouvernementale française
+          let gouvAddresses = [];
+          if (gouvResp && gouvResp.data) {
+            gouvAddresses = (gouvResp.data || []).map(a => ({
+              ...a,
+              _type: 'address',
+              _source: 'gouv',
+              display_name: a.label,
+              short_address: a.address || a.label,
+              postal_code: a.postcode,
+              country_code: 'FR',
+              country: 'France',
+              street: a.street || a.address,
+              house_number: a.housenumber,
+              department: (a.context && a.context.split(',')[1] ? a.context.split(',')[1].trim() : ''),
+              region: (a.context && a.context.split(',')[2] ? a.context.split(',')[2].trim() : '')
+            }));
+          }
+          // Fusion : adresses françaises (gouvernement) en premier, puis Nominatim, puis villes
+          const merged = [...gouvAddresses, ...addresses, ...cities].slice(0, 15);
           setSuggestions(merged);
           setShowSuggestions(merged.length > 0);
         } catch { setSuggestions([]); }
@@ -666,6 +727,26 @@ function App() {
 
   // ===== Pages légales =====
   const [legalPage, setLegalPage] = useState(null); // 'terms' | 'privacy' | null
+
+  // ===== Formulaire de contact =====
+  const [showContact, setShowContact] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [contactStatus, setContactStatus] = useState(null); // null | 'sending' | 'done' | 'error'
+  const sendContact = async () => {
+    if (!contactForm.email || !contactForm.message) {
+      setContactStatus('error');
+      return;
+    }
+    setContactStatus('sending');
+    try {
+      await axios.post(`${API}/api/contact`, contactForm, { timeout: 10000 });
+      setContactStatus('done');
+      setContactForm({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => { setShowContact(false); setContactStatus(null); }, 2000);
+    } catch (e) {
+      setContactStatus('error');
+    }
+  };
 
   // ===== Calcul distance via API backend avec waypoints =====
   const buildWaypointsParam = () => {
@@ -1266,12 +1347,61 @@ function App() {
           <span className="footer-brand">🌍 GeoLoc v4.0</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
+          <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
           <a href="https://github.com/hamiche0808/geo-app" target="_blank" rel="noopener noreferrer" className="footer-link">💻 GitHub</a>
         </div>
         <p className="footer-note">
           Données : OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
         </p>
       </footer>
+
+      {/* Modale contact */}
+      {showContact && (
+        <div className="legal-overlay" onClick={() => { setShowContact(false); setContactStatus(null); }}>
+          <div className="legal-modal contact-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="legal-close" onClick={() => { setShowContact(false); setContactStatus(null); }}>✕</button>
+            <h2>✉️ Nous contacter</h2>
+            <p className="legal-version">Une question ? Un projet ? Écrivez-nous !</p>
+
+            {contactStatus === 'done' ? (
+              <div className="contact-success">
+                <span className="contact-success-icon">✅</span>
+                <p>Message envoyé ! Nous vous répondrons rapidement.</p>
+              </div>
+            ) : (
+              <div className="contact-form">
+                <label className="contact-label">Nom (optionnel)</label>
+                <input type="text" className="contact-input" placeholder="Votre nom"
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })} />
+
+                <label className="contact-label">Email *</label>
+                <input type="email" className="contact-input" placeholder="votre@email.com"
+                  value={contactForm.email}
+                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })} />
+
+                <label className="contact-label">Sujet</label>
+                <input type="text" className="contact-input" placeholder="Sujet de votre message"
+                  value={contactForm.subject}
+                  onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })} />
+
+                <label className="contact-label">Message *</label>
+                <textarea className="contact-textarea" rows="4" placeholder="Votre message..."
+                  value={contactForm.message}
+                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })} />
+
+                {contactStatus === 'error' && (
+                  <p className="contact-error">❌ Erreur : vérifiez votre email et votre message.</p>
+                )}
+
+                <button className="contact-submit" onClick={sendContact} disabled={contactStatus === 'sending'}>
+                  {contactStatus === 'sending' ? '⏳ Envoi...' : '✉️ Envoyer'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Modale légale */}
       {legalPage && (
@@ -1301,7 +1431,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>5. API Payante</h3>
-                    <p>GeoLoc propose une API payante pour les développeurs. Tarifs sur demande. Contact : hamiche@geoloc.app</p>
+                    <p>GeoLoc propose une API payante pour les développeurs. Tarifs sur demande. Contact : hamiche08.08@gmail.com</p>
                   </div>
                   <div className="legal-section">
                     <h3>6. Liens affiliés</h3>
@@ -1309,7 +1439,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>7. Contact</h3>
-                    <p>Email : hamiche@geoloc.app</p>
+                    <p>Email : hamiche08.08@gmail.com</p>
                   </div>
                 </div>
               </>
@@ -1340,7 +1470,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>6. Contact RGPD</h3>
-                    <p>Email : hamiche@geoloc.app</p>
+                    <p>Email : hamiche08.08@gmail.com</p>
                   </div>
                 </div>
               </>
