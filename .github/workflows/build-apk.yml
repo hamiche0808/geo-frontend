@@ -50,25 +50,24 @@ jobs:
       - name: Copy web build
         run: npx cap copy
 
-      - name: Generate keystore (for Play Store signing)
-        id: keystore
+      - name: Generate & commit keystore (first run only)
         run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "No KEYSTORE_BASE64 secret set. Generating a development keystore..."
-            keytool -genkey -v -keystore $HOME/geoloc-keystore.jks \
+          if [ ! -f android/app/geoloc-keystore.jks ]; then
+            echo "Keystore not found. Generating a new one..."
+            keytool -genkey -v -keystore android/app/geoloc-keystore.jks \
               -alias geoloc -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass geoloc123 -keypass geoloc123 \
               -dname "CN=GeoLoc, OU=Dev, O=GeoLoc, L=Paris, ST=France, C=FR"
-            echo "KEY_PASS=geoloc123" >> $GITHUB_OUTPUT
-            echo "Keystore generated at $HOME/geoloc-keystore.jks"
+            echo "Keystore generated! Committing to repo..."
+            git config user.name "GeoBot"
+            git config user.email "bot@geoloc.app"
+            git add android/app/geoloc-keystore.jks
+            git commit -m "Add keystore for APK signing [skip ci]"
+            git push origin HEAD:master
+            echo "Keystore committed!"
           else
-            echo "Using KEYSTORE_BASE64 secret..."
-            echo "$KEYSTORE_BASE64" | base64 --decode > $HOME/geoloc-keystore.jks
-            echo "KEY_PASS=from-secret" >> $GITHUB_OUTPUT
+            echo "Keystore already exists, using it."
           fi
-          cp $HOME/geoloc-keystore.jks android/app/geoloc-keystore.jks
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
       - name: Build APK (release signed)
         run: |
@@ -77,10 +76,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace 2>&1
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'geoloc123' }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'geoloc' }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'geoloc123' }}
+          KEYSTORE_PASSWORD: 'geoloc123'
+          KEY_ALIAS: 'geoloc'
+          KEY_PASSWORD: 'geoloc123'
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
 
       - name: Build APK (debug - for sideloading)
@@ -100,9 +98,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: geo-app-release
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
 
       - name: Upload keystore (for Play Store)
+        if: hashFiles('android/app/geoloc-keystore.jks') != ''
         uses: actions/upload-artifact@v4
         with:
           name: geoloc-keystore
@@ -135,6 +134,6 @@ jobs:
             4. Le prochain build produira une APK release signée prête pour le Play Store
             
             *Application web wrapped avec Capacitor. Données : OpenStreetMap · OpenRouteService · Open-Meteo · api.gouv.fr*
-          artifacts: "android/app/build/outputs/apk/debug/app-debug.apk,android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          artifacts: "android/app/build/outputs/apk/debug/app-debug.apk,android/app/build/outputs/apk/release/app-release.apk"
           makeLatest: true
           replacesArtifacts: true

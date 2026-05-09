@@ -18,12 +18,12 @@ android {
     }
     signingConfigs {
         release {
-            def keystoreB64 = System.getenv("KEYSTORE_BASE64")
-            if (keystoreB64) {
-                storeFile file("${System.getenv("HOME")}/geoloc-keystore.jks")
-                storePassword System.getenv("KEYSTORE_PASSWORD")
-                keyAlias System.getenv("KEY_ALIAS")
-                keyPassword System.getenv("KEY_PASSWORD")
+            def keystoreFile = file("geoloc-keystore.jks")
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: "geoloc123"
+                keyAlias System.getenv("KEY_ALIAS") ?: "geoloc"
+                keyPassword System.getenv("KEY_PASSWORD") ?: "geoloc123"
             }
         }
     }
@@ -34,7 +34,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (System.getenv("KEYSTORE_BASE64")) {
+            def keystoreFile = file("geoloc-keystore.jks")
+            if (keystoreFile.exists()) {
                 signingConfig signingConfigs.release
             }
         }
