@@ -1,3 +1,32 @@
+/* ===== Variables CSS (thème clair) ===== */
+:root {
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --text: #333333;
+  --text-secondary: #666666;
+  --border: #dddddd;
+  --accent: #667eea;
+  --accent-hover: #5a6fd6;
+  --header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --map-placeholder: #e9ecef;
+  --badge-bg: #f0f4ff;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Thème sombre ===== */
+body.dark-mode {
+  --bg: #1a1a2e;
+  --card-bg: #16213e;
+  --text: #e0e0e0;
+  --text-secondary: #aaaaaa;
+  --border: #333355;
+  --accent: #7c8cf5;
+  --header-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  --map-placeholder: #1a1a2e;
+  --badge-bg: #1f2a4a;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,12 +40,14 @@
   margin: 0 auto;
   padding: 10px;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ===== Header ===== */
 header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--header-gradient);
   color: white;
   padding: 20px;
   border-radius: 12px;
@@ -112,6 +143,49 @@ header h1 {
 .search-bar button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Bouton géolocalisation */
+.btn-locate {
+  font-size: 1.4em !important;
+  padding: 6px 12px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 50% !important;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s !important;
+}
+
+.btn-locate:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  transform: scale(1.1);
+}
+
+/* Point bleu pulsant pour la position utilisateur */
+.user-location-dot {
+  background: none !important;
+  border: none !important;
+}
+
+.user-location-dot::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: #4285f4;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(66, 133, 244, 0.6);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.6); }
+  50% { box-shadow: 0 0 0 12px rgba(66, 133, 244, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); }
 }
 
 .btn-reset {
@@ -211,17 +285,19 @@ header h1 {
   margin-top: 10px;
   font-weight: bold;
 }
+body.dark-mode .error { color: #ff8888; }
 
 /* ===== Résultat ===== */
 .result-info {
   margin: 20px auto;
   padding: 20px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   max-width: 600px;
   text-align: center;
-  border-left: 6px solid #667eea;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid var(--accent);
+  box-shadow: var(--shadow);
+  transition: background 0.3s;
 }
 
 .result-info h2 {
@@ -458,4 +534,641 @@ header h1 {
   .map-container {
     height: 40vh;
   }
+}
+
+/* ===== Mode sombre - Surcharges complètes ===== */
+body.dark-mode {
+  background: #1a1a2e;
+}
+
+body.dark-mode .result-info,
+body.dark-mode .history-dropdown { background: #16213e; color: #e0e0e0; }
+
+body.dark-mode .suggestions { background: #1a1a2e; border-color: #333355; }
+body.dark-mode .suggestions li { border-bottom-color: #2a2a4a; }
+body.dark-mode .suggestions li:hover { background: #2a2a4a; }
+body.dark-mode .suggestion-city { color: #e0e0e0; }
+body.dark-mode .suggestion-code { color: #999; }
+
+body.dark-mode input,
+body.dark-mode select {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-color: #333355;
+}
+
+body.dark-mode .map-placeholder { background: #1a1a2e; color: #888; }
+
+body.dark-mode .detail-badge { background: #1f2a4a; color: #ccc; }
+body.dark-mode .coords { color: #888; }
+
+body.dark-mode .btn-export {
+  border-color: #7c8cf5;
+  color: #7c8cf5;
+}
+body.dark-mode .btn-export:hover {
+  background: #7c8cf5;
+  color: #1a1a2e;
+}
+
+body.dark-mode .history-dropdown {
+  border-color: #7c8cf5;
+  color: #e0e0e0;
+}
+
+body.dark-mode .tab-dark { background: rgba(255, 255, 255, 0.15); }
+
+/* Favoris */
+.favorites-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px auto;
+  max-width: 600px;
+  padding: 10px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.fav-chip {
+  padding: 6px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  background: var(--badge-bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.fav-chip:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.fav-chip small { opacity: 0.6; margin-left: 4px; }
+
+/* Bouton favoris */
+/* Météo */
+.weather-info {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 10px 0;
+  padding: 10px 15px;
+  background: var(--badge-bg);
+  border-radius: 12px;
+  font-size: 1em;
+}
+
+.weather-icon { font-size: 1.8em; }
+.weather-temp { font-weight: bold; font-size: 1.3em; color: var(--text); }
+.weather-desc { color: var(--text-secondary); }
+.weather-wind { color: var(--text-secondary); font-size: 0.9em; }
+.weather-detail { color: var(--text-secondary); font-size: 0.85em; margin-left: 4px; }
+
+/* Prévisions 3 jours */
+.forecast-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px 0 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.forecast-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+  background: var(--badge-bg);
+  border-radius: 12px;
+  min-width: 90px;
+  text-align: center;
+  font-size: 0.85em;
+  transition: background 0.2s;
+}
+
+.forecast-day:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.forecast-day-name {
+  font-weight: bold;
+  font-size: 0.95em;
+  color: var(--text);
+}
+
+.forecast-icon {
+  font-size: 1.6em;
+  line-height: 1.2;
+}
+
+.forecast-desc {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.forecast-temps {
+  display: flex;
+  gap: 6px;
+  font-weight: bold;
+}
+
+.forecast-max {
+  color: #e74c3c;
+}
+
+.forecast-min {
+  color: #3498db;
+}
+
+.forecast-precip {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+}
+
+.forecast-prob {
+  font-size: 0.85em;
+  color: var(--accent);
+}
+
+body.dark-mode .forecast-day {
+  background: #1f2a4a;
+}
+
+body.dark-mode .forecast-day:hover {
+  background: #7c8cf5;
+  color: #1a1a2e;
+}
+
+/* Bouton partage */
+.btn-share {
+  padding: 8px 20px;
+  border: 2px solid #34a853;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95em;
+  color: #34a853;
+  transition: all 0.3s;
+}
+body.dark-mode .btn-share { background: transparent; }
+.btn-share:hover { background: #34a853; color: white; }
+
+.btn-fav {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95em;
+  background: #f0f0f0;
+  color: #333;
+  transition: all 0.3s;
+}
+body.dark-mode .btn-fav { background: #2a2a4a; color: #e0e0e0; }
+.btn-fav:hover { background: #e0e0e0; }
+body.dark-mode .btn-fav:hover { background: #3a3a5a; }
+
+/* Sélecteur de mode (distance) */
+.profile-selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.profile-selector label {
+  font-weight: bold;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+.profile-selector select {
+  padding: 8px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+
+.profile-selector select:focus {
+  outline: none;
+  border-color: white;
+}
+
+.profile-selector select option {
+  background: #667eea;
+  color: white;
+}
+
+/* Badge profil dans le résultat distance */
+.profile-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  background: var(--badge-bg);
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+/* Pays sélecteurs individuels en mode Distance */
+.city-with-country {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.country-select-mini {
+  padding: 10px 6px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2em;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  min-width: 48px;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.country-select-mini:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.country-select-mini option {
+  background: #667eea;
+  color: white;
+  font-size: 1em;
+}
+
+body.dark-mode .country-select-mini {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .country-select-mini option {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .city-with-country {
+    max-width: unset;
+  }
+}
+
+/* ===== Multi-étapes (Waypoints) ===== */
+.distance-multi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 12px auto;
+  max-width: 500px;
+}
+
+.waypoint-main {
+  min-width: 280px;
+  max-width: 350px;
+}
+
+.waypoint-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+}
+
+.waypoint-item {
+  min-width: 220px;
+  max-width: 280px;
+}
+
+.wp-number-badge {
+  background: #9b59b6;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75em;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 6px;
+}
+
+.waypoint-connector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 12px;
+}
+
+.wp-arrow {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.btn-remove-wp {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.9em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+}
+
+.btn-remove-wp:hover {
+  background: #c0392b;
+}
+
+.btn-add-stop {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  padding: 6px 20px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 300px;
+  margin: 4px 0;
+}
+
+.btn-add-stop:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Marqueur violet pour waypoints */
+.waypoint-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.wp-dot {
+  width: 16px;
+  height: 16px;
+  background: #9b59b6;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(155, 89, 182, 0.5);
+}
+
+/* Badge des arrêts */
+.wp-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  background: #9b59b6;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: normal;
+}
+
+/* Route stops chips */
+.route-stops {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.stop-chip {
+  background: #667eea;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.stop-chip-wp {
+  background: #9b59b6;
+}
+
+/* ===== Coût carburant ===== */
+.fuel-cost-section {
+  margin: 12px 0;
+  padding: 10px;
+  background: var(--badge-bg);
+  border-radius: 12px;
+}
+
+.btn-fuel-toggle {
+  padding: 8px 16px;
+  border: 2px solid #e67e22;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95em;
+  color: #e67e22;
+  transition: all 0.3s;
+}
+
+.btn-fuel-toggle:hover {
+  background: #e67e22;
+  color: white;
+}
+
+.fuel-calc {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.fuel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  flex-wrap: wrap;
+}
+
+.fuel-row label {
+  font-size: 0.9em;
+  font-weight: bold;
+  min-width: 120px;
+  color: var(--text);
+}
+
+.fuel-input {
+  width: 80px;
+  padding: 6px 8px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95em;
+  text-align: center;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.fuel-select {
+  padding: 6px 8px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95em;
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fuel-result {
+  margin-top: 10px;
+  padding: 10px;
+  background: #e67e22;
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.fuel-result strong {
+  display: block;
+  font-size: 1.3em;
+  margin-bottom: 4px;
+}
+
+.fuel-result small {
+  font-size: 0.8em;
+  opacity: 0.85;
+}
+
+body.dark-mode .fuel-result {
+  background: #d35400;
+}
+
+body.dark-mode .btn-fuel-toggle {
+  border-color: #e67e22;
+  color: #e67e22;
+}
+
+body.dark-mode .btn-fuel-toggle:hover {
+  background: #e67e22;
+  color: #1a1a2e;
+}
+
+/* ===== POIs (liens affiliés) ===== */
+.poi-section {
+  margin: 12px 0;
+  padding: 10px;
+}
+
+.poi-section h3 {
+  font-size: 1em;
+  margin-bottom: 8px;
+  color: var(--text);
+  text-align: center;
+}
+
+.poi-links {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.poi-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px;
+  background: var(--badge-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: bold;
+  font-size: 0.9em;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.poi-link:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.poi-link small {
+  font-weight: normal;
+  font-size: 0.75em;
+  opacity: 0.7;
+}
+
+.poi-link:hover small {
+  opacity: 1;
+}
+
+/* ===== QR Code ===== */
+.btn-qr {
+  padding: 8px 20px;
+  border: 2px solid #9b59b6;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95em;
+  color: #9b59b6;
+  transition: all 0.3s;
+}
+
+body.dark-mode .btn-qr { background: transparent; }
+
+.btn-qr:hover {
+  background: #9b59b6;
+  color: white;
+}
+
+.qr-section {
+  margin: 10px auto;
+  text-align: center;
+}
+
+.qr-image {
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  max-width: 100%;
+}
+
+.qr-hint {
+  margin-top: 6px;
+  font-size: 0.85em;
+  color: var(--text-secondary);
 }
