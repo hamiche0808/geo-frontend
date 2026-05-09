@@ -59,6 +59,51 @@ header h1 {
   margin-bottom: 10px;
 }
 
+/* ===== App Brand (logo + nom + tagline) ===== */
+.app-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.app-logo {
+  margin-bottom: 4px;
+}
+
+.logo-svg {
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.4));
+  animation: logo-pulse 3s ease-in-out infinite;
+}
+
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+
+.app-title {
+  font-size: 1.9em;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  line-height: 1.2;
+}
+
+.app-tagline {
+  font-size: 0.8em;
+  opacity: 0.75;
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
 /* ===== Onglets ===== */
 .tabs {
   display: flex;
@@ -444,6 +489,21 @@ body.dark-mode .error { color: #ff8888; }
     font-size: 1.3em;
   }
 
+  .logo-svg {
+    width: 42px;
+    height: 42px;
+  }
+
+  .app-title {
+    font-size: 1.4em;
+    letter-spacing: 1.5px;
+  }
+
+  .app-tagline {
+    font-size: 0.7em;
+    letter-spacing: 1px;
+  }
+
   .tabs {
     gap: 5px;
   }
@@ -529,6 +589,21 @@ body.dark-mode .error { color: #ff8888; }
 @media (max-width: 480px) {
   header h1 {
     font-size: 1.1em;
+  }
+
+  .logo-svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-title {
+    font-size: 1.2em;
+    letter-spacing: 1px;
+  }
+
+  .app-tagline {
+    font-size: 0.65em;
+    letter-spacing: 0.5px;
   }
 
   .map-container {

@@ -284,8 +284,15 @@ function App() {
       }
       if (accent) root.style.setProperty('--wl-accent', accent);
       if (logo) {
-        const h1 = document.querySelector('header h1');
-        if (h1) h1.innerHTML = `<img src="${encodeURI(logo)}" alt="Logo" style="max-height:40px;vertical-align:middle"> ${h1.textContent.replace('🌍 ','')}`;
+        const brand = document.querySelector('.app-brand');
+        if (brand) {
+          const existingLogo = brand.querySelector('.app-logo');
+          const titleEl = brand.querySelector('.app-title');
+          if (existingLogo) {
+            existingLogo.innerHTML = `<img src="${encodeURI(logo)}" alt="Logo" style="height:48px;width:auto">`;
+          }
+          if (titleEl) titleEl.style.display = 'none';
+        }
       }
     }
 
@@ -951,7 +958,28 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1>🌍 GeoLoc</h1>
+        <div className="app-brand">
+          <div className="app-logo">
+            <svg viewBox="0 0 60 60" className="logo-svg">
+              <defs>
+                <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#667eea"/>
+                  <stop offset="100%" stopColor="#764ba2"/>
+                </linearGradient>
+              </defs>
+              <circle cx="30" cy="30" r="27" fill="none" stroke="url(#lg)" strokeWidth="3" opacity="0.9"/>
+              <ellipse cx="30" cy="30" rx="16" ry="27" fill="none" stroke="url(#lg)" strokeWidth="2.5" opacity="0.7"/>
+              <ellipse cx="30" cy="30" rx="27" ry="12" fill="none" stroke="url(#lg)" strokeWidth="2" opacity="0.6"/>
+              <circle cx="30" cy="14" r="4" fill="white" opacity="0.9"/>
+              <circle cx="43" cy="22" r="3" fill="white" opacity="0.6"/>
+              <circle cx="22" cy="42" r="3.5" fill="white" opacity="0.7"/>
+              <circle cx="16" cy="25" r="2.5" fill="white" opacity="0.5"/>
+              <circle cx="38" cy="44" r="2" fill="white" opacity="0.4"/>
+            </svg>
+          </div>
+          <div className="app-title">GeoLoc</div>
+          <div className="app-tagline">Recherche · Itinéraire · Météo</div>
+        </div>
 
         {/* Onglets */}
         <div className="tabs">
