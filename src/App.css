@@ -934,6 +934,42 @@ body.dark-mode .country-select-mini option {
   border-color: rgba(255, 255, 255, 0.6);
 }
 
+/* ===== Bouton inverser départ/arrivée ===== */
+.swap-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 2px 0;
+}
+
+.btn-swap {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-swap:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: rotate(180deg);
+}
+
+.btn-swap:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Marqueur violet pour waypoints */
 .waypoint-marker {
   background: none !important;

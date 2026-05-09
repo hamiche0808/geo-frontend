@@ -18,6 +18,21 @@ function getFlagIcon(countryCode) {
 
 const API = 'https://geo-app-1-z314.onrender.com';
 
+// Récupérer la population INSEE d'une commune française
+async function fetchFrPopulation(postalCode, cityName) {
+  try {
+    const params = new URLSearchParams();
+    if (postalCode) params.set('postal_code', postalCode);
+    if (cityName) params.set('city_name', cityName);
+    if (!postalCode && !cityName) return null;
+    const resp = await axios.get(`${API}/api/population-fr?${params.toString()}`, { timeout: 8000 });
+    if (resp.data && resp.data.length > 0) {
+      return resp.data[0].population; // population municipale INSEE
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 // Emoji météo selon code WMO
 function getWeatherEmoji(code) {
   if (code === 0) return '☀️';
@@ -481,6 +496,12 @@ function App() {
         population: 0,
         display_name: item.display_name || ''
       };
+      // Population INSEE pour la France
+      if ((addrLocation.country_code === 'FR' || addrLocation.country === 'France') && addrLocation.postal_code) {
+        fetchFrPopulation(addrLocation.postal_code, addrLocation.city).then(pop => {
+          if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
+        });
+      }
       setLocation(addrLocation);
       fetchWeather(item.latitude, item.longitude);
       setLoading(false);
@@ -490,16 +511,23 @@ function App() {
     try {
       const url = `${API}/api/location/${encodeURIComponent(item.postal_code)}?country=${item.country_code || country}`;
       const resp = await axios.get(url);
-      setLocation(resp.data);
-      saveToHistory(resp.data);
-      fetchWeather(resp.data.latitude, resp.data.longitude);
+      const locData = resp.data;
+      // Population INSEE pour la France (remplace celle du département)
+      if ((locData.country_code === 'FR' || locData.country === 'France') && locData.postal_code) {
+        fetchFrPopulation(locData.postal_code, locData.city).then(pop => {
+          if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
+        });
+      }
+      setLocation(locData);
+      saveToHistory(locData);
+      fetchWeather(locData.latitude, locData.longitude);
     } catch (err) {
       setError(`Erreur: ${err.message}`);
       setLocation(null);
     } finally { setLoading(false); }
   };
 
-  // ===== Mode Distance =====
+  // ===== Mode Itinéraire =====
   const handleDistanceCity = async (cityData, side) => {
     const data = cityData;
     const countryForLookup = side === 'A' ? (countryA || 'FR') : (countryB || 'FR');
@@ -519,6 +547,16 @@ function App() {
         display_name: data.display_name || '',
         is_address: true
       };
+      // Population INSEE pour la France
+      if ((addrData.country_code === 'FR' || addrData.country === 'France') && addrData.postal_code) {
+        fetchFrPopulation(addrData.postal_code, addrData.city).then(pop => {
+          if (pop != null) {
+            const updated = { ...addrData, population: pop };
+            if (side === 'A') setCityA(updated);
+            else setCityB(updated);
+          }
+        });
+      }
       if (side === 'A') setCityA(addrData);
       else setCityB(addrData);
       return;
@@ -528,8 +566,19 @@ function App() {
     try {
       const url = `${API}/api/location/${encodeURIComponent(data.postal_code)}?country=${data.country_code || countryForLookup}`;
       const resp = await axios.get(url);
-      if (side === 'A') setCityA(resp.data);
-      else setCityB(resp.data);
+      const locData = resp.data;
+      // Population INSEE pour la France (remplace celle du département)
+      if ((locData.country_code === 'FR' || locData.country === 'France') && locData.postal_code) {
+        fetchFrPopulation(locData.postal_code, locData.city).then(pop => {
+          if (pop != null) {
+            const updated = { ...locData, population: pop };
+            if (side === 'A') setCityA(updated);
+            else setCityB(updated);
+          }
+        });
+      }
+      if (side === 'A') setCityA(locData);
+      else setCityB(locData);
     } catch {
       // Fallback : utiliser les données de la suggestion (latitude/longitude déjà présentes)
       const fallback = {
@@ -619,6 +668,16 @@ function App() {
     newWpC[idx] = lookupCountry;
     setWaypoints(newWp);
     setWaypointCountries(newWpC);
+  };
+
+  // ===== Inverser départ et arrivée =====
+  const swapCities = () => {
+    const tmpCity = cityA;
+    const tmpCountry = countryA;
+    setCityA(cityB);
+    setCountryA(countryB);
+    setCityB(tmpCity);
+    setCountryB(tmpCountry);
   };
 
   const resetCities = () => {
@@ -767,7 +826,7 @@ function App() {
     }
   };
 
-  // ===== Calcul distance via API backend avec waypoints =====
+  // ===== Calcul itinéraire via API backend avec waypoints =====
   const buildWaypointsParam = () => {
     const validWp = waypoints.filter(w => w && w.latitude && w.longitude);
     if (validWp.length === 0) return '';
@@ -897,7 +956,7 @@ function App() {
         {/* Onglets */}
         <div className="tabs">
           <button className={`tab ${mode === 'search' ? 'active' : ''}`} onClick={() => { setMode('search'); setError(''); }}>🔍 Recherche</button>
-          <button className={`tab ${mode === 'distance' ? 'active' : ''}`} onClick={() => { setMode('distance'); setError(''); }}>📏 Distance</button>
+          <button className={`tab ${mode === 'distance' ? 'active' : ''}`} onClick={() => { setMode('distance'); setError(''); }}>🗺️ Itinéraire</button>
           <button className="tab tab-dark" onClick={() => setDarkMode(!darkMode)} title="Mode sombre">
             {darkMode ? '☀️' : '🌙'}
           </button>
@@ -955,6 +1014,14 @@ function App() {
                 <select className="country-select-mini" value={countryA} onChange={(e) => setCountryA(e.target.value)}>
                   {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag}</option>)}
                 </select>
+              </div>
+
+              {/* Bouton inverser départ/arrivée */}
+              <div className="swap-container">
+                <button className="btn-swap" onClick={swapCities} title="Inverser départ et arrivée"
+                  disabled={!cityA && !cityB}>
+                  ⇄
+                </button>
               </div>
 
               {/* Flèche */}
@@ -1022,7 +1089,7 @@ function App() {
       {/* Résultat distance */}
       {mode === 'distance' && distance !== null && (
         <div className="result-info distance-result">
-          <h2>📏 Distance</h2>
+          <h2>🗺️ Itinéraire</h2>
           <p className="distance-value">{distance.toLocaleString()} km</p>
           {duration !== null && (
             <p className="duration-value">
@@ -1434,7 +1501,7 @@ function App() {
                 <div className="legal-sections">
                   <div className="legal-section">
                     <h3>1. Objet</h3>
-                    <p>Les présentes CGU régissent l'utilisation de l'application GeoLoc. L'application permet la recherche de codes postaux, le calcul de distances, l'affichage météorologique et la planification d'itinéraires.</p>
+                    <p>Les présentes CGU régissent l'utilisation de l'application GeoLoc. L'application permet la recherche de codes postaux, le calcul d'itinéraires, l'affichage météorologique et la planification d'itinéraires.</p>
                   </div>
                   <div className="legal-section">
                     <h3>2. Service gratuit</h3>
