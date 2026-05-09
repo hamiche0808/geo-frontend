@@ -632,6 +632,14 @@ body.dark-mode select {
   border-color: #333355;
 }
 
+body.dark-mode .map-controls .map-layer-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+body.dark-mode .map-layer-btn.active {
+  background: rgba(102, 126, 234, 0.5);
+  border-color: #667eea;
+}
 body.dark-mode .map-placeholder { background: #1a1a2e; color: #888; }
 
 body.dark-mode .detail-badge { background: #1f2a4a; color: #ccc; }
@@ -1540,6 +1548,139 @@ body.dark-mode .suggestion-street {
 .contact-success p {
   font-size: 1.1em;
   color: var(--text);
+}
+
+
+/* ===== Controles carte (fond, plein ecran) ===== */
+.map-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 8px auto;
+  max-width: 900px;
+  padding: 0 4px;
+}
+
+.map-layer-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.map-layer-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.82em;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.map-layer-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.map-layer-btn.active {
+  background: rgba(102, 126, 234, 0.6);
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+}
+
+.map-fullscreen-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  font-size: 1.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.map-fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Mode plein ecran : 80% de la hauteur */
+.map-fullscreen {
+  height: 80vh !important;
+}
+
+/* ===== Modale parametres ===== */
+.settings-modal {
+  max-width: 420px;
+}
+
+.settings-content {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.settings-group {
+  margin: 14px 0;
+}
+
+.settings-group label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.9em;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.settings-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95em;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.settings-colors {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.settings-colors > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings-colors small {
+  opacity: 0.7;
+  font-size: 0.8em;
+}
+
+.settings-colors input[type="color"] {
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 2px;
+  background: transparent;
+}
+
+/* ===== Tab langue / settings ===== */
+.tab-lang, .tab-settings {
+  min-width: 42px;
+  padding: 8px 12px !important;
+  font-size: 0.9em !important;
 }
 
 /* ===== White-label vars ===== */

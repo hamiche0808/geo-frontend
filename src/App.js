@@ -18,6 +18,43 @@ function getFlagIcon(countryCode) {
 
 const API = 'https://geo-app-1-z314.onrender.com';
 
+// ===== Traductions FR / EN =====
+const TR = {
+  fr: {
+    search: 'Recherche', itinerary: 'Itineraire', settings: 'Parametres',
+    fullscreen: 'Plein ecran', exitFullscreen: 'Reduire',
+    mapLayer: 'Fond de carte', street: 'Route', satellite: 'Satellite', terrain: 'Relief',
+    searchPlaceholder: 'Code postal ou nom de ville...',
+    noMapData: 'Effectuez une recherche', noMapDataDistance: 'Selectionnez deux villes',
+  },
+  en: {
+    search: 'Search', itinerary: 'Route', settings: 'Settings',
+    fullscreen: 'Full screen', exitFullscreen: 'Minimize',
+    mapLayer: 'Map layer', street: 'Street', satellite: 'Satellite', terrain: 'Terrain',
+    searchPlaceholder: 'Postal code or city name...',
+    noMapData: 'Search for a location', noMapDataDistance: 'Select two cities',
+  }
+};
+function tr(key, lang) {
+  return (TR[lang] && TR[lang][key]) || key;
+}
+
+// ===== Fonds de carte =====
+const MAP_TILES = {
+  street: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attr: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attr: '&copy; <a href="https://www.esri.com/">Esri</a>'
+  },
+  terrain: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attr: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+  }
+};
+
 // Récupérer la population INSEE d'une commune française
 async function fetchFrPopulation(postalCode, cityName) {
   try {
@@ -239,6 +276,17 @@ function App() {
   const [modeProfile, setModeProfile] = useState('driving'); // driving | cycling | walking
   const [favorites, setFavorites] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
+
+  // Fond de carte + plein ecran
+  const [mapStyle, setMapStyle] = useState('street');
+  const [fullScreenMap, setFullScreenMap] = useState(false);
+
+  // Langue + parametres
+  const [lang, setLang] = useState('fr');
+  const [showSettings, setShowSettings] = useState(false);
+  const [customPrimary, setCustomPrimary] = useState('');
+  const [customAccent, setCustomAccent] = useState('');
+
   const debounceRef = useRef(null);
 
   // Charger l'historique et les favoris
@@ -988,6 +1036,12 @@ function App() {
           <button className="tab tab-dark" onClick={() => setDarkMode(!darkMode)} title="Mode sombre">
             {darkMode ? '☀️' : '🌙'}
           </button>
+          <button className="tab tab-lang" onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')} title="Langue">
+            {lang === 'fr' ? '🇬🇧' : '🇫🇷'}
+          </button>
+          <button className="tab tab-settings" onClick={() => setShowSettings(true)} title="Paramètres">
+            ⚙️
+          </button>
         </div>
 
         {/* Barre d'outils */}
@@ -1005,7 +1059,7 @@ function App() {
                 <input type="text" value={searchInput} onChange={handleInputChange}
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder="Code postal ou nom de ville..." />
+                  placeholder={tr("searchPlaceholder", lang)} />
                 {showSuggestions && suggestions.length > 0 && (
                   <ul className="suggestions">
                     {suggestions.map((s, idx) => (
@@ -1374,8 +1428,26 @@ function App() {
         </div>
       )}
 
+      {/* Controles carte */}
+      <div className="map-controls">
+        <div className="map-layer-buttons">
+          {Object.entries(MAP_TILES).map(([key, val]) => (
+            <button key={key}
+              className={`map-layer-btn ${mapStyle === key ? 'active' : ''}`}
+              onClick={() => setMapStyle(key)}
+              title={tr(key, lang)}>
+              {key === 'street' ? '🗺️' : key === 'satellite' ? '🛰️' : '⛰️'} {tr(key, lang)}
+            </button>
+          ))}
+        </div>
+        <button className="map-fullscreen-btn" onClick={() => setFullScreenMap(!fullScreenMap)}
+          title={tr(fullScreenMap ? 'exitFullscreen' : 'fullscreen', lang)}>
+          {fullScreenMap ? '⛶' : '⛶'}
+        </button>
+      </div>
+
       {/* Carte */}
-      <div className="map-container">
+      <div className={`map-container ${fullScreenMap ? 'map-fullscreen' : ''}`}>
         {(mode === 'search' && location) || (mode === 'distance' && (cityA || cityB)) ? (
           <MapContainer key={mode + (cityA?.postal_code || '') + (cityB?.postal_code || '') + waypoints.length}
             center={getMapCenter()} zoom={getMapZoom()}
@@ -1391,8 +1463,9 @@ function App() {
               routeCoords={routeCoords}
             />
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution={MAP_TILES[mapStyle].attr}
+              url={MAP_TILES[mapStyle].url}
+              key={mapStyle}
             />
 
             {/* Position utilisateur (point bleu) */}
