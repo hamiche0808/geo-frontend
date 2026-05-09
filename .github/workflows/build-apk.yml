@@ -20,12 +20,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Debug environment
-        run: |
-          echo "Node version: $(node -v)"
-          echo "Npm version: $(npm -v)"
-          ls -la package.json package-lock.json
-
       - name: Install dependencies
         run: npm install --legacy-peer-deps --no-audit --no-fund 2>&1
 
@@ -46,8 +40,8 @@ jobs:
       - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Add Android platform
-        run: npx cap add android
+      - name: Sync Android platform (already exists)
+        run: npx cap sync android
 
       - name: Copy web build
         run: npx cap copy
