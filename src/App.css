@@ -1206,3 +1206,152 @@ body.dark-mode .suggestion-street {
 .city-input-wrapper .suggestions li .suggestion-code {
   font-size: 0.8em;
 }
+
+/* ===== Footer ===== */
+.app-footer {
+  margin-top: 30px;
+  padding: 15px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.footer-brand {
+  font-weight: bold;
+  color: var(--accent);
+  font-size: 0.9em;
+}
+
+.footer-link {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--accent);
+  background: var(--badge-bg);
+}
+
+.footer-note {
+  font-size: 0.75em;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* ===== Modale légale ===== */
+.legal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.legal-modal {
+  background: var(--card-bg);
+  color: var(--text);
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.legal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.legal-close:hover {
+  background: #e74c3c;
+}
+
+.legal-modal h2 {
+  font-size: 1.4em;
+  margin-bottom: 4px;
+  color: var(--accent);
+}
+
+.legal-version {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.legal-sections {
+  text-align: left;
+}
+
+.legal-section {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal-section:last-child {
+  border-bottom: none;
+}
+
+.legal-section h3 {
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.legal-section p {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== White-label vars ===== */
+:root {
+  --wl-primary: initial;
+  --wl-accent: initial;
+}
+
+/* ===== Bouton Export amélioré ===== */
+.btn-export:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

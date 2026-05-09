@@ -218,7 +218,7 @@ function App() {
     document.body.className = darkMode ? 'dark-mode' : '';
   }, [darkMode]);
 
-  // Lecture des paramètres d'URL pour le partage
+  // Lecture des paramètres d'URL pour le partage + white-label
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const pc = params.get('pc');
@@ -226,11 +226,27 @@ function App() {
     const from = params.get('from');
     const to = params.get('to');
     const wp = params.get('wp'); // waypoints
+    const logo = params.get('logo');
+    const primary = params.get('primary');
+    const accent = params.get('accent');
+
+    // White-label : personnalisation via URL
+    if (primary || accent || logo) {
+      const root = document.documentElement;
+      if (primary) {
+        root.style.setProperty('--wl-primary', primary);
+        document.querySelector('header').style.background = primary;
+      }
+      if (accent) root.style.setProperty('--wl-accent', accent);
+      if (logo) {
+        const h1 = document.querySelector('header h1');
+        if (h1) h1.innerHTML = `<img src="${encodeURI(logo)}" alt="Logo" style="max-height:40px;vertical-align:middle"> ${h1.textContent.replace('🌍 ','')}`;
+      }
+    }
 
     if (from && to) {
       // Mode distance partagé
       setMode('distance');
-      // Les paramètres contiennent les noms de villes - on fait une recherche inverse
       handleSharedRoute(from, to, wp);
     } else if (pc) {
       setSearchInput(pc);
@@ -609,6 +625,48 @@ function App() {
   // Vitesses moyennes pour estimer la durée selon le profil
   const PROFILE_SPEEDS = { driving: 50, cycling: 15, walking: 5 };
 
+  // ===== Export PDF =====
+  const [exporting, setExporting] = useState(false);
+  const exportPdf = async () => {
+    setExporting(true);
+    setError('');
+    try {
+      const payload = {
+        mode: mode,
+        from_city: cityA?.city || '',
+        to_city: cityB?.city || '',
+        distance_km: distance || 0,
+        duration_s: duration || 0,
+        profile: modeProfile,
+        waypoints: waypoints.filter(w => w && w.city).map(w => w.city),
+        city: location?.city || '',
+        postal_code: location?.postal_code || '',
+        country: location?.country || '',
+        latitude: location?.latitude || cityA?.latitude || '',
+        longitude: location?.longitude || cityA?.longitude || '',
+        weather: weather || null,
+        fuel_cost: showFuelCalc ? calculateFuelCost().toFixed(2) : null
+      };
+      const resp = await axios.post(`${API}/api/export/pdf`, payload, { responseType: 'blob', timeout: 30000 });
+      const blob = new Blob([resp.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `geoloc-itineraire-${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      setError('PDF téléchargé !');
+      setTimeout(() => setError(''), 2000);
+    } catch (e) {
+      setError('Erreur téléchargement PDF');
+    } finally { setExporting(false); }
+  };
+
+  // ===== Pages légales =====
+  const [legalPage, setLegalPage] = useState(null); // 'terms' | 'privacy' | null
+
   // ===== Calcul distance via API backend avec waypoints =====
   const buildWaypointsParam = () => {
     const validWp = waypoints.filter(w => w && w.latitude && w.longitude);
@@ -966,6 +1024,9 @@ function App() {
             <button className="btn-qr" onClick={() => setShowQR(!showQR)}>
               📱 {showQR ? 'Masquer QR' : 'QR Code'}
             </button>
+            <button className="btn-export" onClick={exportPdf} disabled={exporting}>
+              {exporting ? '⏳' : '📄'} Export PDF
+            </button>
           </div>
           {showQR && (
             <div className="qr-section">
@@ -1054,6 +1115,9 @@ function App() {
             <button className="btn-share" onClick={shareLocation}>📤 Partager</button>
             <button className="btn-qr" onClick={() => setShowQR(!showQR)}>
               📱 {showQR ? 'Masquer QR' : 'QR Code'}
+            </button>
+            <button className="btn-export" onClick={exportPdf} disabled={exporting}>
+              {exporting ? '⏳' : '📄'} Export PDF
             </button>
             {location && (
               <button className="btn-fav" onClick={() => toggleFavorite(location)}>
@@ -1195,6 +1259,95 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="app-footer">
+        <div className="footer-links">
+          <span className="footer-brand">🌍 GeoLoc v4.0</span>
+          <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
+          <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
+          <a href="https://github.com/hamiche0808/geo-app" target="_blank" rel="noopener noreferrer" className="footer-link">💻 GitHub</a>
+        </div>
+        <p className="footer-note">
+          Données : OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
+        </p>
+      </footer>
+
+      {/* Modale légale */}
+      {legalPage && (
+        <div className="legal-overlay" onClick={() => setLegalPage(null)}>
+          <div className="legal-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="legal-close" onClick={() => setLegalPage(null)}>✕</button>
+            {legalPage === 'terms' ? (
+              <>
+                <h2>📜 Conditions Générales d'Utilisation</h2>
+                <p className="legal-version">Version 1.0 - Mai 2026</p>
+                <div className="legal-sections">
+                  <div className="legal-section">
+                    <h3>1. Objet</h3>
+                    <p>Les présentes CGU régissent l'utilisation de l'application GeoLoc. L'application permet la recherche de codes postaux, le calcul de distances, l'affichage météorologique et la planification d'itinéraires.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>2. Service gratuit</h3>
+                    <p>GeoLoc est un service gratuit. Aucun paiement n'est requis pour les fonctionnalités de base. Une API payante est disponible pour les professionnels.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>3. Données géographiques</h3>
+                    <p>Les données proviennent de sources ouvertes : OpenStreetMap (Nominatim), OpenRouteService, et Open-Meteo. GeoLoc ne garantit pas l'exactitude de ces données.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>4. Responsabilité</h3>
+                    <p>GeoLoc fournit des informations à titre indicatif. L'application ne peut être tenue responsable des conséquences de l'utilisation des données fournies.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>5. API Payante</h3>
+                    <p>GeoLoc propose une API payante pour les développeurs. Tarifs sur demande. Contact : hamiche@geoloc.app</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>6. Liens affiliés</h3>
+                    <p>L'application contient des liens affiliés (Booking, Skyscanner, Kayak, TripAdvisor). GeoLoc peut percevoir une commission sans coût supplémentaire pour l'utilisateur.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>7. Contact</h3>
+                    <p>Email : hamiche@geoloc.app</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2>🔒 Politique de Confidentialité</h2>
+                <p className="legal-version">Version 1.0 - Mai 2026</p>
+                <div className="legal-sections">
+                  <div className="legal-section">
+                    <h3>1. Collecte des données</h3>
+                    <p>GeoLoc ne collecte aucune donnée personnelle identifiable. Pas de compte, pas d'email requis.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>2. Stockage local</h3>
+                    <p>Les favoris et l'historique sont stockés localement dans votre navigateur (localStorage). Aucune donnée n'est transmise à nos serveurs.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>3. Services tiers</h3>
+                    <p>OpenStreetMap, OpenRouteService, Open-Meteo, Nominatim peuvent collecter des données selon leurs propres politiques.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>4. Cookies</h3>
+                    <p>GeoLoc n'utilise pas de cookies. Aucun traceur publicitaire.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>5. Géolocalisation</h3>
+                    <p>Optionnelle. Les coordonnées GPS ne sont utilisées que pour la carte et ne sont jamais stockées.</p>
+                  </div>
+                  <div className="legal-section">
+                    <h3>6. Contact RGPD</h3>
+                    <p>Email : hamiche@geoloc.app</p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
