@@ -1,4 +1,4 @@
-/* Service Worker for GeoLoc PWA - cache static assets for offline use */
+/* Service Worker for GeoLoc PWA - cache statique + mise à jour automatique */
 const CACHE_NAME = 'geoloc-v1';
 const STATIC_URLS = [
   '/',
@@ -16,7 +16,7 @@ self.addEventListener('install', event => {
       return cache.addAll(STATIC_URLS);
     })
   );
-  self.skipWaiting();
+  // Ne pas skipWaiting immédiatement → on laisse le client décider
 });
 
 self.addEventListener('activate', event => {
@@ -25,9 +25,8 @@ self.addEventListener('activate', event => {
       return Promise.all(
         keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
@@ -36,4 +35,11 @@ self.addEventListener('fetch', event => {
       return cached || fetch(event.request);
     })
   );
+});
+
+// Recevoir l'ordre du client de passer en attente → actif
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

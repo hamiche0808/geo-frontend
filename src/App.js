@@ -286,6 +286,14 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [customPrimary, setCustomPrimary] = useState('');
   const [customAccent, setCustomAccent] = useState('');
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+
+  // Écouter les mises à jour PWA
+  useEffect(() => {
+    const handler = () => setUpdateAvailable(true);
+    window.addEventListener('sw-update-available', handler);
+    return () => window.removeEventListener('sw-update-available', handler);
+  }, []);
 
   const debounceRef = useRef(null);
 
@@ -1020,6 +1028,13 @@ function App() {
   // ===== Rendu =====
   return (
     <div className="App">
+      {/* Bandeau de mise à jour PWA */}
+      {updateAvailable && (
+        <div className="update-banner" onClick={() => { if (window.applyUpdate) window.applyUpdate(); }}>
+          <span>🔄 Nouvelle version disponible</span>
+          <button className="update-btn">Mettre à jour</button>
+        </div>
+      )}
       <header>
         <div className="app-brand">
           <div className="app-logo">

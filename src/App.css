@@ -13,6 +13,45 @@
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* ===== Bandeau de mise à jour PWA ===== */
+.update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  animation: slideDown 0.3s ease-out;
+}
+.update-banner .update-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.update-banner .update-btn:hover {
+  transform: scale(1.05);
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
 /* ===== Thème sombre ===== */
 body.dark-mode {
   --bg: #1a1a2e;
