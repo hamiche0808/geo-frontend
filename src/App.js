@@ -732,18 +732,37 @@ function App() {
   const [showContact, setShowContact] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null); // null | 'sending' | 'done' | 'error'
+  const [contactErrorMsg, setContactErrorMsg] = useState('');
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const sendContact = async () => {
-    if (!contactForm.email || !contactForm.message) {
+    // Validation email
+    if (!contactForm.email) {
+      setContactErrorMsg("❌ L'adresse email est obligatoire.");
+      setContactStatus('error');
+      return;
+    }
+    if (!EMAIL_REGEX.test(contactForm.email)) {
+      setContactErrorMsg("❌ L'adresse email n'est pas valide. Exemple : votrenom@email.com");
+      setContactStatus('error');
+      return;
+    }
+    // Validation message
+    if (!contactForm.message) {
+      setContactErrorMsg("❌ Le message est vide. Écrivez votre message avant d'envoyer.");
       setContactStatus('error');
       return;
     }
     setContactStatus('sending');
+    setContactErrorMsg('');
     try {
       await axios.post(`${API}/api/contact`, contactForm, { timeout: 10000 });
       setContactStatus('done');
+      setContactErrorMsg('');
       setContactForm({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => { setShowContact(false); setContactStatus(null); }, 2000);
     } catch (e) {
+      const detail = e.response?.data?.detail;
+      setContactErrorMsg(detail ? `❌ ${detail}` : "❌ Erreur d'envoi. Vérifiez votre connexion et réessayez.");
       setContactStatus('error');
     }
   };
@@ -1357,9 +1376,9 @@ function App() {
 
       {/* Modale contact */}
       {showContact && (
-        <div className="legal-overlay" onClick={() => { setShowContact(false); setContactStatus(null); }}>
+        <div className="legal-overlay" onClick={() => { setShowContact(false); setContactStatus(null); setContactErrorMsg(''); }}>
           <div className="legal-modal contact-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="legal-close" onClick={() => { setShowContact(false); setContactStatus(null); }}>✕</button>
+            <button className="legal-close" onClick={() => { setShowContact(false); setContactStatus(null); setContactErrorMsg(''); }}>✕</button>
             <h2>✉️ Nous contacter</h2>
             <p className="legal-version">Une question ? Un projet ? Écrivez-nous !</p>
 
@@ -1390,8 +1409,8 @@ function App() {
                   value={contactForm.message}
                   onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })} />
 
-                {contactStatus === 'error' && (
-                  <p className="contact-error">❌ Erreur : vérifiez votre email et votre message.</p>
+                {contactStatus === 'error' && contactErrorMsg && (
+                  <p className="contact-error">{contactErrorMsg}</p>
                 )}
 
                 <button className="contact-submit" onClick={sendContact} disabled={contactStatus === 'sending'}>
