@@ -1558,6 +1558,67 @@ function App() {
         </p>
       </footer>
 
+      {/* Modale paramètres */}
+      {showSettings && (
+        <div className="legal-overlay" onClick={() => setShowSettings(false)}>
+          <div className="legal-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="legal-close" onClick={() => setShowSettings(false)}>✕</button>
+            <h2>⚙️ {lang === 'fr' ? 'Paramètres' : 'Settings'}</h2>
+
+            <label style={{display:'block', margin:'15px 0 5px'}}>
+              {lang === 'fr' ? 'Langue' : 'Language'}
+            </label>
+            <select value={lang} onChange={(e) => setLang(e.target.value)} style={{width:'100%', padding:'8px', borderRadius:'6px', border:'1px solid #ccc'}}>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="en">🇬🇧 English</option>
+            </select>
+
+            <label style={{display:'block', margin:'15px 0 5px'}}>
+              {lang === 'fr' ? 'Mode sombre' : 'Dark mode'}
+            </label>
+            <button onClick={() => setDarkMode(!darkMode)} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer'}}>
+              {darkMode ? '☀️ ' + (lang === 'fr' ? 'Clair' : 'Light') : '🌙 ' + (lang === 'fr' ? 'Sombre' : 'Dark')}
+            </button>
+
+            <label style={{display:'block', margin:'15px 0 5px'}}>
+              {lang === 'fr' ? 'Couleur principale' : 'Primary color'}
+            </label>
+            <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
+              <input type="color" value={customPrimary || '#1976D2'} onChange={(e) => {
+                setCustomPrimary(e.target.value);
+                document.documentElement.style.setProperty('--wl-primary', e.target.value);
+              }} style={{width:'50px', height:'40px', borderRadius:'6px', border:'none', cursor:'pointer'}} />
+              <button onClick={() => {
+                setCustomPrimary('');
+                document.documentElement.style.removeProperty('--wl-primary');
+              }} style={{padding:'6px 12px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', fontSize:'12px'}}>
+                {lang === 'fr' ? 'Réinitialiser' : 'Reset'}
+              </button>
+            </div>
+
+            <label style={{display:'block', margin:'15px 0 5px'}}>
+              {lang === 'fr' ? "Couleur d'accent" : 'Accent color'}
+            </label>
+            <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
+              <input type="color" value={customAccent || '#4CAF50'} onChange={(e) => {
+                setCustomAccent(e.target.value);
+                document.documentElement.style.setProperty('--wl-accent', e.target.value);
+              }} style={{width:'50px', height:'40px', borderRadius:'6px', border:'none', cursor:'pointer'}} />
+              <button onClick={() => {
+                setCustomAccent('');
+                document.documentElement.style.removeProperty('--wl-accent');
+              }} style={{padding:'6px 12px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', fontSize:'12px'}}>
+                {lang === 'fr' ? 'Réinitialiser' : 'Reset'}
+              </button>
+            </div>
+
+            <p style={{marginTop:'20px', opacity:0.6, fontSize:'12px'}}>
+              {lang === 'fr' ? 'Les couleurs sont réinitialisées au rechargement de la page.' : 'Colors reset on page reload.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Admin panel (messages) */}
       {showAdmin && (
         <div className="legal-overlay" onClick={() => setShowAdmin(false)}>
