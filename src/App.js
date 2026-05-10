@@ -1536,10 +1536,10 @@ function App() {
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
           <span className="footer-link" style={{cursor:'default', opacity:0.7}}>📱 Installez l'app via Chrome (PWA)</span>
         </div>
-        <p className="footer-note">
-          Données : OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
+        <p className="footer-note" style={{marginTop:'2px'}}>
+          OpenStreetMap · OpenRouteService · Open-Meteo · Nominatim
         </p>
-        <p className="footer-note" style={{marginTop:'6px', fontWeight:'500'}}>
+        <p className="footer-note" style={{marginTop:'3px', fontWeight:'500'}}>
           Créé par <strong>BEN MESLI Hamiche</strong> © {new Date().getFullYear()}
         </p>
       </footer>
