@@ -419,7 +419,7 @@ function App() {
   // ===== Partage =====
   // Partage de l'application complète
   const [showQR, setShowQR] = useState(false);
-  const APP_URL = 'https://geo-app-1-z314.onrender.com';
+  const APP_URL = window.location.origin;
 
   const shareApp = () => {
     const url = APP_URL;
