@@ -2,7 +2,7 @@
 const CACHE_NAME = 'geoloc-v1';
 const STATIC_URLS = [
   '/',
-  '/static/js/main.d54acce5.js',
+  '/static/js/main.3a2bcace.js',
   '/static/css/main.90b31a94.css',
   '/static/js/453.ae5edcc7.chunk.js',
   '/favicon.ico',
