@@ -413,59 +413,28 @@ function App() {
   };
 
   // ===== Partage =====
-  const shareLocation = () => {
-    const url = window.location.origin + `?city=${encodeURIComponent(location.city)}&pc=${location.postal_code}`;
-    if (navigator.share) {
-      navigator.share({
-        title: `${location.city} (${location.postal_code})`,
-        text: `📍 ${location.city} (${location.postal_code})\nCoordonnées : ${location.latitude}, ${location.longitude}\nPays : ${location.country}`,
-        url: url
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        setError('Lien copié !');
-        setTimeout(() => setError(''), 2000);
-      }).catch(() => {});
-    }
-  };
-
-  // Partage d'itinéraire
+  // Partage de l'application complète
   const [showQR, setShowQR] = useState(false);
-  const getRouteUrl = () => {
-    const params = new URLSearchParams();
-    params.set('from', cityA?.city || '');
-    params.set('to', cityB?.city || '');
-    if (waypoints.length > 0) {
-      const wpNames = waypoints.filter(w => w && w.city).map(w => w.city).join(';');
-      if (wpNames) params.set('wp', wpNames);
-    }
-    return window.location.origin + '?' + params.toString();
-  };
+  const APP_URL = 'https://geoloc-app.onrender.com';
 
-  const shareRoute = () => {
-    const url = getRouteUrl();
+  const shareApp = () => {
+    const url = APP_URL;
     if (navigator.share) {
       navigator.share({
-        title: `Itinéraire ${cityA?.city || ''} → ${cityB?.city || ''}`,
-        text: `📍 Itinéraire : ${cityA?.city || ''} → ${cityB?.city || ''}` +
-          (waypoints.length > 0 ? ` avec ${waypoints.length} arrêt(s)` : '') +
-          `\nDistance : ${distance} km` +
-          `\nDurée : ${duration ? Math.floor(duration / 3600) + 'h' + Math.round((duration % 3600) / 60) + 'min' : 'N/A'}`,
+        title: 'GeoLoc - Recherche, Itinéraire, Météo',
+        text: '🌍 GeoLoc - Recherche d\'adresses, itinéraires, météo et population. Application gratuite et sans compte !',
         url: url
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => {
-        setError('Lien d\'itinéraire copié !');
+        setError('Lien de l\'application copié !');
         setTimeout(() => setError(''), 2000);
       }).catch(() => {});
     }
   };
 
   const getSearchUrl = () => {
-    if (mode === 'search' && location) {
-      return window.location.origin + `?city=${encodeURIComponent(location.city)}&pc=${location.postal_code}`;
-    }
-    return getRouteUrl();
+    return APP_URL;
   };
 
   // ===== Mode Recherche =====
@@ -1299,7 +1268,7 @@ function App() {
 
           {/* Boutons d'action */}
           <div className="actions">
-            <button className="btn-share" onClick={shareRoute}>📤 Partager</button>
+            <button className="btn-share" onClick={shareApp}>📤 Partager</button>
             <button className="btn-qr" onClick={() => setShowQR(!showQR)}>
               📱 {showQR ? 'Masquer QR' : 'QR Code'}
             </button>
@@ -1309,9 +1278,9 @@ function App() {
           </div>
           {showQR && (
             <div className="qr-section">
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getRouteUrl())}`}
-                alt="QR Code de l'itinéraire" className="qr-image" />
-              <p className="qr-hint">Scannez pour ouvrir l'itinéraire</p>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getSearchUrl())}`}
+                alt="QR Code de l'application" className="qr-image" />
+              <p className="qr-hint">Scannez pour ouvrir l'application</p>
             </div>
           )}
         </div>
@@ -1391,7 +1360,7 @@ function App() {
           </div>
 
           <div className="actions">
-            <button className="btn-share" onClick={shareLocation}>📤 Partager</button>
+            <button className="btn-share" onClick={shareApp}>📤 Partager</button>
             <button className="btn-qr" onClick={() => setShowQR(!showQR)}>
               📱 {showQR ? 'Masquer QR' : 'QR Code'}
             </button>
