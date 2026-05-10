@@ -1610,9 +1610,10 @@ body.dark-mode .suggestion-street {
 }
 
 .map-layer-btn {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.55);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 20px;
   padding: 5px 14px;
   font-size: 0.82em;
@@ -1622,20 +1623,22 @@ body.dark-mode .suggestion-street {
 }
 
 .map-layer-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 .map-layer-btn.active {
-  background: rgba(102, 126, 234, 0.6);
-  border-color: #667eea;
-  box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+  background: rgba(102, 126, 234, 0.75);
+  border-color: #a0b4ff;
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
 .map-fullscreen-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.55);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
   width: 38px;
   height: 38px;
@@ -1649,7 +1652,8 @@ body.dark-mode .suggestion-street {
 }
 
 .map-fullscreen-btn:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 /* Mode plein ecran : 80% de la hauteur */
