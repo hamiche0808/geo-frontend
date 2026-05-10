@@ -680,6 +680,8 @@ body.dark-mode .map-layer-btn.active {
   border-color: #667eea;
 }
 body.dark-mode .map-placeholder { background: #1a1a2e; color: #888; }
+body.dark-mode .leaflet-tile-pane { filter: brightness(0.85) invert(0.05); }
+body.dark-mode .leaflet-control-attribution { background: rgba(0,0,0,0.6); color: #aaa; }
 
 body.dark-mode .detail-badge { background: #1f2a4a; color: #ccc; }
 body.dark-mode .coords { color: #888; }

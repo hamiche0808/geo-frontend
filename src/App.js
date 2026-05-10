@@ -39,11 +39,11 @@ function tr(key, lang) {
   return (TR[lang] && TR[lang][key]) || key;
 }
 
-// ===== Fonds de carte =====
+// ===== Fonds de carte (améliorés) =====
 const MAP_TILES = {
   street: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attr: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attr: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
   },
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -51,20 +51,21 @@ const MAP_TILES = {
   },
   terrain: {
     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attr: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+    attr: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
   }
 };
 
-// Récupérer la population INSEE d'une commune française
-async function fetchFrPopulation(postalCode, cityName) {
+// Récupérer la population d'une commune (France → INSEE, Belgique → Statbel)
+async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
   try {
     const params = new URLSearchParams();
     if (postalCode) params.set('postal_code', postalCode);
     if (cityName) params.set('city_name', cityName);
     if (!postalCode && !cityName) return null;
-    const resp = await axios.get(`${API}/api/population-fr?${params.toString()}`, { timeout: 8000 });
+    const endpoint = countryCode === 'BE' ? 'population-be' : 'population-fr';
+    const resp = await axios.get(`${API}/api/${endpoint}?${params.toString()}`, { timeout: 8000 });
     if (resp.data && resp.data.length > 0) {
-      return resp.data[0].population; // population municipale INSEE
+      return resp.data[0].population;
     }
   } catch { /* ignore */ }
   return null;
@@ -559,9 +560,10 @@ function App() {
         population: 0,
         display_name: item.display_name || ''
       };
-      // Population INSEE pour la France
-      if ((addrLocation.country_code === 'FR' || addrLocation.country === 'France') && addrLocation.postal_code) {
-        fetchFrPopulation(addrLocation.postal_code, addrLocation.city).then(pop => {
+      // Population INSEE (France) ou Statbel (Belgique)
+      const cc = addrLocation.country_code || '';
+      if ((cc === 'FR' || cc === 'BE' || addrLocation.country === 'France' || addrLocation.country === 'Belgium' || addrLocation.country === 'Belgique') && addrLocation.postal_code) {
+        fetchPopulation(addrLocation.postal_code, addrLocation.city, cc).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
         });
       }
@@ -575,9 +577,10 @@ function App() {
       const url = `${API}/api/location/${encodeURIComponent(item.postal_code)}?country=${item.country_code || country}`;
       const resp = await axios.get(url);
       const locData = resp.data;
-      // Population INSEE pour la France (remplace celle du département)
-      if ((locData.country_code === 'FR' || locData.country === 'France') && locData.postal_code) {
-        fetchFrPopulation(locData.postal_code, locData.city).then(pop => {
+      // Population INSEE (France) ou Statbel (Belgique)
+      const cc2 = locData.country_code || '';
+      if ((cc2 === 'FR' || cc2 === 'BE' || locData.country === 'France' || locData.country === 'Belgium' || locData.country === 'Belgique') && locData.postal_code) {
+        fetchPopulation(locData.postal_code, locData.city, cc2).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
         });
       }
@@ -610,9 +613,10 @@ function App() {
         display_name: data.display_name || '',
         is_address: true
       };
-      // Population INSEE pour la France
-      if ((addrData.country_code === 'FR' || addrData.country === 'France') && addrData.postal_code) {
-        fetchFrPopulation(addrData.postal_code, addrData.city).then(pop => {
+      // Population INSEE (France) ou Statbel (Belgique)
+      const cc3 = addrData.country_code || '';
+      if ((cc3 === 'FR' || cc3 === 'BE' || addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique') && addrData.postal_code) {
+        fetchPopulation(addrData.postal_code, addrData.city, cc3).then(pop => {
           if (pop != null) {
             const updated = { ...addrData, population: pop };
             if (side === 'A') setCityA(updated);
@@ -630,9 +634,10 @@ function App() {
       const url = `${API}/api/location/${encodeURIComponent(data.postal_code)}?country=${data.country_code || countryForLookup}`;
       const resp = await axios.get(url);
       const locData = resp.data;
-      // Population INSEE pour la France (remplace celle du département)
-      if ((locData.country_code === 'FR' || locData.country === 'France') && locData.postal_code) {
-        fetchFrPopulation(locData.postal_code, locData.city).then(pop => {
+      // Population INSEE (France) ou Statbel (Belgique)
+      const cc4 = locData.country_code || '';
+      if ((cc4 === 'FR' || cc4 === 'BE' || locData.country === 'France' || locData.country === 'Belgium' || locData.country === 'Belgique') && locData.postal_code) {
+        fetchPopulation(locData.postal_code, locData.city, cc4).then(pop => {
           if (pop != null) {
             const updated = { ...locData, population: pop };
             if (side === 'A') setCityA(updated);
@@ -978,11 +983,6 @@ function App() {
         name: '🏨 Hôtels',
         url: `https://www.booking.com/searchresults.html?ss=${searchCity}`,
         label: `Hôtels à ${cityName}`
-      },
-      {
-        name: '✈️ Vols',
-        url: `https://www.skyscanner.fr/transport/flights-to/${searchCity}`,
-        label: `Vols vers ${cityName}`
       },
       {
         name: '🚗 Voitures',
