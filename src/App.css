@@ -1634,6 +1634,175 @@ body.dark-mode .suggestion-street {
   filter: drop-shadow(0 3px 3px rgba(0,0,0,0.15));
 }
 
+/* ===== Modale API / Développeurs ===== */
+.api-modal {
+  max-width: 680px !important;
+}
+.api-section {
+  margin: 18px 0;
+  text-align: left;
+}
+.api-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 1em;
+}
+.api-pricing {
+  display: flex;
+  gap: 12px;
+}
+.api-tier {
+  flex: 1;
+  border: 2px solid var(--border, #ddd);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.api-tier-free {
+  border-color: var(--accent, #667eea);
+}
+.api-tier-pro {
+  border-color: #ff9800;
+}
+.api-tier h4 {
+  margin: 0 0 6px 0;
+  font-size: 1.05em;
+}
+.api-price {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: var(--accent, #667eea);
+  margin-bottom: 10px;
+}
+.api-tier-pro .api-price {
+  color: #ff9800;
+  font-size: 1em;
+}
+.api-tier ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85em;
+}
+.api-tier ul li {
+  padding: 3px 0;
+  opacity: 0.85;
+}
+.api-tier ul li::before {
+  content: '✓ ';
+  color: var(--accent, #667eea);
+  font-weight: bold;
+}
+.api-tier-pro ul li::before {
+  color: #ff9800;
+}
+.api-key-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.api-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 2px solid var(--border, #ddd);
+  border-radius: 8px;
+  font-size: 0.95em;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--card-bg, #fff);
+  color: var(--text, #333);
+}
+.api-input:focus {
+  border-color: var(--accent, #667eea);
+}
+.api-btn {
+  padding: 10px 20px;
+  background: var(--accent, #667eea);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95em;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.api-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.api-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.api-error {
+  color: #e53935;
+  font-size: 0.85em;
+  margin: 6px 0 0 0;
+  width: 100%;
+}
+.api-key-done {
+  margin-top: 8px;
+}
+.api-key-display {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--card-bg, #f5f5f5);
+  border: 2px solid var(--border, #ddd);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 8px;
+  word-break: break-all;
+}
+.api-key-display code {
+  font-size: 0.8em;
+  flex: 1;
+}
+.api-endpoints {
+  max-height: 350px;
+  overflow-y: auto;
+  font-size: 0.85em;
+}
+.api-category {
+  margin: 12px 0;
+}
+.api-category h4 {
+  margin: 0 0 6px 0;
+  font-size: 0.95em;
+  color: var(--accent, #667eea);
+}
+.api-ep {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border, #eee);
+}
+.api-ep code {
+  font-size: 0.82em;
+  white-space: nowrap;
+  background: var(--card-bg, #f0f0f0);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.api-ep span {
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+.api-code-block {
+  background: var(--card-bg, #f5f5f5);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.82em;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 8px;
+}
+
 /* ===== Controles carte (fond, plein ecran) ===== */
 .map-controls {
   display: flex;

@@ -828,6 +828,29 @@ function App() {
   // ===== Pages légales =====
   const [legalPage, setLegalPage] = useState(null); // 'terms' | 'privacy' | null
 
+  // ===== Page API / Développeurs =====
+  const [showApi, setShowApi] = useState(false);
+  const [apiKeyGenerated, setApiKeyGenerated] = useState(null);
+  const [apiKeyEmail, setApiKeyEmail] = useState('');
+  const [apiKeyStatus, setApiKeyStatus] = useState(null); // null | 'loading' | 'done' | 'error'
+  const [apiKeyError, setApiKeyError] = useState('');
+  const generateApiKey = async () => {
+    if (!apiKeyEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(apiKeyEmail)) {
+      setApiKeyError('Email valide requis');
+      return;
+    }
+    setApiKeyStatus('loading');
+    setApiKeyError('');
+    try {
+      const resp = await axios.get(`${API}/api/auth/register?email=${encodeURIComponent(apiKeyEmail)}`);
+      setApiKeyGenerated(resp.data.api_key);
+      setApiKeyStatus('done');
+    } catch (err) {
+      setApiKeyError(err.response?.data?.detail || err.message);
+      setApiKeyStatus('error');
+    }
+  };
+
   // ===== Admin (messages) =====
   const urlParams = new URLSearchParams(window.location.search);
   const adminToken = urlParams.get('admin');
@@ -1538,6 +1561,7 @@ function App() {
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
+          <button className="footer-link" onClick={() => setShowApi(true)}>🔑 API</button>
           <span className="footer-link" style={{cursor:'default', opacity:0.7}}>📱 Installez l'app via Chrome (PWA)</span>
         </div>
         <p className="footer-note" style={{marginTop:'2px'}}>
@@ -1765,6 +1789,129 @@ function App() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== Modale API / Développeurs ===== */}
+      {showApi && (
+        <div className="legal-overlay" onClick={() => setShowApi(false)}>
+          <div className="legal-modal api-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="legal-close" onClick={() => setShowApi(false)}>✕</button>
+            <h2>🔑 GeoLoc API</h2>
+            <p style={{opacity:0.7, marginBottom:'15px'}}>
+              Intégrez la géolocalisation, la météo et les itinéraires dans vos applications.
+            </p>
+
+            <div className="api-section">
+              <h3>📋 Offres</h3>
+              <div className="api-pricing">
+                <div className="api-tier api-tier-free">
+                  <h4>Gratuit</h4>
+                  <div className="api-price">0€</div>
+                  <ul>
+                    <li>100 requêtes / jour</li>
+                    <li>Tous les endpoints</li>
+                    <li>Clé API personnelle</li>
+                    <li>Support email</li>
+                  </ul>
+                </div>
+                <div className="api-tier api-tier-pro">
+                  <h4>Pro</h4>
+                  <div className="api-price">Sur devis</div>
+                  <ul>
+                    <li>Jusqu'à 10 000 requêtes / jour</li>
+                    <li>Tous les endpoints</li>
+                    <li>Support prioritaire</li>
+                    <li>Pas de limite de débit</li>
+                  </ul>
+                  <p style={{fontSize:'12px', opacity:0.6, marginTop:'8px'}}>
+                    Contactez-nous pour un devis personnalisé
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="api-section">
+              <h3>🚀 Obtenir une clé gratuite</h3>
+              {!apiKeyGenerated ? (
+                <div className="api-key-form">
+                  <input
+                    type="email"
+                    placeholder="Votre email"
+                    value={apiKeyEmail}
+                    onChange={(e) => setApiKeyEmail(e.target.value)}
+                    className="api-input"
+                  />
+                  <button onClick={generateApiKey} disabled={apiKeyStatus === 'loading'} className="api-btn">
+                    {apiKeyStatus === 'loading' ? '⏳ Génération...' : '🔑 Générer ma clé'}
+                  </button>
+                  {apiKeyError && <p className="api-error">{apiKeyError}</p>}
+                </div>
+              ) : (
+                <div className="api-key-done">
+                  <p style={{color:'#4CAF50', fontWeight:'bold'}}>✅ Clé générée avec succès !</p>
+                  <div className="api-key-display">
+                    <code>{apiKeyGenerated}</code>
+                    <button onClick={() => { navigator.clipboard.writeText(apiKeyGenerated); setError('Clé copiée !'); setTimeout(() => setError(''), 2000); }}
+                      style={{padding:'4px 10px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', fontSize:'12px'}}>
+                      📋 Copier
+                    </button>
+                  </div>
+                  <p style={{fontSize:'12px', opacity:0.6, marginTop:'8px'}}>
+                    Incluez cette clé dans vos requêtes via l'en-tête <code>X-API-Key</code> ou le paramètre <code>api_key</code>.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="api-section">
+              <h3>📚 Endpoints disponibles</h3>
+              <div className="api-endpoints">
+                <div className="api-category">
+                  <h4>📍 Géolocalisation</h4>
+                  <div className="api-ep"><code>GET /api/location/{'{code}'}</code> <span>Infos ville par code postal</span></div>
+                  <div className="api-ep"><code>GET /api/search?q=...</code> <span>Recherche de villes</span></div>
+                  <div className="api-ep"><code>GET /api/reverse?lat=&amp;lon=</code> <span>Coordonnées → adresse</span></div>
+                  <div className="api-ep"><code>GET /api/geocode?q=...</code> <span>Géocodage d'adresse</span></div>
+                  <div className="api-ep"><code>GET /api/geocode-fr?q=...</code> <span>Géocodage France (gouvernement)</span></div>
+                </div>
+                <div className="api-category">
+                  <h4>🌤️ Météo</h4>
+                  <div className="api-ep"><code>GET /api/weather?lat=&amp;lon=</code> <span>Météo actuelle + 4 jours</span></div>
+                </div>
+                <div className="api-category">
+                  <h4>🗺️ Itinéraires</h4>
+                  <div className="api-ep"><code>GET /api/directions?origin_lat=&amp;origin_lon=&amp;dest_lat=&amp;dest_lon=</code> <span>Calcul d'itinéraire</span></div>
+                  <div className="api-ep"><code>GET /api/v2/directions?...</code> <span>Itinéraire multi-étapes</span></div>
+                  <div className="api-ep"><code>GET /api/export/pdf?...</code> <span>Export PDF de l'itinéraire</span></div>
+                </div>
+                <div className="api-category">
+                  <h4>👥 Population</h4>
+                  <div className="api-ep"><code>GET /api/population-fr?postal_code=</code> <span>Population France (INSEE)</span></div>
+                  <div className="api-ep"><code>GET /api/population-be?city_name=</code> <span>Population Belgique (Statbel)</span></div>
+                </div>
+                <div className="api-category">
+                  <h4>⚖️ Légal</h4>
+                  <div className="api-ep"><code>GET /api/legal/terms</code> <span>Conditions générales</span></div>
+                  <div className="api-ep"><code>GET /api/legal/privacy</code> <span>Politique de confidentialité</span></div>
+                </div>
+                <div className="api-category">
+                  <h4>✉️ Contact</h4>
+                  <div className="api-ep"><code>GET /api/contact?...</code> <span>Envoyer un message</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="api-section">
+              <h3>🔧 Utilisation</h3>
+              <p>Envoyez vos requêtes avec votre clé API :</p>
+              <pre className="api-code-block">{`curl -H "X-API-Key: votre_cle_ici" \\
+  "https://geo-app-1-z314.onrender.com/api/location/75001"`}</pre>
+              <p style={{fontSize:'12px', opacity:0.6, marginTop:'8px'}}>
+                L'API est accessible à : <code>https://geo-app-1-z314.onrender.com/api/*</code>
+              </p>
+            </div>
           </div>
         </div>
       )}
