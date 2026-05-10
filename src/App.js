@@ -8,11 +8,15 @@ import './App.css';
 // Icône de drapeau dynamique selon le pays
 function getFlagIcon(countryCode) {
   const code = (countryCode || 'FR').toLowerCase();
-  return L.icon({
-    iconUrl: `https://flagcdn.com/w20/${code}.png`,
-    iconSize: [20, 15],
-    iconAnchor: [10, 15],
-    popupAnchor: [0, -15],
+  const flagUrl = `https://flagcdn.com/w20/${code}.png`;
+  return L.divIcon({
+    className: 'flag-pin-marker',
+    html: `<div class="flag-pin-face">
+      <img src="${flagUrl}" alt="" crossorigin="anonymous" />
+    </div>`,
+    iconSize: [34, 44],
+    iconAnchor: [17, 44],
+    popupAnchor: [0, -48],
   });
 }
 
@@ -415,7 +419,7 @@ function App() {
   // ===== Partage =====
   // Partage de l'application complète
   const [showQR, setShowQR] = useState(false);
-  const APP_URL = 'https://geoloc-app.onrender.com';
+  const APP_URL = 'https://geo-app-1-z314.onrender.com';
 
   const shareApp = () => {
     const url = APP_URL;

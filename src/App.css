@@ -1597,6 +1597,43 @@ body.dark-mode .suggestion-street {
 }
 
 
+/* ===== Epingles drapeau (flag-pin) ===== */
+.flag-pin-marker {
+  background: none !important;
+  border: none !important;
+}
+.flag-pin-face {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  background: #fff;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.flag-pin-face img {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+.flag-pin-face::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid #fff;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.15));
+}
+
 /* ===== Controles carte (fond, plein ecran) ===== */
 .map-controls {
   display: flex;
