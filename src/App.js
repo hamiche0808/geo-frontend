@@ -343,7 +343,7 @@ function App() {
         root.style.setProperty('--wl-primary', primary);
         document.querySelector('header').style.background = primary;
       }
-      if (accent) root.style.setProperty('--wl-accent', accent);
+      if (accent) root.style.setProperty('--accent', accent);
       if (logo) {
         const brand = document.querySelector('.app-brand');
         if (brand) {
@@ -1577,10 +1577,12 @@ function App() {
               <input type="color" value={customPrimary || '#1976D2'} onChange={(e) => {
                 setCustomPrimary(e.target.value);
                 document.documentElement.style.setProperty('--wl-primary', e.target.value);
+                document.querySelector('header').style.background = e.target.value;
               }} style={{width:'50px', height:'40px', borderRadius:'6px', border:'none', cursor:'pointer'}} />
               <button onClick={() => {
                 setCustomPrimary('');
                 document.documentElement.style.removeProperty('--wl-primary');
+                document.querySelector('header').style.background = '';
               }} style={{padding:'6px 12px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', fontSize:'12px'}}>
                 {lang === 'fr' ? 'Réinitialiser' : 'Reset'}
               </button>
@@ -1592,11 +1594,11 @@ function App() {
             <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
               <input type="color" value={customAccent || '#4CAF50'} onChange={(e) => {
                 setCustomAccent(e.target.value);
-                document.documentElement.style.setProperty('--wl-accent', e.target.value);
+                document.documentElement.style.setProperty('--accent', e.target.value);
               }} style={{width:'50px', height:'40px', borderRadius:'6px', border:'none', cursor:'pointer'}} />
               <button onClick={() => {
                 setCustomAccent('');
-                document.documentElement.style.removeProperty('--wl-accent');
+                document.documentElement.style.removeProperty('--accent');
               }} style={{padding:'6px 12px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', fontSize:'12px'}}>
                 {lang === 'fr' ? 'Réinitialiser' : 'Reset'}
               </button>
