@@ -1745,7 +1745,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>5. API Payante</h3>
-                    <p>GeoLoc propose une API payante pour les développeurs. Tarifs sur demande. Contact : hamiche08.08@gmail.com</p>
+                    <p>GeoLoc propose une API payante pour les développeurs. Tarifs sur demande. Contact : contact.fr.geoloc@gmail.com</p>
                   </div>
                   <div className="legal-section">
                     <h3>6. Liens affiliés</h3>
@@ -1753,7 +1753,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>7. Contact</h3>
-                    <p>Email : hamiche08.08@gmail.com</p>
+                    <p>Email : contact.fr.geoloc@gmail.com</p>
                   </div>
                 </div>
               </>
@@ -1784,7 +1784,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>6. Contact RGPD</h3>
-                    <p>Email : hamiche08.08@gmail.com</p>
+                    <p>Email : contact.fr.geoloc@gmail.com</p>
                   </div>
                 </div>
               </>
