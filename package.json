@@ -19,8 +19,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prebuild": "node -e \"const fs=require('fs'); const p='public/service-worker.js'; let c=fs.readFileSync(p,'utf8'); const ts=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8); c=c.replace(/TIMESTAMP_BUILD/g,ts).replace(/TS_PLACEHOLDER/g,ts); fs.writeFileSync(p,c);\"",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "npm run prebuild && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

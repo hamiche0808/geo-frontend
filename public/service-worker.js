@@ -1,23 +1,11 @@
-/* Service Worker for GeoLoc PWA - cache statique + mise à jour automatique */
+// GeoLoc PWA Service Worker — version mp167mdf-vh57vp
+// Mise à jour : ce commentaire change à chaque déploiement pour forcer la détection de mise à jour
 const CACHE_NAME = 'geoloc-v1';
-const STATIC_URLS = [
-  '/',
-  '/static/js/main.7a87c26e.js',
-  '/static/css/main.958e9c30.css',
-  '/static/js/453.ae5edcc7.chunk.js',
-  '/favicon.ico',
-  '/logo192.png',
-  '/logo512.png',
-  '/manifest.json'
-];
+const TIMESTAMP = 'mp167mdf-vh57vp';
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_URLS);
-    })
-  );
-  // Ne pas skipWaiting immédiatement → on laisse le client décider
+  // Ne PAS skipWaiting immédiatement → on laisse le client décider via le bouton "Mettre à jour"
+  // Le client envoie 'SKIP_WAITING' via postMessage, géré plus bas
 });
 
 self.addEventListener('activate', event => {
@@ -30,10 +18,33 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Stratégie : Network First (site frais en ligne) / Stale-while-revalidate (assets)
 self.addEventListener('fetch', event => {
+  const { request } = event;
+  // Ne pas intercepter les appels vers l'API
+  if (request.url.includes('/api/') || request.url.includes('render.com')) {
+    return;
+  }
+  // Navigation (pages HTML) : Network First
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(request))
+    );
+    return;
+  }
+  // Autres ressources : Stale-while-revalidate
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request);
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(request).then(cached => {
+        const fetchPromise = fetch(request).then(networkResp => {
+          // Mettre en cache la réponse réseau si valide
+          if (networkResp && networkResp.ok) {
+            cache.put(request, networkResp.clone());
+          }
+          return networkResp;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      });
     })
   );
 });
