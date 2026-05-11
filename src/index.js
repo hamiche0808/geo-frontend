@@ -14,6 +14,7 @@ root.render(
 // ===== Service Worker PWA avec mise à jour intelligente =====
 let swRegistration = null;
 let currentUpdateId = null;
+let waitingWorker = null; // Référence directe au nouveau worker en attente
 let installPromptEvent = null; // Pour l'invite d'installation PWA
 
 // Écouter l'événement d'installation PWA (beforeinstallprompt)
@@ -40,6 +41,8 @@ if ('serviceWorker' in navigator) {
         const newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Stocker la référence directe au worker en attente (plus fiable que reg.waiting)
+            waitingWorker = newWorker;
             // ID unique pour cette mise à jour (timestamp + random)
             currentUpdateId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
 
@@ -55,8 +58,8 @@ if ('serviceWorker' in navigator) {
               }));
             } else {
               // MODE DESKTOP (site web) : mise à jour automatique immédiate
-              if (reg.waiting) {
-                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+              if (waitingWorker) {
+                waitingWorker.postMessage({ type: 'SKIP_WAITING' });
               }
             }
           }
@@ -80,9 +83,19 @@ if ('serviceWorker' in navigator) {
 
 // Exposer la fonction de mise à jour pour App.js
 window.applyUpdate = function() {
-  if (swRegistration && swRegistration.waiting) {
-    swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+  // Utiliser waitingWorker (référence directe, plus fiable) sinon fallback sur reg.waiting
+  if (waitingWorker) {
+    console.log('Sending SKIP_WAITING to waitingWorker');
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    return true;
   }
+  if (swRegistration && swRegistration.waiting) {
+    console.log('Sending SKIP_WAITING to swRegistration.waiting');
+    swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    return true;
+  }
+  console.warn('applyUpdate: no waiting worker found');
+  return false;
 };
 
 // Exposer la vérification manuelle de mise à jour

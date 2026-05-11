@@ -451,7 +451,15 @@ function App() {
   const handleUpdateNow = () => {
     localStorage.removeItem('geoPostponedUpdateId'); // Réinitialiser pour la prochaine
     setUpdateAvailable(false);
-    if (window.applyUpdate) window.applyUpdate();
+    setError('⏳ Mise à jour en cours...');
+    setTimeout(() => setError(''), 5000);
+    if (window.applyUpdate) {
+      console.log('Applying update via SKIP_WAITING...');
+      window.applyUpdate();
+    } else {
+      setError('❌ Erreur : fonction de mise à jour indisponible, rechargez la page.');
+      console.error('applyUpdate not found');
+    }
   };
 
   // Reporter la mise à jour (1 seule fois)
@@ -459,6 +467,11 @@ function App() {
     const updateId = window.getCurrentUpdateId ? window.getCurrentUpdateId() : null;
     if (updateId) {
       localStorage.setItem('geoPostponedUpdateId', updateId);
+      setError('⏳ Mise à jour reportée. Elle sera requise à la prochaine ouverture.');
+      setTimeout(() => setError(''), 4000);
+    } else {
+      setError('⏳ Mise à jour reportée.');
+      setTimeout(() => setError(''), 3000);
     }
     setUpdateAvailable(false);
   };
