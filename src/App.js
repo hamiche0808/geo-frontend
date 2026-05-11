@@ -5,18 +5,13 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
-// ===== Axios personnalisé : HTTPS forcé + User-Agent + cache session =====
+// ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
     'User-Agent': 'GeolocApp-Client/1.0',
     'X-Requested-With': 'XMLHttpRequest'
   },
-  timeout: 10000,
-  // Forcer HTTPS si le schéma est manquant
-  transformRequest: [(data, headers) => {
-    // Assurer que l'URL de destination est bien en HTTPS
-    return data;
-  }]
+  timeout: 10000
 });
 // Intercepteur pour logger les erreurs réseau
 API_CLIENT.interceptors.response.use(
