@@ -358,7 +358,6 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [customPrimary, setCustomPrimary] = useState('');
   const [customAccent, setCustomAccent] = useState('');
-  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
@@ -375,60 +374,24 @@ function App() {
     };
   }, []);
 
-  // Écouter les mises à jour PWA avec règle d'or : site web → auto, PWA → notif avec 1 report
+  // ===== Mise à jour automatique au démarrage =====
   useEffect(() => {
-    const handler = (event) => {
-      const updateId = event.detail?.updateId;
-      const postponedId = localStorage.getItem('geoPostponedUpdateId');
-
-      // Mise à jour trouvée → annuler le timeout "À jour" et afficher le statut
-      if (window.__updateCheckTimeout) {
-        clearTimeout(window.__updateCheckTimeout);
-        window.__updateCheckTimeout = null;
-      }
-      setUpdateCheckMsg('found');
-
-      if (updateId && postponedId === updateId) {
-        // Cette mise à jour a DÉJÀ ÉTÉ REPORTÉE → forcer la mise à jour maintenant
-        if (window.applyUpdate) window.applyUpdate();
-        return;
-      }
-
-      // Nouvelle mise à jour (ou première fois) → afficher la bannière
-      setUpdateAvailable(true);
-    };
-    window.addEventListener('sw-update-available', handler);
-    return () => window.removeEventListener('sw-update-available', handler);
+    // Vérifier les mises à jour dès l'ouverture de l'app
+    if (window.checkForUpdates) {
+      window.checkForUpdates();
+    }
   }, []);
 
-  // Appliquer la mise à jour
-  const handleUpdateNow = () => {
-    localStorage.removeItem('geoPostponedUpdateId'); // Réinitialiser pour la prochaine
-    setUpdateAvailable(false);
-    setError('⏳ Mise à jour en cours...');
-    setTimeout(() => setError(''), 5000);
-    if (window.applyUpdate) {
-      console.log('Applying update via SKIP_WAITING...');
-      window.applyUpdate();
-    } else {
-      setError('❌ Erreur : fonction de mise à jour indisponible, rechargez la page.');
-      console.error('applyUpdate not found');
-    }
-  };
-
-  // Reporter la mise à jour (1 seule fois)
-  const handleUpdateLater = () => {
-    const updateId = window.getCurrentUpdateId ? window.getCurrentUpdateId() : null;
-    if (updateId) {
-      localStorage.setItem('geoPostponedUpdateId', updateId);
-      setError('⏳ Mise à jour reportée. Elle sera requise à la prochaine ouverture.');
-      setTimeout(() => setError(''), 4000);
-    } else {
-      setError('⏳ Mise à jour reportée.');
+  // Écouter les mises à jour PWA automatiques
+  useEffect(() => {
+    const handler = () => {
+      setError('🔄 Mise à jour détectée — rechargement...');
       setTimeout(() => setError(''), 3000);
-    }
-    setUpdateAvailable(false);
-  };
+    };
+    window.addEventListener('sw-update-applied', handler);
+    return () => window.removeEventListener('sw-update-applied', handler);
+  }, []);
+  // ===== Fin mise à jour automatique =====
 
   const debounceRef = useRef(null);
 
@@ -1195,27 +1158,6 @@ function App() {
   // ===== Rendu =====
   return (
     <div className="App">
-      {/* Bandeau de mise à jour PWA */}
-      {updateAvailable && (
-        <div className="update-banner">
-          <div className="update-banner-content">
-            <span className="update-icon">🔄</span>
-            <span className="update-text">
-              <strong>Nouvelle version disponible</strong>
-              <br />
-              <small>Mettez à jour pour profiter des dernières améliorations</small>
-            </span>
-          </div>
-          <div className="update-banner-actions">
-            <button className="update-btn update-btn-primary" onClick={handleUpdateNow}>
-              ✓ Mettre à jour
-            </button>
-            <button className="update-btn update-btn-later" onClick={handleUpdateLater}>
-              ⏳ Plus tard
-            </button>
-          </div>
-        </div>
-      )}
       <header>
         <div className="app-brand">
           <div className="app-logo">

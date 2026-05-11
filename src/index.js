@@ -46,22 +46,16 @@ if ('serviceWorker' in navigator) {
             // ID unique pour cette mise à jour (timestamp + random)
             currentUpdateId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
 
-            // Détection mobile : écran tactile ET petite largeur
-            const isMobile = ('ontouchstart' in window) && window.innerWidth < 1024;
-            // Détection PWA installée
-            const isPwa = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-
-            if (isMobile || isPwa) {
-              // MODE MOBILE / PWA : notifier l'utilisateur avec possibilité de reporter
-              window.dispatchEvent(new CustomEvent('sw-update-available', {
-                detail: { registration: reg, updateId: currentUpdateId }
-              }));
-            } else {
-              // MODE DESKTOP (site web) : mise à jour automatique immédiate
-              if (waitingWorker) {
-                waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-              }
+            // MISE À JOUR AUTOMATIQUE : quelque soit la plateforme (desktop, mobile, PWA)
+            // On envoie immédiatement SKIP_WAITING pour activer la nouvelle version
+            if (waitingWorker) {
+              waitingWorker.postMessage({ type: 'SKIP_WAITING' });
             }
+
+            // Notifier l'UI qu'une mise à jour a été détectée et appliquée (notification discrète)
+            window.dispatchEvent(new CustomEvent('sw-update-applied', {
+              detail: { updateId: currentUpdateId }
+            }));
           }
         });
       });
