@@ -13,7 +13,22 @@ root.render(
 
 // ===== Service Worker PWA avec mise à jour intelligente =====
 let swRegistration = null;
-let currentUpdateId = null; // Identifiant unique de la mise à jour courante
+let currentUpdateId = null;
+let installPromptEvent = null; // Pour l'invite d'installation PWA
+
+// Écouter l'événement d'installation PWA (beforeinstallprompt)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPromptEvent = e;
+  // Informer App.js que l'installation est disponible
+  window.dispatchEvent(new CustomEvent('pwa-install-available'));
+});
+
+// Écouter l'installation réussie
+window.addEventListener('appinstalled', () => {
+  installPromptEvent = null;
+  window.dispatchEvent(new CustomEvent('pwa-installed'));
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -47,6 +62,11 @@ if ('serviceWorker' in navigator) {
           }
         });
       });
+
+      // Vérification périodique des mises à jour (toutes les 30 min)
+      setInterval(() => {
+        reg.update();
+      }, 30 * 60 * 1000);
     }).catch(err => {
       console.warn('SW registration failed:', err);
     });
@@ -65,9 +85,32 @@ window.applyUpdate = function() {
   }
 };
 
+// Exposer la vérification manuelle de mise à jour
+window.checkForUpdates = function() {
+  if (swRegistration) {
+    swRegistration.update();
+    return true;
+  }
+  return false;
+};
+
 // Exposer l'ID de mise à jour courant
 window.getCurrentUpdateId = function() {
   return currentUpdateId;
+};
+
+// Exposer l'invite d'installation PWA
+window.installPwa = function() {
+  if (installPromptEvent) {
+    installPromptEvent.prompt();
+    // Ne pas réutiliser l'événement
+    installPromptEvent = null;
+  }
+};
+
+// Vérifier si l'installation PWA est disponible
+window.isPwaInstallAvailable = function() {
+  return installPromptEvent !== null;
 };
 
 // If you want to start measuring performance in your app, pass a function

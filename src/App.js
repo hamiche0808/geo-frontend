@@ -414,6 +414,20 @@ function App() {
   const [customAccent, setCustomAccent] = useState('');
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
+  const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
+
+  // Écouter la disponibilité d'installation PWA
+  useEffect(() => {
+    const handler = () => setPwaInstallAvailable(true);
+    const installedHandler = () => setPwaInstallAvailable(false);
+    window.addEventListener('pwa-install-available', handler);
+    window.addEventListener('pwa-installed', installedHandler);
+    return () => {
+      window.removeEventListener('pwa-install-available', handler);
+      window.removeEventListener('pwa-installed', installedHandler);
+    };
+  }, []);
+
   // Écouter les mises à jour PWA avec règle d'or : site web → auto, PWA → notif avec 1 report
   useEffect(() => {
     const handler = (event) => {
@@ -1842,6 +1856,28 @@ function App() {
             <button onClick={() => setDarkMode(!darkMode)} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer'}}>
               {darkMode ? '☀️ ' + (lang === 'fr' ? 'Clair' : 'Light') : '🌙 ' + (lang === 'fr' ? 'Sombre' : 'Dark')}
             </button>
+
+            <label style={{display:'block', margin:'15px 0 5px'}}>
+              {lang === 'fr' ? 'Mise à jour' : 'Update'}
+            </label>
+            <button onClick={() => {
+              if (window.checkForUpdates) {
+                const ok = window.checkForUpdates();
+                if (ok) {
+                  setError(lang === 'fr' ? '🔄 Vérification des mises à jour...' : '🔄 Checking for updates...');
+                  setTimeout(() => setError(''), 3000);
+                }
+              }
+            }} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', marginRight:'8px'}}>
+              🔄 {lang === 'fr' ? 'Vérifier les mises à jour' : 'Check for updates'}
+            </button>
+
+            {pwaInstallAvailable && (
+              <button onClick={() => { if (window.installPwa) window.installPwa(); }}
+                style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid var(--accent)', cursor:'pointer', background:'var(--accent)', color:'white', marginTop:'8px', display:'block', width:'100%'}}>
+                📲 {lang === 'fr' ? "Installer l'application" : 'Install the app'}
+              </button>
+            )}
 
             <label style={{display:'block', margin:'15px 0 5px'}}>
               {lang === 'fr' ? 'Couleur principale' : 'Primary color'}
