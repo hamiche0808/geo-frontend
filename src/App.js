@@ -415,6 +415,7 @@ function App() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
+  const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
 
   // Écouter la disponibilité d'installation PWA
   useEffect(() => {
@@ -433,6 +434,13 @@ function App() {
     const handler = (event) => {
       const updateId = event.detail?.updateId;
       const postponedId = localStorage.getItem('geoPostponedUpdateId');
+
+      // Mise à jour trouvée → annuler le timeout "À jour" et afficher le statut
+      if (window.__updateCheckTimeout) {
+        clearTimeout(window.__updateCheckTimeout);
+        window.__updateCheckTimeout = null;
+      }
+      setUpdateCheckMsg('found');
 
       if (updateId && postponedId === updateId) {
         // Cette mise à jour a DÉJÀ ÉTÉ REPORTÉE → forcer la mise à jour maintenant
@@ -1873,17 +1881,43 @@ function App() {
             <label style={{display:'block', margin:'15px 0 5px'}}>
               {lang === 'fr' ? 'Mise à jour' : 'Update'}
             </label>
-            <button onClick={() => {
-              if (window.checkForUpdates) {
-                const ok = window.checkForUpdates();
-                if (ok) {
-                  setError(lang === 'fr' ? '🔄 Vérification des mises à jour...' : '🔄 Checking for updates...');
+            <div style={{display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap'}}>
+              <button onClick={() => {
+                if (window.checkForUpdates) {
+                  const ok = window.checkForUpdates();
+                  if (ok) {
+                    setUpdateCheckMsg('checking');
+                    setError(lang === 'fr' ? '🔄 Vérification en cours...' : '🔄 Checking...');
+                    // Si aucun update trouvé après 4s, afficher "À jour"
+                    const timeoutId = setTimeout(() => {
+                      setUpdateCheckMsg(prev => {
+                        if (prev === 'checking') {
+                          setError(lang === 'fr' ? '✅ Aucune mise à jour disponible' : '✅ Already up to date');
+                          setTimeout(() => { setError(''); setUpdateCheckMsg(null); }, 3000);
+                          return null;
+                        }
+                        return prev;
+                      });
+                    }, 4000);
+                    // Stocker le timeout pour le nettoyer si un update est trouvé
+                    window.__updateCheckTimeout = timeoutId;
+                  } else {
+                    setError('❌ Impossible de vérifier les mises à jour');
+                    setTimeout(() => setError(''), 3000);
+                  }
+                } else {
+                  setError('❌ Service Worker non disponible');
                   setTimeout(() => setError(''), 3000);
                 }
-              }
-            }} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer', marginRight:'8px'}}>
-              🔄 {lang === 'fr' ? 'Vérifier les mises à jour' : 'Check for updates'}
-            </button>
+              }} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer'}}>
+                🔄 {lang === 'fr' ? 'Vérifier les mises à jour' : 'Check for updates'}
+              </button>
+              {updateCheckMsg === 'found' && (
+                <span style={{color:'var(--accent)', fontSize:'0.85em', fontWeight:600}}>
+                  🆕 {lang === 'fr' ? 'Mise à jour trouvée !' : 'Update found!'}
+                </span>
+              )}
+            </div>
 
             {pwaInstallAvailable && (
               <button onClick={() => { if (window.installPwa) window.installPwa(); }}
