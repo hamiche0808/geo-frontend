@@ -28,16 +28,18 @@ if ('serviceWorker' in navigator) {
             // ID unique pour cette mise à jour (timestamp + random)
             currentUpdateId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
 
-            // Vérifier le mode d'affichage : PWA installée ou site web
+            // Détection mobile : écran tactile ET petite largeur
+            const isMobile = ('ontouchstart' in window) && window.innerWidth < 1024;
+            // Détection PWA installée
             const isPwa = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 
-            if (isPwa) {
-              // MODE PWA : notifier l'utilisateur avec possibilité de reporter
+            if (isMobile || isPwa) {
+              // MODE MOBILE / PWA : notifier l'utilisateur avec possibilité de reporter
               window.dispatchEvent(new CustomEvent('sw-update-available', {
                 detail: { registration: reg, updateId: currentUpdateId }
               }));
             } else {
-              // MODE SITE WEB : mise à jour automatique immédiate
+              // MODE DESKTOP (site web) : mise à jour automatique immédiate
               if (reg.waiting) {
                 reg.waiting.postMessage({ type: 'SKIP_WAITING' });
               }
