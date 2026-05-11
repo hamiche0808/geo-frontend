@@ -11,25 +11,37 @@ root.render(
   </React.StrictMode>
 );
 
-// ===== Service Worker PWA avec notification de mise à jour =====
+// ===== Service Worker PWA avec mise à jour intelligente =====
 let swRegistration = null;
+let currentUpdateId = null; // Identifiant unique de la mise à jour courante
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js').then(reg => {
       swRegistration = reg;
-      console.log('SW registered:', reg.scope);
 
       // Détection de mise à jour
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
-          // Quand le nouveau worker est installé ET qu'un ancien contrôle déjà
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Nouveau contenu disponible → notifier l'utilisateur
-            window.dispatchEvent(new CustomEvent('sw-update-available', {
-              detail: { registration: reg }
-            }));
+            // ID unique pour cette mise à jour (timestamp + random)
+            currentUpdateId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+
+            // Vérifier le mode d'affichage : PWA installée ou site web
+            const isPwa = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+            if (isPwa) {
+              // MODE PWA : notifier l'utilisateur avec possibilité de reporter
+              window.dispatchEvent(new CustomEvent('sw-update-available', {
+                detail: { registration: reg, updateId: currentUpdateId }
+              }));
+            } else {
+              // MODE SITE WEB : mise à jour automatique immédiate
+              if (reg.waiting) {
+                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+              }
+            }
           }
         });
       });
@@ -49,6 +61,11 @@ window.applyUpdate = function() {
   if (swRegistration && swRegistration.waiting) {
     swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
   }
+};
+
+// Exposer l'ID de mise à jour courant
+window.getCurrentUpdateId = function() {
+  return currentUpdateId;
 };
 
 // If you want to start measuring performance in your app, pass a function

@@ -412,12 +412,40 @@ function App() {
   const [customAccent, setCustomAccent] = useState('');
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
-  // Écouter les mises à jour PWA
+  // Écouter les mises à jour PWA avec règle d'or : site web → auto, PWA → notif avec 1 report
   useEffect(() => {
-    const handler = () => setUpdateAvailable(true);
+    const handler = (event) => {
+      const updateId = event.detail?.updateId;
+      const postponedId = localStorage.getItem('geoPostponedUpdateId');
+
+      if (updateId && postponedId === updateId) {
+        // Cette mise à jour a DÉJÀ ÉTÉ REPORTÉE → forcer la mise à jour maintenant
+        if (window.applyUpdate) window.applyUpdate();
+        return;
+      }
+
+      // Nouvelle mise à jour (ou première fois) → afficher la bannière
+      setUpdateAvailable(true);
+    };
     window.addEventListener('sw-update-available', handler);
     return () => window.removeEventListener('sw-update-available', handler);
   }, []);
+
+  // Appliquer la mise à jour
+  const handleUpdateNow = () => {
+    localStorage.removeItem('geoPostponedUpdateId'); // Réinitialiser pour la prochaine
+    setUpdateAvailable(false);
+    if (window.applyUpdate) window.applyUpdate();
+  };
+
+  // Reporter la mise à jour (1 seule fois)
+  const handleUpdateLater = () => {
+    const updateId = window.getCurrentUpdateId ? window.getCurrentUpdateId() : null;
+    if (updateId) {
+      localStorage.setItem('geoPostponedUpdateId', updateId);
+    }
+    setUpdateAvailable(false);
+  };
 
   const debounceRef = useRef(null);
 
@@ -1148,9 +1176,23 @@ function App() {
     <div className="App">
       {/* Bandeau de mise à jour PWA */}
       {updateAvailable && (
-        <div className="update-banner" onClick={() => { if (window.applyUpdate) window.applyUpdate(); }}>
-          <span>🔄 Nouvelle version disponible</span>
-          <button className="update-btn">Mettre à jour</button>
+        <div className="update-banner">
+          <div className="update-banner-content">
+            <span className="update-icon">🔄</span>
+            <span className="update-text">
+              <strong>Nouvelle version disponible</strong>
+              <br />
+              <small>Mettez à jour pour profiter des dernières améliorations</small>
+            </span>
+          </div>
+          <div className="update-banner-actions">
+            <button className="update-btn update-btn-primary" onClick={handleUpdateNow}>
+              ✓ Mettre à jour
+            </button>
+            <button className="update-btn update-btn-later" onClick={handleUpdateLater}>
+              ⏳ Plus tard
+            </button>
+          </div>
         </div>
       )}
       <header>
