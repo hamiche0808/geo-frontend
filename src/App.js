@@ -1145,7 +1145,7 @@ function App() {
           setRouteCoords(leafletCoords.length > 0 ? leafletCoords : null);
           setDuration(data.duration || null);
 
-          // Stocker toutes les routes alternatives
+          // Stocker toutes les routes alternatives (nouveau format: data.routes, ancien: 1 seule route)
           if (data.routes && data.routes.length > 1) {
             const alternatives = data.routes.map((r, idx) => {
               const rCoords = (r.route_coords || []).map(c => [c[1], c[0]]);
@@ -1157,6 +1157,22 @@ function App() {
               };
             });
             setRouteAlternatives(alternatives);
+          } else if (data.routes && data.routes.length === 1) {
+            // Si le backend n'a retourné qu'une seule route, on crée tout de même un tableau
+            const r = data.routes[0];
+            const rCoords = (r.route_coords || []).map(c => [c[1], c[0]]);
+            setRouteAlternatives([{
+              distance: Math.round(r.distance / 1000),
+              duration: r.duration || null,
+              route_coords: rCoords
+            }]);
+          } else {
+            // Ancien format (sans data.routes) : créer une seule alternative avec les données principales
+            setRouteAlternatives([{
+              distance: Math.round(data.distance / 1000),
+              duration: data.duration || null,
+              route_coords: (data.route_coords || []).map(c => [c[1], c[0]])
+            }]);
           }
         }
       })
@@ -1423,9 +1439,9 @@ function App() {
           <h2>🗺️ Itinéraire</h2>
           
           {/* Sélecteur d'itinéraires alternatifs */}
-          {routeAlternatives && routeAlternatives.length > 1 && (
+          {routeAlternatives && routeAlternatives.length >= 1 && (
             <div className="route-alternatives">
-              <h4 className="alt-title">Choisissez votre itinéraire :</h4>
+              <h4 className="alt-title">{routeAlternatives.length > 1 ? 'Choisissez votre itinéraire :' : 'Itinéraire proposé :'}</h4>
               <div className="alt-cards">
                 {routeAlternatives.map((alt, idx) => (
                   <button
@@ -1883,11 +1899,13 @@ function App() {
             </label>
             <div style={{display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap'}}>
               <button onClick={() => {
+                // Fermer le menu paramètres
+                setShowSettings(false);
                 if (window.checkForUpdates) {
                   const ok = window.checkForUpdates();
                   if (ok) {
                     setUpdateCheckMsg('checking');
-                    setError(lang === 'fr' ? '🔄 Vérification en cours...' : '🔄 Checking...');
+                    setError(lang === 'fr' ? '🔄 Vérification des mises à jour...' : '🔄 Checking for updates...');
                     // Si aucun update trouvé après 4s, afficher "À jour"
                     const timeoutId = setTimeout(() => {
                       setUpdateCheckMsg(prev => {
@@ -1899,24 +1917,18 @@ function App() {
                         return prev;
                       });
                     }, 4000);
-                    // Stocker le timeout pour le nettoyer si un update est trouvé
                     window.__updateCheckTimeout = timeoutId;
                   } else {
                     setError('❌ Impossible de vérifier les mises à jour');
-                    setTimeout(() => setError(''), 3000);
+                    setTimeout(() => setError(''), 4000);
                   }
                 } else {
-                  setError('❌ Service Worker non disponible');
-                  setTimeout(() => setError(''), 3000);
+                  setError('❌ Service Worker non disponible, rechargez la page');
+                  setTimeout(() => setError(''), 4000);
                 }
               }} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer'}}>
                 🔄 {lang === 'fr' ? 'Vérifier les mises à jour' : 'Check for updates'}
               </button>
-              {updateCheckMsg === 'found' && (
-                <span style={{color:'var(--accent)', fontSize:'0.85em', fontWeight:600}}>
-                  🆕 {lang === 'fr' ? 'Mise à jour trouvée !' : 'Update found!'}
-                </span>
-              )}
             </div>
 
             {pwaInstallAvailable && (
