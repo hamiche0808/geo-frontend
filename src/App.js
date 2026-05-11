@@ -12,6 +12,7 @@ const API_CLIENT = axios.create({
   headers: {
     'User-Agent': 'GeoLocApp/4.3 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
+    'X-API-Key': 'geoloc-app-key-2026',
   },
   timeout: 60000
 });
