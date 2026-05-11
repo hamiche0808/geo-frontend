@@ -5,6 +5,66 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
+// ===== Axios personnalisé : HTTPS forcé + User-Agent + cache session =====
+const API_CLIENT = axios.create({
+  headers: {
+    'User-Agent': 'GeolocApp-Client/1.0',
+    'X-Requested-With': 'XMLHttpRequest'
+  },
+  timeout: 10000,
+  // Forcer HTTPS si le schéma est manquant
+  transformRequest: [(data, headers) => {
+    // Assurer que l'URL de destination est bien en HTTPS
+    return data;
+  }]
+});
+// Intercepteur pour logger les erreurs réseau
+API_CLIENT.interceptors.response.use(
+  response => response,
+  error => {
+    if (!error.response) {
+      console.warn('⚠️ Erreur réseau GeoLoc :', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+// ===== Cache Session (sessionStorage) =====
+function getCacheKey(url) {
+  return 'geoCache:' + url;
+}
+function getFromCache(url) {
+  try {
+    const key = getCacheKey(url);
+    const item = sessionStorage.getItem(key);
+    if (item) {
+      const parsed = JSON.parse(item);
+      // Cache valide 10 minutes
+      if (Date.now() - parsed.ts < 600000) {
+        return parsed.data;
+      }
+      sessionStorage.removeItem(key);
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+function setToCache(url, data) {
+  try {
+    const key = getCacheKey(url);
+    sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+  } catch (e) { /* ignore */ }
+}
+
+// Version avec cache pour les appels GET
+async function cachedGet(url, params = {}) {
+  const cacheKey = url + JSON.stringify(params);
+  const cached = getFromCache(cacheKey);
+  if (cached) return cached;
+  const resp = await API_CLIENT.get(url, { params });
+  setToCache(cacheKey, resp.data);
+  return resp.data;
+}
+
 // Icône de drapeau dynamique selon le pays
 function getFlagIcon(countryCode) {
   const code = (countryCode || 'FR').toLowerCase();
@@ -62,14 +122,15 @@ const MAP_TILES = {
 // Récupérer la population d'une commune (France → INSEE, Belgique → Statbel)
 async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
   try {
-    const params = new URLSearchParams();
-    if (postalCode) params.set('postal_code', postalCode);
-    if (cityName) params.set('city_name', cityName);
     if (!postalCode && !cityName) return null;
     const endpoint = countryCode === 'BE' ? 'population-be' : 'population-fr';
-    const resp = await axios.get(`${API}/api/${endpoint}?${params.toString()}`, { timeout: 8000 });
-    if (resp.data && resp.data.length > 0) {
-      return resp.data[0].population;
+    const params = { postal_code: postalCode, city_name: cityName };
+    const data = await cachedGet(`${API}/api/${endpoint}`, params);
+    if (data && Array.isArray(data) && data.length > 0) {
+      return data[0].population;
+    }
+    if (data && data.length > 0) {
+      return data[0].population;
     }
   } catch { /* ignore */ }
   return null;
@@ -87,6 +148,44 @@ function getWeatherEmoji(code) {
   if (code >= 80 && code <= 82) return '🌦️';
   if (code >= 95) return '⛈️';
   return '🌡️';
+}
+
+// Déterminer si le temps est "beau" (extérieur) ou "mauvais" (intérieur)
+// Beau : ensoleillé, partiellement nuageux, nuageux sans précipitation
+// Mauvais : brouillard, pluie, neige, orage, bruine
+function isGoodWeather(code) {
+  if (code === 0 || code === 1) return true;      // Ensoleillé, partiellement nuageux
+  if (code === 2) return true;                      // Partiellement nuageux
+  if (code === 3) return true;                      // Nuageux
+  if (code >= 45 && code <= 48) return false;       // Brouillard
+  if (code >= 51 && code <= 55) return false;       // Bruine
+  if (code >= 61 && code <= 65) return false;       // Pluie
+  if (code >= 71 && code <= 75) return false;       // Neige
+  if (code >= 80 && code <= 82) return false;       // Averses
+  if (code >= 95) return false;                     // Orage
+  return true; // Par défaut, on suppose beau temps
+}
+
+// Activités intelligentes selon la météo (zéro appel API supplémentaire)
+function getSmartActivities(weatherCode) {
+  const good = isGoodWeather(weatherCode);
+  if (good) {
+    return [
+      { emoji: '🌳', name: 'Parcs & Jardins', desc: 'Profitez du beau temps' },
+      { emoji: '⛲', name: 'Monuments', desc: 'Visitez les sites historiques' },
+      { emoji: '⛱️', name: 'Plages & Lac', desc: 'Idéal pour une baignade' },
+      { emoji: '🚴', name: 'Balade à vélo', desc: 'Parcourez la ville' },
+      { emoji: '🧺', name: 'Pique-nique', desc: 'En plein air' },
+    ];
+  } else {
+    return [
+      { emoji: '🏛️', name: 'Musées', desc: 'Culture & expositions' },
+      { emoji: '🍿', name: 'Cinémas', desc: 'Films & séances' },
+      { emoji: '🛍️', name: 'Shopping', desc: 'Centres commerciaux' },
+      { emoji: '🎮', name: 'Bowling / Jeux', desc: 'Activités couvertes' },
+      { emoji: '☕', name: 'Cafés & Salons', desc: 'Détente au chaud' },
+    ];
+  }
 }
 
 const COUNTRIES = [
@@ -146,6 +245,7 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
   const [input, setInput] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
   const [show, setShow] = useState(false);
+  const [searching, setSearching] = useState(false);
   const debounce = useRef(null);
 
   useEffect(() => { setInput(value || ''); }, [value]);
@@ -154,33 +254,36 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
     const v = e.target.value;
     setInput(v);
     if (onChange) onChange(v);
-    if (v.length >= 2) {
+    // Reset erreur dès qu'on tape
+    // Min 3 caractères
+    if (v.trim().length >= 3) {
+      setSearching(true);
       if (debounce.current) clearTimeout(debounce.current);
       debounce.current = setTimeout(async () => {
         try {
           // Appeler les endpoints en parallèle : villes + adresses + (France → API gouvernementale)
           const promises = [
-            axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] })),
-            axios.get(`${API}/api/geocode?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] }))
+            cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => []),
+            cachedGet(`${API}/api/geocode`, { q: v, country, limit: 10 }).catch(() => [])
           ];
           // Pour la France, ajouter l'API gouvernementale (meilleure qualité)
           const isFrance = country === 'FR';
           if (isFrance) {
             promises.push(
-              axios.get(`${API}/api/geocode-fr?q=${encodeURIComponent(v)}&limit=10`).catch(() => ({ data: [] }))
+              cachedGet(`${API}/api/geocode-fr`, { q: v, limit: 10 }).catch(() => [])
             );
           }
           const results = await Promise.all(promises);
-          const cityResp = results[0];
-          const addrResp = results[1];
-          const gouvResp = isFrance ? results[2] : null;
+          const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
+          const addrResp = Array.isArray(results[1]) ? results[1] : (results[1]?.data || []);
+          const gouvResp = isFrance ? (Array.isArray(results[2]) ? results[2] : (results[2]?.data || [])) : null;
 
-          const cities = (cityResp.data || []).map(c => ({ ...c, _type: 'city' }));
-          const addresses = (addrResp.data || []).map(a => ({ ...a, _type: 'address' }));
+          const cities = (cityResp || []).map(c => ({ ...c, _type: 'city' }));
+          const addresses = (addrResp || []).map(a => ({ ...a, _type: 'address' }));
           // Normaliser les résultats de l'API gouvernementale française
           let gouvAddresses = [];
-          if (gouvResp && gouvResp.data) {
-            gouvAddresses = (gouvResp.data || []).map(a => ({
+          if (gouvResp && gouvResp.length > 0) {
+            gouvAddresses = gouvResp.map(a => ({
               ...a,
               _type: 'address',
               _source: 'gouv',
@@ -200,41 +303,56 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
           setSuggestions(merged);
           setShow(merged.length > 0);
         } catch { setSuggestions([]); }
-      }, 200);
-    } else { setSuggestions([]); setShow(false); }
+        setSearching(false);
+      }, 800);
+    } else { setSuggestions([]); setShow(false); setSearching(false); }
+  };
+
+  // Formater l'affichage d'une suggestion avec population
+  const formatSuggestion = (s) => {
+    const name = s._type === 'address' ? (s.short_address || s.display_name?.split(',')[0]) : s.city;
+    const code = s._type === 'address' ? `${s.city || ''} · ${s.postal_code || ''}` : s.postal_code;
+    const pop = s.population ? ` - ${s.population.toLocaleString()} hab.` : '';
+    return { name, code, pop };
   };
 
   return (
     <div className="city-input-wrapper">
       <label className="city-input-label">{label}</label>
-      <input
-        type="text"
-        value={input}
-        onChange={handleChange}
-        onFocus={() => suggestions.length > 0 && setShow(true)}
-        onBlur={() => setTimeout(() => setShow(false), 200)}
-        placeholder={placeholder}
-      />
+      <div className="city-input-field">
+        <input
+          type="text"
+          value={input}
+          onChange={handleChange}
+          onFocus={() => suggestions.length > 0 && setShow(true)}
+          onBlur={() => setTimeout(() => setShow(false), 200)}
+          placeholder={placeholder}
+        />
+        {searching && <span className="input-spinner">⏳</span>}
+      </div>
       {show && suggestions.length > 0 && (
         <ul className="suggestions">
-          {suggestions.map((s, idx) => (
-            <li key={idx} onMouseDown={() => {
-              setInput(s._type === 'address' ? (s.short_address || s.display_name) : s.city);
-              setShow(false);
-              onSelect(s);
-            }}>
-              <span className="suggestion-city">
-                {s._type === 'address' ? '📍 ' : '🏙️ '}
-                {s._type === 'address' ? (s.short_address || s.display_name) : s.city}
-              </span>
-              <span className="suggestion-code">
-                {s._type === 'address' ? `${s.city} · ${s.postal_code}` : s.postal_code}
-              </span>
-              {s._type === 'address' && s.street && (
-                <span className="suggestion-street">{s.display_name?.split(',')[0]}</span>
-              )}
-            </li>
-          ))}
+          {suggestions.map((s, idx) => {
+            const { name, code, pop } = formatSuggestion(s);
+            return (
+              <li key={idx} onMouseDown={() => {
+                setInput(s._type === 'address' ? (s.short_address || s.display_name) : s.city);
+                setShow(false);
+                onSelect(s);
+              }}>
+                <span className="suggestion-city">
+                  {s._type === 'address' ? '📍 ' : '🏙️ '}
+                  {name}
+                </span>
+                <span className="suggestion-code">
+                  {code}{pop}
+                </span>
+                {s._type === 'address' && s.street && (
+                  <span className="suggestion-street">{s.display_name?.split(',')[0]}</span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
@@ -275,6 +393,7 @@ function App() {
   const [country, setCountry] = useState('FR');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchingDebounce, setSearchingDebounce] = useState(false);
   const [history, setHistory] = useState([]);
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -375,21 +494,24 @@ function App() {
     try {
       // Chercher les villes par nom
       const [fromData, toData] = await Promise.all([
-        axios.get(`${API}/api/search?q=${encodeURIComponent(from)}&limit=1`),
-        axios.get(`${API}/api/search?q=${encodeURIComponent(to)}&limit=1`)
+        cachedGet(`${API}/api/search`, { q: from, limit: 1 }),
+        cachedGet(`${API}/api/search`, { q: to, limit: 1 })
       ]);
-      if (fromData.data?.length > 0) {
-        handleDistanceCity(fromData.data[0], 'A');
+      const fromArr = Array.isArray(fromData) ? fromData : (fromData?.data || []);
+      const toArr = Array.isArray(toData) ? toData : (toData?.data || []);
+      if (fromArr.length > 0) {
+        handleDistanceCity(fromArr[0], 'A');
       }
-      if (toData.data?.length > 0) {
-        handleDistanceCity(toData.data[0], 'B');
+      if (toArr.length > 0) {
+        handleDistanceCity(toArr[0], 'B');
       }
       if (wpStr) {
         const wpNames = wpStr.split(';');
         for (const name of wpNames) {
-          const resp = await axios.get(`${API}/api/search?q=${encodeURIComponent(name)}&limit=1`);
-          if (resp.data?.length > 0) {
-            addWaypointWithData(resp.data[0]);
+          const resp = await cachedGet(`${API}/api/search`, { q: name, limit: 1 });
+          const arr = Array.isArray(resp) ? resp : (resp?.data || []);
+          if (arr.length > 0) {
+            addWaypointWithData(arr[0]);
           }
         }
       }
@@ -407,9 +529,9 @@ function App() {
   // ===== Météo via Open-Meteo (actuelle + 3 jours) =====
   const fetchWeather = async (lat, lon) => {
     try {
-      const resp = await axios.get(`${API}/api/weather?lat=${lat}&lon=${lon}`);
-      if (resp.data && !resp.data.error) {
-        setWeather(resp.data);
+      const data = await cachedGet(`${API}/api/weather`, { lat, lon });
+      if (data && !data.error) {
+        setWeather(data);
       } else {
         setWeather(null);
       }
@@ -445,18 +567,18 @@ function App() {
   const handleSearch = async (query) => {
     const term = (query || searchInput).trim();
     if (!term) return;
-    setError('');
+    setError(null);
     setLoading(true);
     try {
-      const url = `${API}/api/location/${encodeURIComponent(term)}?country=${country}`;
-      const resp = await axios.get(url);
-      setLocation(resp.data);
-      saveToHistory(resp.data);
+      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(term)}`, { country });
+      setLocation(data);
+      saveToHistory(data);
       setShowSuggestions(false);
       // Charger la météo
-      fetchWeather(resp.data.latitude, resp.data.longitude);
+      fetchWeather(data.latitude, data.longitude);
     } catch (err) {
-      setError(err.response?.status === 404 ? 'Code postal non trouvé.' : `Erreur: ${err.message}`);
+      const errMsg = err?.response?.status === 404 ? 'Code postal non trouvé.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
+      setError(errMsg);
       setLocation(null);
     } finally { setLoading(false); }
   };
@@ -464,33 +586,36 @@ function App() {
   const handleInputChange = (e) => {
     const v = e.target.value;
     setSearchInput(v);
-    if (v.length >= 2) {
+    // Reset erreur dès qu'une nouvelle saisie commence
+    setError(null);
+    if (v.trim().length >= 3) {
+      setSearchingDebounce(true);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
         try {
           // Appeler les endpoints en parallèle : villes + adresses + (France → API gouvernementale)
           const promises = [
-            axios.get(`${API}/api/search?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] })),
-            axios.get(`${API}/api/geocode?q=${encodeURIComponent(v)}&country=${country}&limit=10`).catch(() => ({ data: [] }))
+            cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => []),
+            cachedGet(`${API}/api/geocode`, { q: v, country, limit: 10 }).catch(() => [])
           ];
           // Pour la France, ajouter l'API gouvernementale (meilleure qualité)
           const isFrance = country === 'FR';
           if (isFrance) {
             promises.push(
-              axios.get(`${API}/api/geocode-fr?q=${encodeURIComponent(v)}&limit=10`).catch(() => ({ data: [] }))
+              cachedGet(`${API}/api/geocode-fr`, { q: v, limit: 10 }).catch(() => [])
             );
           }
           const results = await Promise.all(promises);
-          const cityResp = results[0];
-          const addrResp = results[1];
-          const gouvResp = isFrance ? results[2] : null;
+          const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
+          const addrResp = Array.isArray(results[1]) ? results[1] : (results[1]?.data || []);
+          const gouvResp = isFrance ? (Array.isArray(results[2]) ? results[2] : (results[2]?.data || [])) : null;
 
-          const cities = (cityResp.data || []).map(c => ({ ...c, _type: 'city' }));
-          const addresses = (addrResp.data || []).map(a => ({ ...a, _type: 'address' }));
+          const cities = (cityResp || []).map(c => ({ ...c, _type: 'city' }));
+          const addresses = (addrResp || []).map(a => ({ ...a, _type: 'address' }));
           // Normaliser les résultats de l'API gouvernementale française
           let gouvAddresses = [];
-          if (gouvResp && gouvResp.data) {
-            gouvAddresses = (gouvResp.data || []).map(a => ({
+          if (gouvResp && gouvResp.length > 0) {
+            gouvAddresses = gouvResp.map(a => ({
               ...a,
               _type: 'address',
               _source: 'gouv',
@@ -510,14 +635,16 @@ function App() {
           setSuggestions(merged);
           setShowSuggestions(merged.length > 0);
         } catch { setSuggestions([]); }
-      }, 200);
-    } else { setSuggestions([]); setShowSuggestions(false); }
+        setSearchingDebounce(false);
+      }, 800);
+    } else { setSuggestions([]); setShowSuggestions(false); setSearchingDebounce(false); }
   };
 
   const selectSuggestion = async (item) => {
     setSearchInput(item.city || item.display_name?.split(',')[0] || '');
     setShowSuggestions(false);
     setLoading(true);
+    setError(null);
     
     // Si c'est une adresse complète, utiliser directement les coordonnées
     if (item._type === 'address') {
@@ -530,7 +657,7 @@ function App() {
         longitude: item.longitude,
         department: item.department || '',
         region: item.region || '',
-        population: 0,
+        population: item.population || 0,
         display_name: item.display_name || ''
       };
       // Population INSEE (France) ou Statbel (Belgique)
@@ -547,21 +674,19 @@ function App() {
     }
     
     try {
-      const url = `${API}/api/location/${encodeURIComponent(item.postal_code)}?country=${item.country_code || country}`;
-      const resp = await axios.get(url);
-      const locData = resp.data;
+      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country });
       // Population INSEE (France) ou Statbel (Belgique)
-      const cc2 = locData.country_code || '';
-      if ((cc2 === 'FR' || cc2 === 'BE' || locData.country === 'France' || locData.country === 'Belgium' || locData.country === 'Belgique') && locData.postal_code) {
-        fetchPopulation(locData.postal_code, locData.city, cc2).then(pop => {
+      const cc2 = data.country_code || '';
+      if ((cc2 === 'FR' || cc2 === 'BE' || data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique') && data.postal_code) {
+        fetchPopulation(data.postal_code, data.city, cc2).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
         });
       }
-      setLocation(locData);
-      saveToHistory(locData);
-      fetchWeather(locData.latitude, locData.longitude);
+      setLocation(data);
+      saveToHistory(data);
+      fetchWeather(data.latitude, data.longitude);
     } catch (err) {
-      setError(`Erreur: ${err.message}`);
+      setError(`Erreur: ${err?.message || 'Réseau indisponible'}`);
       setLocation(null);
     } finally { setLoading(false); }
   };
@@ -582,7 +707,7 @@ function App() {
         longitude: data.longitude,
         department: data.department || '',
         region: data.region || '',
-        population: 0,
+        population: data.population || 0,
         display_name: data.display_name || '',
         is_address: true
       };
@@ -604,22 +729,20 @@ function App() {
     
     // Sinon, ville normale : chercher les détails via l'API
     try {
-      const url = `${API}/api/location/${encodeURIComponent(data.postal_code)}?country=${data.country_code || countryForLookup}`;
-      const resp = await axios.get(url);
-      const locData = resp.data;
+      const locResp = await cachedGet(`${API}/api/location/${encodeURIComponent(data.postal_code)}`, { country: data.country_code || countryForLookup });
       // Population INSEE (France) ou Statbel (Belgique)
-      const cc4 = locData.country_code || '';
-      if ((cc4 === 'FR' || cc4 === 'BE' || locData.country === 'France' || locData.country === 'Belgium' || locData.country === 'Belgique') && locData.postal_code) {
-        fetchPopulation(locData.postal_code, locData.city, cc4).then(pop => {
+      const cc4 = locResp.country_code || '';
+      if ((cc4 === 'FR' || cc4 === 'BE' || locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique') && locResp.postal_code) {
+        fetchPopulation(locResp.postal_code, locResp.city, cc4).then(pop => {
           if (pop != null) {
-            const updated = { ...locData, population: pop };
+            const updated = { ...locResp, population: pop };
             if (side === 'A') setCityA(updated);
             else setCityB(updated);
           }
         });
       }
-      if (side === 'A') setCityA(locData);
-      else setCityB(locData);
+      if (side === 'A') setCityA(locResp);
+      else setCityB(locResp);
     } catch {
       // Fallback : utiliser les données de la suggestion (latitude/longitude déjà présentes)
       const fallback = {
@@ -631,7 +754,7 @@ function App() {
         longitude: data.longitude,
         department: '',
         region: '',
-        population: 0
+        population: data.population || 0
       };
       if (side === 'A') setCityA(fallback);
       else setCityB(fallback);
@@ -693,9 +816,8 @@ function App() {
     }
     
     try {
-      const url = `${API}/api/location/${encodeURIComponent(cityData.postal_code)}?country=${lookupCountry}`;
-      const resp = await axios.get(url);
-      newWp[idx] = resp.data;
+      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry });
+      newWp[idx] = data;
     } catch {
       newWp[idx] = {
         city: cityData.city,
@@ -711,7 +833,7 @@ function App() {
     setWaypointCountries(newWpC);
   };
 
-  // ===== Inverser départ et arrivée =====
+  // ===== Inverser départ et arrivée (simple échange mémoire, zéro appel API) =====
   const swapCities = () => {
     const tmpCity = cityA;
     const tmpCountry = countryA;
@@ -758,11 +880,11 @@ function App() {
         setUserPos({ lat: latitude, lon: longitude, accuracy });
         // Reverse geocoding via notre API
         try {
-          const resp = await axios.get(`${API}/api/reverse?lat=${latitude}&lon=${longitude}`);
-          setUserCity(resp.data);
+          const data = await cachedGet(`${API}/api/reverse`, { lat: latitude, lon: longitude });
+          setUserCity(data);
           if (mode === 'search') {
-            setLocation(resp.data);
-            setSearchInput(resp.data.city || '');
+            setLocation(data);
+            setSearchInput(data.city || '');
           }
         } catch { /* ignore */ }
         setLocating(false);
@@ -808,7 +930,7 @@ function App() {
         weather: weather || null,
         fuel_cost: showFuelCalc ? calculateFuelCost().toFixed(2) : null
       };
-      const resp = await axios.post(`${API}/api/export/pdf`, payload, { responseType: 'blob', timeout: 30000 });
+      const resp = await API_CLIENT.post(`${API}/api/export/pdf`, payload, { responseType: 'blob', timeout: 30000 });
       const blob = new Blob([resp.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -842,11 +964,11 @@ function App() {
     setApiKeyStatus('loading');
     setApiKeyError('');
     try {
-      const resp = await axios.get(`${API}/api/auth/register?email=${encodeURIComponent(apiKeyEmail)}`);
-      setApiKeyGenerated(resp.data.api_key);
+      const data = await cachedGet(`${API}/api/auth/register`, { email: apiKeyEmail });
+      setApiKeyGenerated(data.api_key);
       setApiKeyStatus('done');
     } catch (err) {
-      setApiKeyError(err.response?.data?.detail || err.message);
+      setApiKeyError(err?.response?.data?.detail || err?.message || 'Erreur réseau');
       setApiKeyStatus('error');
     }
   };
@@ -860,9 +982,9 @@ function App() {
   useEffect(() => {
     if (showAdmin && adminToken) {
       setAdminLoading(true);
-      axios.get(`${API}/api/admin/messages?token=${adminToken}`)
-        .then(res => { setAdminMessages(res.data.messages || []); setAdminLoading(false); })
-        .catch(err => { setAdminLoading(false); alert('Erreur admin: ' + (err.response?.data?.detail || err.message)); });
+      cachedGet(`${API}/api/admin/messages`, { token: adminToken })
+        .then(data => { setAdminMessages(data.messages || []); setAdminLoading(false); })
+        .catch(err => { setAdminLoading(false); alert('Erreur admin: ' + (err?.response?.data?.detail || err?.message || 'Erreur réseau')); });
     }
   }, [showAdmin, adminToken]);
 
@@ -893,7 +1015,7 @@ function App() {
     setContactStatus('sending');
     setContactErrorMsg('');
     try {
-      await axios.post(`${API}/api/contact`, contactForm, { timeout: 10000 });
+      await API_CLIENT.post(`${API}/api/contact`, contactForm, { timeout: 10000 });
       setContactStatus('done');
       setContactErrorMsg('');
       setContactForm({ name: '', email: '', subject: '', message: '' });
@@ -943,8 +1065,8 @@ function App() {
       url += `&waypoints=${encodeURIComponent(waypointsParam)}`;
     }
 
-    fetch(url)
-      .then(res => res.json())
+    API_CLIENT.get(url)
+      .then(res => res.data)
       .then(data => {
         if (data.distance) {
           const km = data.distance / 1000;
@@ -1086,23 +1208,29 @@ function App() {
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   placeholder={tr("searchPlaceholder", lang)} />
+                {searchingDebounce && <span className="search-spinner">⏳ Recherche...</span>}
                 {showSuggestions && suggestions.length > 0 && (
                   <ul className="suggestions">
-                    {suggestions.map((s, idx) => (
-                      <li key={idx} onMouseDown={() => selectSuggestion(s)}>
-                        <span className="suggestion-city">
-                          {s._type === 'address' ? '📍 ' : '🏙️ '}
-                          {s._type === 'address' ? (s.short_address || s.display_name?.split(',')[0]) : s.city}
-                        </span>
-                        <span className="suggestion-code">
-                          {s._type === 'address' ? `${s.city || ''} · ${s.postal_code || ''}` : s.postal_code}
-                        </span>
-                      </li>
-                    ))}
+                    {suggestions.map((s, idx) => {
+                      const pop = s.population ? ` - ${s.population.toLocaleString()} hab.` : '';
+                      return (
+                        <li key={idx} onMouseDown={() => selectSuggestion(s)}>
+                          <span className="suggestion-city">
+                            {s._type === 'address' ? '📍 ' : '🏙️ '}
+                            {s._type === 'address' ? (s.short_address || s.display_name?.split(',')[0]) : s.city}
+                          </span>
+                          <span className="suggestion-code">
+                            {s._type === 'address' ? `${s.city || ''} · ${s.postal_code || ''}` : s.postal_code}{pop}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
-              <button onClick={() => handleSearch()} disabled={loading}>{loading ? '⏳' : '🔍 Rechercher'}</button>
+              <button onClick={() => handleSearch()} disabled={loading || searchingDebounce}>
+                {loading ? '⏳' : searchingDebounce ? '⏳' : '🔍 Rechercher'}
+              </button>
             </>
           )}
 
@@ -1347,6 +1475,25 @@ function App() {
                   <span className="weather-detail">🌧️ {weather.current.precipitation_probability}%</span>
                 )}
               </div>
+              {/* Activités intelligentes selon la météo (zéro appel API) */}
+              <div className="smart-activities">
+                <h4 className="activities-title">
+                  {isGoodWeather(weather.current.weathercode) ? '🌳 Activités extérieures' : '🏛️ Activités intérieures'}
+                </h4>
+                <div className="activities-grid">
+                  {getSmartActivities(weather.current.weathercode).map((act, idx) => (
+                    <button key={idx} className="activity-btn" title={act.desc}
+                      onClick={() => {
+                        const q = encodeURIComponent(`${act.name} ${location?.city || ''}`);
+                        window.open(`https://www.google.com/search?q=${q}`, '_blank', 'noopener');
+                      }}>
+                      <span className="activity-emoji">{act.emoji}</span>
+                      <span className="activity-name">{act.name}</span>
+                      <span className="activity-desc">{act.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
               {/* Prévisions 3 jours */}
               {weather.daily && weather.daily.length > 0 && (
                 <div className="forecast-bar">
@@ -1418,9 +1565,8 @@ function App() {
             <button key={idx} className="fav-chip" onClick={async () => {
               setSearchInput(f.postal_code);
               try {
-                const url = `${API}/api/location/${encodeURIComponent(f.postal_code)}?country=${f.country_code || country}`;
-                const resp = await axios.get(url);
-                setLocation(resp.data);
+                const data = await cachedGet(`${API}/api/location/${encodeURIComponent(f.postal_code)}`, { country: f.country_code || country });
+                setLocation(data);
               } catch { setLocation(f); }
               setMode('search');
             }}>
@@ -1440,9 +1586,8 @@ function App() {
               const h = history[idx];
               setSearchInput(h.postal_code);
               try {
-                const url = `${API}/api/location/${encodeURIComponent(h.postal_code)}?country=${h.country_code || country}`;
-                const resp = await axios.get(url);
-                setLocation(resp.data);
+                const data = await cachedGet(`${API}/api/location/${encodeURIComponent(h.postal_code)}`, { country: h.country_code || country });
+                setLocation(data);
               } catch { setLocation(h); }
               e.target.value = '';
             }}>
