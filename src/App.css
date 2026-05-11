@@ -2138,6 +2138,102 @@ body.dark-mode .suggestion-street {
   text-overflow: ellipsis;
 }
 
+/* ===== Itinéraires alternatifs ===== */
+.route-alternatives {
+  margin: 12px 0 16px;
+  padding: 12px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.alt-title {
+  margin: 0 0 10px;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.alt-cards {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.alt-card {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-family: inherit;
+}
+.alt-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.alt-card-active {
+  border-color: #ff4444;
+  background: #fff5f5;
+  box-shadow: 0 2px 8px rgba(255,68,68,0.15);
+}
+.alt-number {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.alt-card-active .alt-number {
+  color: #ff4444;
+}
+.alt-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.alt-detail strong {
+  font-size: 1.1em;
+  color: var(--text);
+}
+.alt-time {
+  font-size: 0.75em;
+  color: var(--text-secondary);
+}
+.alt-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.65em;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+body.dark-mode .route-alternatives {
+  background: #2a2a2a;
+  border-color: #444;
+}
+body.dark-mode .alt-card {
+  background: #333;
+  border-color: #555;
+  color: #eee;
+}
+body.dark-mode .alt-card-active {
+  background: #442222;
+  border-color: #ff4444;
+}
+body.dark-mode .alt-detail strong {
+  color: #eee;
+}
+
 /* ===== Mode sombre pour activités ===== */
 body.dark-mode .smart-activities {
   background: #2a2a2a;

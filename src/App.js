@@ -375,6 +375,8 @@ function App() {
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [routeCoords, setRouteCoords] = useState(null); // tracé routier
+  const [routeAlternatives, setRouteAlternatives] = useState(null); // toutes les routes alternatives
+  const [selectedRouteIdx, setSelectedRouteIdx] = useState(0); // index de la route sélectionnée
 
   // Multi-étapes (waypoints)
   const [waypoints, setWaypoints] = useState([]); // array de city objects
@@ -1067,6 +1069,8 @@ function App() {
       setDistance(null);
       setDuration(null);
       setRouteCoords(null);
+      setRouteAlternatives(null);
+      setSelectedRouteIdx(0);
       return;
     }
 
@@ -1077,7 +1081,6 @@ function App() {
     let totalAirKm = haversineKm(cityA.latitude, cityA.longitude, cityB.latitude, cityB.longitude);
     if (waypointsParam) {
       const validWp = waypoints.filter(w => w && w.latitude && w.longitude);
-      // Calculer distance A → WP1 + WP1 → WP2 + ... + WPn → B
       totalAirKm = haversineKm(cityA.latitude, cityA.longitude, validWp[0].latitude, validWp[0].longitude);
       for (let i = 0; i < validWp.length - 1; i++) {
         totalAirKm += haversineKm(validWp[i].latitude, validWp[i].longitude, validWp[i+1].latitude, validWp[i+1].longitude);
@@ -1086,9 +1089,11 @@ function App() {
     }
     setDistance(Math.round(totalAirKm));
     setRouteCoords(null);
+    setRouteAlternatives(null);
+    setSelectedRouteIdx(0);
 
     const profile = modeProfile;
-    let url = `${API}/api/directions?origin_lat=${cityA.latitude}&origin_lon=${cityA.longitude}&dest_lat=${cityB.latitude}&dest_lon=${cityB.longitude}&profile=${profile}`;
+    let url = `${API}/api/directions?origin_lat=${cityA.latitude}&origin_lon=${cityA.longitude}&dest_lat=${cityB.latitude}&dest_lon=${cityB.longitude}&profile=${profile}&alternatives=3`;
     if (waypointsParam) {
       url += `&waypoints=${encodeURIComponent(waypointsParam)}`;
     }
@@ -1099,12 +1104,25 @@ function App() {
         if (data.distance) {
           const km = data.distance / 1000;
           const coords = data.route_coords || [];
-          // Convertir [lon, lat] → [lat, lon] pour Leaflet
           const leafletCoords = coords.map(c => [c[1], c[0]]);
 
           setDistance(Math.round(km));
           setRouteCoords(leafletCoords.length > 0 ? leafletCoords : null);
           setDuration(data.duration || null);
+
+          // Stocker toutes les routes alternatives
+          if (data.routes && data.routes.length > 1) {
+            const alternatives = data.routes.map((r, idx) => {
+              const rCoords = (r.route_coords || []).map(c => [c[1], c[0]]);
+              return {
+                distance: Math.round(r.distance / 1000),
+                duration: r.duration || null,
+                route_coords: rCoords,
+                selected: idx === 0
+              };
+            });
+            setRouteAlternatives(alternatives);
+          }
         }
       })
       .catch(() => {
@@ -1368,10 +1386,46 @@ function App() {
       {mode === 'distance' && distance !== null && (
         <div className="result-info distance-result">
           <h2>🗺️ Itinéraire</h2>
+          
+          {/* Sélecteur d'itinéraires alternatifs */}
+          {routeAlternatives && routeAlternatives.length > 1 && (
+            <div className="route-alternatives">
+              <h4 className="alt-title">Choisissez votre itinéraire :</h4>
+              <div className="alt-cards">
+                {routeAlternatives.map((alt, idx) => (
+                  <button
+                    key={idx}
+                    className={`alt-card ${selectedRouteIdx === idx ? 'alt-card-active' : ''}`}
+                    onClick={() => {
+                      setSelectedRouteIdx(idx);
+                      setDistance(alt.distance);
+                      setDuration(alt.duration);
+                      setRouteCoords(alt.route_coords.length > 0 ? alt.route_coords : null);
+                    }}
+                  >
+                    <span className="alt-number">#{idx + 1}</span>
+                    <span className="alt-detail">
+                      <strong>{alt.distance.toLocaleString()} km</strong>
+                      {alt.duration !== null && (
+                        <span className="alt-time">
+                          ⏱️ {Math.floor(alt.duration / 3600)}h{Math.round((alt.duration % 3600) / 60)}min
+                        </span>
+                      )}
+                    </span>
+                    {idx === 0 && <span className="alt-badge">Recommandé</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <p className="distance-value">{distance.toLocaleString()} km</p>
           {duration !== null && (
             <p className="duration-value">
               ⏱️ {Math.floor(duration / 3600)}h{Math.round((duration % 3600) / 60)}min
+              {routeAlternatives && routeAlternatives.length > 1 && (
+                <span className="wp-badge"> 🛣️ {routeAlternatives.length} propositions</span>
+              )}
               {waypoints.filter(w => w && w.city).length > 0 && (
                 <span className="wp-badge"> 🛑 {waypoints.filter(w => w && w.city).length} arrêt(s)</span>
               )}
@@ -1726,7 +1780,15 @@ function App() {
               </Marker>
             )}
 
-            {/* Tracé route OSRM (trait plein) ou vol d'oiseau (traitillés) */}
+            {/* Routes alternatives non sélectionnées (grisées) */}
+            {routeAlternatives && routeAlternatives.length > 1 && routeAlternatives.map((alt, idx) => (
+              idx !== selectedRouteIdx && alt.route_coords.length > 0 && (
+                <Polyline key={'alt-' + idx} positions={alt.route_coords}
+                  color="#cccccc" weight={3} opacity={0.4} dashArray="6,4" />
+              )
+            ))}
+
+            {/* Tracé route sélectionnée (trait plein) ou vol d'oiseau (traitillés) */}
             {routeCoords && (
               <Polyline positions={routeCoords} color="#ff4444" weight={4} />
             )}
