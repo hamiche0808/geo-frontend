@@ -10,10 +10,10 @@ import ActivitiesWidget from './ActivitiesWidget';
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
-    'User-Agent': 'GeolocApp-Client/1.0',
-    'X-Requested-With': 'XMLHttpRequest'
+    'User-Agent': 'GeoLocApp/4.3 (hamiche08.08@gmail.com)',
+    'Accept': 'application/json',
   },
-  timeout: 10000
+  timeout: 60000
 });
 // Intercepteur pour logger les erreurs réseau
 API_CLIENT.interceptors.response.use(
