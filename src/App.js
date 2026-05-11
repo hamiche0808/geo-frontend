@@ -4,6 +4,8 @@ import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
+import WeatherWidget from './WeatherWidget';
+import ActivitiesWidget from './ActivitiesWidget';
 
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
@@ -75,7 +77,7 @@ function getFlagIcon(countryCode) {
   });
 }
 
-const API = 'https://geo-app-1-z314.onrender.com';
+const API = process.env.REACT_APP_API_URL || 'https://geo-app-1-z314.onrender.com';
 
 // ===== Traductions FR / EN =====
 const TR = {
@@ -129,58 +131,6 @@ async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
     }
   } catch { /* ignore */ }
   return null;
-}
-
-// Emoji météo selon code WMO
-function getWeatherEmoji(code) {
-  if (code === 0) return '☀️';
-  if (code <= 2) return '🌤️';
-  if (code === 3) return '☁️';
-  if (code >= 45 && code <= 48) return '🌫️';
-  if (code >= 51 && code <= 55) return '🌦️';
-  if (code >= 61 && code <= 65) return '🌧️';
-  if (code >= 71 && code <= 75) return '🌨️';
-  if (code >= 80 && code <= 82) return '🌦️';
-  if (code >= 95) return '⛈️';
-  return '🌡️';
-}
-
-// Déterminer si le temps est "beau" (extérieur) ou "mauvais" (intérieur)
-// Beau : ensoleillé, partiellement nuageux, nuageux sans précipitation
-// Mauvais : brouillard, pluie, neige, orage, bruine
-function isGoodWeather(code) {
-  if (code === 0 || code === 1) return true;      // Ensoleillé, partiellement nuageux
-  if (code === 2) return true;                      // Partiellement nuageux
-  if (code === 3) return true;                      // Nuageux
-  if (code >= 45 && code <= 48) return false;       // Brouillard
-  if (code >= 51 && code <= 55) return false;       // Bruine
-  if (code >= 61 && code <= 65) return false;       // Pluie
-  if (code >= 71 && code <= 75) return false;       // Neige
-  if (code >= 80 && code <= 82) return false;       // Averses
-  if (code >= 95) return false;                     // Orage
-  return true; // Par défaut, on suppose beau temps
-}
-
-// Activités intelligentes selon la météo (zéro appel API supplémentaire)
-function getSmartActivities(weatherCode) {
-  const good = isGoodWeather(weatherCode);
-  if (good) {
-    return [
-      { emoji: '🌳', name: 'Parcs & Jardins', desc: 'Profitez du beau temps' },
-      { emoji: '⛲', name: 'Monuments', desc: 'Visitez les sites historiques' },
-      { emoji: '⛱️', name: 'Plages & Lac', desc: 'Idéal pour une baignade' },
-      { emoji: '🚴', name: 'Balade à vélo', desc: 'Parcourez la ville' },
-      { emoji: '🧺', name: 'Pique-nique', desc: 'En plein air' },
-    ];
-  } else {
-    return [
-      { emoji: '🏛️', name: 'Musées', desc: 'Culture & expositions' },
-      { emoji: '🍿', name: 'Cinémas', desc: 'Films & séances' },
-      { emoji: '🛍️', name: 'Shopping', desc: 'Centres commerciaux' },
-      { emoji: '🎮', name: 'Bowling / Jeux', desc: 'Activités couvertes' },
-      { emoji: '☕', name: 'Cafés & Salons', desc: 'Détente au chaud' },
-    ];
-  }
 }
 
 const COUNTRIES = [
@@ -990,7 +940,7 @@ function App() {
         weather: weather || null,
         fuel_cost: showFuelCalc ? calculateFuelCost().toFixed(2) : null
       };
-      const resp = await API_CLIENT.post(`${API}/api/export/pdf`, payload, { responseType: 'blob', timeout: 30000 });
+      const resp = await API_CLIENT.post(`${API}/api/export/pro-pdf`, payload, { responseType: 'blob', timeout: 30000 });
       const blob = new Blob([resp.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1612,58 +1562,8 @@ function App() {
           </div>
           {weather && weather.current && !weather.error && (
             <>
-              <div className="weather-info">
-                <span className="weather-icon">{getWeatherEmoji(weather.current.weathercode)}</span>
-                <span className="weather-temp">{Math.round(weather.current.temperature)}°C</span>
-                <span className="weather-desc">{weather.current.description}</span>
-                <span className="weather-detail">💨 {weather.current.windspeed} km/h</span>
-                {weather.current.humidity != null && <span className="weather-detail">💧 {weather.current.humidity}%</span>}
-                {weather.current.feels_like != null && <span className="weather-detail">🌡️ Ressenti {Math.round(weather.current.feels_like)}°C</span>}
-                {weather.current.precipitation_probability != null && weather.current.precipitation_probability > 0 && (
-                  <span className="weather-detail">🌧️ {weather.current.precipitation_probability}%</span>
-                )}
-              </div>
-              {/* Activités intelligentes selon la météo (zéro appel API) */}
-              <div className="smart-activities">
-                <h4 className="activities-title">
-                  {isGoodWeather(weather.current.weathercode) ? '🌳 Activités extérieures' : '🏛️ Activités intérieures'}
-                </h4>
-                <div className="activities-grid">
-                  {getSmartActivities(weather.current.weathercode).map((act, idx) => (
-                    <button key={idx} className="activity-btn" title={act.desc}
-                      onClick={() => {
-                        const q = encodeURIComponent(`${act.name} ${location?.city || ''}`);
-                        window.open(`https://www.google.com/search?q=${q}`, '_blank', 'noopener');
-                      }}>
-                      <span className="activity-emoji">{act.emoji}</span>
-                      <span className="activity-name">{act.name}</span>
-                      <span className="activity-desc">{act.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Prévisions 3 jours */}
-              {weather.daily && weather.daily.length > 0 && (
-                <div className="forecast-bar">
-                  {weather.daily.slice(1).map((day, idx) => (
-                    <div key={idx} className="forecast-day">
-                      <span className="forecast-day-name">{day.day_name}</span>
-                      <span className="forecast-icon">{getWeatherEmoji(day.weathercode)}</span>
-                      <span className="forecast-desc">{day.description}</span>
-                      <span className="forecast-temps">
-                        <span className="forecast-max">{day.temp_max}°</span>
-                        <span className="forecast-min">{day.temp_min}°</span>
-                      </span>
-                      <span className="forecast-precip">
-                        💧{day.precipitation}mm
-                        {day.precipitation_probability != null && day.precipitation_probability > 0 && (
-                          <span className="forecast-prob"> ({day.precipitation_probability}%)</span>
-                        )}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <WeatherWidget weather={weather} cityName={location?.city} lang={lang} />
+              <ActivitiesWidget weatherCode={weather.current.weathercode} cityName={location?.city} lang={lang} />
             </>
           )}
           <p className="coords">Coordonnées : {location.latitude}, {location.longitude}</p>
