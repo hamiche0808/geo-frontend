@@ -1033,7 +1033,9 @@ function App() {
       setApiKeyGenerated(data.api_key);
       setApiKeyStatus('done');
     } catch (err) {
-      setApiKeyError(err?.response?.data?.detail || err?.message || 'Erreur réseau');
+      let errDetail = err?.response?.data?.detail;
+      if (errDetail && typeof errDetail !== 'string') { try { errDetail = JSON.stringify(errDetail); } catch { errDetail = String(errDetail); } }
+      setApiKeyError(errDetail || err?.message || 'Erreur réseau');
       setApiKeyStatus('error');
     }
   };
@@ -1049,7 +1051,7 @@ function App() {
       setAdminLoading(true);
       cachedGet(`${API}/api/admin/messages`, { token: adminToken })
         .then(data => { setAdminMessages(data.messages || []); setAdminLoading(false); })
-        .catch(err => { setAdminLoading(false); alert('Erreur admin: ' + (err?.response?.data?.detail || err?.message || 'Erreur réseau')); });
+        .catch(err => { setAdminLoading(false); let admDetail = err?.response?.data?.detail; if (admDetail && typeof admDetail !== 'string') { try { admDetail = JSON.stringify(admDetail); } catch { admDetail = String(admDetail); } }; alert('Erreur admin: ' + (admDetail || err?.message || 'Erreur réseau')); });
     }
   }, [showAdmin, adminToken]);
 
@@ -1086,7 +1088,11 @@ function App() {
       setContactForm({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => { setShowContact(false); setContactStatus(null); }, 2000);
     } catch (e) {
-      const detail = e.response?.data?.detail;
+      let detail = e.response?.data?.detail;
+      // Si le détail est un objet/tableau, le formater lisiblement
+      if (detail && typeof detail !== 'string') {
+        try { detail = JSON.stringify(detail); } catch { detail = String(detail); }
+      }
       setContactErrorMsg(detail ? `❌ ${detail}` : "❌ Erreur d'envoi. Vérifiez votre connexion et réessayez.");
       setContactStatus('error');
     }
