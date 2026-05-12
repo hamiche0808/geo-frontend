@@ -554,7 +554,7 @@ function App() {
     setError(null);
     
     try {
-      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country });
+      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country, city: item.city });
       // Population INSEE (France) ou Statbel (Belgique)
       const cc2 = data.country_code || '';
       if ((cc2 === 'FR' || cc2 === 'BE' || data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique') && data.postal_code) {
@@ -609,7 +609,7 @@ function App() {
     
     // Sinon, ville normale : chercher les détails via l'API
     try {
-      const locResp = await cachedGet(`${API}/api/location/${encodeURIComponent(data.postal_code)}`, { country: data.country_code || countryForLookup });
+      const locResp = await cachedGet(`${API}/api/location/${encodeURIComponent(data.postal_code)}`, { country: data.country_code || countryForLookup, city: data.city });
       // Population INSEE (France) ou Statbel (Belgique)
       const cc4 = locResp.country_code || '';
       if ((cc4 === 'FR' || cc4 === 'BE' || locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique') && locResp.postal_code) {
@@ -696,7 +696,7 @@ function App() {
     }
     
     try {
-      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry });
+      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry, city: cityData.city });
       newWp[idx] = data;
     } catch {
       newWp[idx] = {
