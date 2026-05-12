@@ -10,7 +10,7 @@ import ActivitiesWidget from './ActivitiesWidget';
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
-    'User-Agent': 'GeoLocApp/4.3 (hamiche08.08@gmail.com)',
+    'User-Agent': 'GeoLocApp/4.4 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
     'X-API-Key': 'geoloc-app-key-2026',
   },
@@ -143,6 +143,64 @@ const COUNTRIES = [
   { code: 'US', name: 'États-Unis', flag: '🇺🇸' },
   { code: 'GB', name: 'Royaume-Uni', flag: '🇬🇧' },
 ];
+
+// ===== Fuseaux horaires IANA par code pays (pour l'heure locale réelle) =====
+const COUNTRY_TZ = {
+  'FR': 'Europe/Paris',
+  'BE': 'Europe/Brussels',
+  'DE': 'Europe/Berlin',
+  'IT': 'Europe/Rome',
+  'ES': 'Europe/Madrid',
+  'GB': 'Europe/London',
+  'PT': 'Europe/Lisbon',
+  'NL': 'Europe/Amsterdam',
+  'LU': 'Europe/Luxembourg',
+  'CH': 'Europe/Zurich',
+  'AT': 'Europe/Vienna',
+  'DK': 'Europe/Copenhagen',
+  'SE': 'Europe/Stockholm',
+  'NO': 'Europe/Oslo',
+  'FI': 'Europe/Helsinki',
+  'PL': 'Europe/Warsaw',
+  'CZ': 'Europe/Prague',
+  'SK': 'Europe/Bratislava',
+  'HU': 'Europe/Budapest',
+  'RO': 'Europe/Bucharest',
+  'BG': 'Europe/Sofia',
+  'GR': 'Europe/Athens',
+  'HR': 'Europe/Zagreb',
+  'RS': 'Europe/Belgrade',
+  'IE': 'Europe/Dublin',
+  'IS': 'Atlantic/Reykjavik',
+  'TR': 'Europe/Istanbul',
+  'RU': 'Europe/Moscow',
+  'US': 'America/New_York',
+  'CA': 'America/Toronto',
+  'MX': 'America/Mexico_City',
+  'BR': 'America/Sao_Paulo',
+  'AR': 'America/Argentina/Buenos_Aires',
+  'AU': 'Australia/Sydney',
+  'NZ': 'Pacific/Auckland',
+  'JP': 'Asia/Tokyo',
+  'CN': 'Asia/Shanghai',
+  'IN': 'Asia/Kolkata',
+  'KR': 'Asia/Seoul',
+  'SG': 'Asia/Singapore',
+  'HK': 'Asia/Hong_Kong',
+  'TW': 'Asia/Taipei',
+  'TH': 'Asia/Bangkok',
+  'VN': 'Asia/Ho_Chi_Minh',
+  'MY': 'Asia/Kuala_Lumpur',
+  'PH': 'Asia/Manila',
+  'ID': 'Asia/Jakarta',
+  'MA': 'Africa/Casablanca',
+  'DZ': 'Africa/Algiers',
+  'TN': 'Africa/Tunis',
+  'ZA': 'Africa/Johannesburg',
+  'EG': 'Africa/Cairo',
+  'KE': 'Africa/Nairobi',
+  'NG': 'Africa/Lagos',
+};
 
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -498,14 +556,18 @@ function App() {
 
   const shareApp = () => {
     const url = APP_URL;
+    // Inclure l'heure locale de la destination si disponible
+    const timeStr = localTimeStr ? ` (🕐 ${localTimeStr})` : '';
+    const destStr = location?.city ? `\n📍 ${location.city}${location.postal_code ? ' ('+location.postal_code+')' : ''}${timeStr}` : '';
+    const shareText = `🌍 GeoLoc - Recherche d'adresses, itinéraires, météo et population. Application gratuite et sans compte !${destStr}`;
     if (navigator.share) {
       navigator.share({
         title: 'GeoLoc - Recherche, Itinéraire, Météo',
-        text: '🌍 GeoLoc - Recherche d\'adresses, itinéraires, météo et population. Application gratuite et sans compte !',
+        text: shareText,
         url: url
       }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(url).then(() => {
+      navigator.clipboard.writeText(`${shareText}\n${url}`).then(() => {
         setError('Lien de l\'application copié !');
         setTimeout(() => setError(''), 2000);
       }).catch(() => {});
@@ -544,27 +606,27 @@ function App() {
     fetchImage();
   }, [location?.city, location?.country]);
 
-  // ===== Heure locale =====
-  const getLocalTime = (lat, lon) => {
-    if (!lat || !lon) return '';
+  // ===== Heure locale (temps réel, rafraîchie toutes les 30s) =====
+  const [localTimeStr, setLocalTimeStr] = useState('');
+  const getLocalTime = (countryCode) => {
     try {
-      // Calcul de l'offset UTC à partir de la longitude (15° = 1h)
-      const offsetHours = lon / 15;
-      const sign = offsetHours >= 0 ? '+' : '-';
-      const absOffset = Math.abs(offsetHours);
-      const hours = Math.floor(absOffset);
-      const minutes = Math.round((absOffset - hours) * 60);
-      const offsetStr = `UTC${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      
-      // Heure locale approximative
-      const utc = new Date();
-      const localMs = utc.getTime() + offsetHours * 3600000;
-      const local = new Date(localMs);
-      const h = String(local.getHours()).padStart(2, '0');
-      const m = String(local.getMinutes()).padStart(2, '0');
-      return `${h}:${m}`;
+      const tz = COUNTRY_TZ[countryCode] || 'Europe/Paris';
+      return new Intl.DateTimeFormat('fr-FR', {
+        timeZone: tz,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).format(new Date());
     } catch { return ''; }
   };
+  // Mise à jour dynamique toutes les 30 secondes
+  useEffect(() => {
+    if (!location?.country_code) { setLocalTimeStr(''); return; }
+    const update = () => setLocalTimeStr(getLocalTime(location.country_code));
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, [location?.country_code]);
 
   // ===== Mode Recherche =====
   const handleSearch = async (query) => {
@@ -1499,8 +1561,8 @@ function App() {
                   <p className="country-name">{location.country}</p>
                 </>
               )}
-              {location.latitude && location.longitude && (
-                <span className="local-time">🕐 {getLocalTime(location.latitude, location.longitude)}</span>
+              {location.latitude && location.longitude && localTimeStr && (
+                <span className="local-time">🕐 {localTimeStr}</span>
               )}
             </div>
           </div>
@@ -1708,7 +1770,7 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-links">
-          <span className="footer-brand">🌍 GeoLoc v4.3</span>
+          <span className="footer-brand">🌍 GeoLoc v4.4</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
