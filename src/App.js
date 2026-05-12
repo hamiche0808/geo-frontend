@@ -209,7 +209,7 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
           try {
             // Uniquement les villes/localités (pas d'adresses/rues)
             const promises = [
-              cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => [])
+            cachedGet(`${API}/api/search`, { q: v, country, limit: v.trim().length >= 5 && /^\d+$/.test(v.trim()) ? 20 : 10 }).catch(() => [])
             ];
             const results = await Promise.all(promises);
             const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
@@ -603,7 +603,7 @@ function App() {
         try {
           // Uniquement les villes/localités (pas d'adresses/rues)
           const promises = [
-            cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => [])
+            cachedGet(`${API}/api/search`, { q: v, country, limit: v.trim().length >= 5 && /^\d+$/.test(v.trim()) ? 20 : 10 }).catch(() => [])
           ];
           const results = await Promise.all(promises);
           const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
