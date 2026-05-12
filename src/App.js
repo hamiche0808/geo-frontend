@@ -293,10 +293,23 @@ function App() {
   const [waypointCountries, setWaypointCountries] = useState([]);
 
   // Coût carburant
-  const [fuelConsumption, setFuelConsumption] = useState(7); // L/100km
-  const [fuelType, setFuelType] = useState('essence');
-  const [fuelPrice, setFuelPrice] = useState(1.85); // €/L
+  const [fuelConsumption, setFuelConsumption] = useState(() => {
+    const saved = localStorage.getItem('geoloc_fuel_consumption');
+    return saved ? parseFloat(saved) : 7;
+  });
+  const [fuelType, setFuelType] = useState(() => {
+    return localStorage.getItem('geoloc_fuel_type') || 'essence';
+  });
+  const [fuelPrice, setFuelPrice] = useState(() => {
+    const saved = localStorage.getItem('geoloc_fuel_price');
+    return saved ? parseFloat(saved) : 1.85;
+  });
   const [showFuelCalc, setShowFuelCalc] = useState(false);
+
+  // Sauvegarder les valeurs carburant dans localStorage
+  useEffect(() => { localStorage.setItem('geoloc_fuel_consumption', String(fuelConsumption)); }, [fuelConsumption]);
+  useEffect(() => { localStorage.setItem('geoloc_fuel_type', fuelType); }, [fuelType]);
+  useEffect(() => { localStorage.setItem('geoloc_fuel_price', String(fuelPrice)); }, [fuelPrice]);
 
   const [userPos, setUserPos] = useState(null);
   const [userCity, setUserCity] = useState(null);
@@ -309,6 +322,8 @@ function App() {
   const [history, setHistory] = useState([]);
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [cityImage, setCityImage] = useState(null); // URL de la miniature ville
   const [modeProfile, setModeProfile] = useState('driving'); // driving | cycling | walking
   const [favorites, setFavorites] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
@@ -501,24 +516,79 @@ function App() {
     return APP_URL;
   };
 
+  // ===== Miniature ville (Wikipedia) =====
+  useEffect(() => {
+    if (!location?.city) { setCityImage(null); return; }
+    const city = location.city;
+    const country = location.country || 'France';
+    // Essayer Wikipedia en français puis en anglais
+    const fetchImage = async () => {
+      for (const lang of ['fr', 'en']) {
+        try {
+          const resp = await fetch(
+            `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(city)}&prop=pageimages&format=json&pithumbsize=300&origin=*`
+          );
+          const data = await resp.json();
+          const pages = data?.query?.pages;
+          if (pages) {
+            const page = Object.values(pages)[0];
+            if (page?.thumbnail?.source) {
+              setCityImage(page.thumbnail.source);
+              return;
+            }
+          }
+        } catch { /* ignore */ }
+      }
+      setCityImage(null);
+    };
+    fetchImage();
+  }, [location?.city, location?.country]);
+
+  // ===== Heure locale =====
+  const getLocalTime = (lat, lon) => {
+    if (!lat || !lon) return '';
+    try {
+      // Calcul de l'offset UTC à partir de la longitude (15° = 1h)
+      const offsetHours = lon / 15;
+      const sign = offsetHours >= 0 ? '+' : '-';
+      const absOffset = Math.abs(offsetHours);
+      const hours = Math.floor(absOffset);
+      const minutes = Math.round((absOffset - hours) * 60);
+      const offsetStr = `UTC${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      
+      // Heure locale approximative
+      const utc = new Date();
+      const localMs = utc.getTime() + offsetHours * 3600000;
+      const local = new Date(localMs);
+      const h = String(local.getHours()).padStart(2, '0');
+      const m = String(local.getMinutes()).padStart(2, '0');
+      return `${h}:${m}`;
+    } catch { return ''; }
+  };
+
   // ===== Mode Recherche =====
   const handleSearch = async (query) => {
     const term = (query || searchInput).trim();
     if (!term) return;
     setError(null);
     setLoading(true);
+    setLoadingMessage('🔍 Recherche...');
     try {
+      setLoadingMessage('📡 Connexion...');
       const data = await cachedGet(`${API}/api/location/${encodeURIComponent(term)}`, { country });
+      setLoadingMessage('🌍 Analyse...');
       setLocation(data);
       saveToHistory(data);
       setShowSuggestions(false);
       // Charger la météo
+      setLoadingMessage('🌤️ Météo...');
       fetchWeather(data.latitude, data.longitude);
+      setLoadingMessage('🖼️ Ville...');
     } catch (err) {
       const errMsg = err?.response?.status === 404 ? 'Code postal non trouvé.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
       setError(errMsg);
       setLocation(null);
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setLoadingMessage(''); }
   };
 
   const handleInputChange = (e) => {
@@ -551,24 +621,29 @@ function App() {
     setSearchInput(item.city || '');
     setShowSuggestions(false);
     setLoading(true);
+    setLoadingMessage('📡 Connexion...');
     setError(null);
     
     try {
+      setLoadingMessage('🌍 Analyse...');
       const data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country, city: item.city });
       // Population INSEE (France) ou Statbel (Belgique)
       const cc2 = data.country_code || '';
       if ((cc2 === 'FR' || cc2 === 'BE' || data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique') && data.postal_code) {
+        setLoadingMessage('👥 Population...');
         fetchPopulation(data.postal_code, data.city, cc2).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
         });
       }
+      setLoadingMessage('🌤️ Météo...');
       setLocation(data);
       saveToHistory(data);
       fetchWeather(data.latitude, data.longitude);
+      setLoadingMessage('🖼️ Ville...');
     } catch (err) {
       setError(`Erreur: ${err?.message || 'Réseau indisponible'}`);
       setLocation(null);
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setLoadingMessage(''); }
   };
 
   // ===== Mode Itinéraire =====
@@ -1237,6 +1312,15 @@ function App() {
 
         {error && <p className="error">{error}</p>}
       </header>
+      {/* Overlay de chargement réactif */}
+      {loading && loadingMessage && (
+        <div className="loading-overlay">
+          <div className="loading-modal">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
 
       {/* Résultat distance */}
       {mode === 'distance' && distance !== null && (
@@ -1396,18 +1480,30 @@ function App() {
       {/* Résultat recherche */}
       {mode === 'search' && location && (
         <div className="result-info">
-          {location.display_name ? (
-            <>
-              <h2>{location.display_name.split(',')[0]}</h2>
-              <p className="address-full">{location.display_name}</p>
-              <p className="country-name">{location.country}</p>
-            </>
-          ) : (
-            <>
-              <h2>{location.city} <span className="postal-code">({location.postal_code})</span></h2>
-              <p className="country-name">{location.country}</p>
-            </>
-          )}
+          <div className="city-header">
+            {cityImage ? (
+              <img src={cityImage} alt={location.city} className="city-thumbnail" onError={() => setCityImage(null)} />
+            ) : (
+              <div className="city-thumbnail-fallback">🏙️</div>
+            )}
+            <div className="city-info">
+              {location.display_name ? (
+                <>
+                  <h2>{location.display_name.split(',')[0]}</h2>
+                  <p className="address-full">{location.display_name}</p>
+                  <p className="country-name">{location.country}</p>
+                </>
+              ) : (
+                <>
+                  <h2>{location.city} <span className="postal-code">({location.postal_code})</span></h2>
+                  <p className="country-name">{location.country}</p>
+                </>
+              )}
+              {location.latitude && location.longitude && (
+                <span className="local-time">🕐 {getLocalTime(location.latitude, location.longitude)}</span>
+              )}
+            </div>
+          </div>
           <div className="details">
             {location.department && <span className="detail-badge">📍 {location.department}</span>}
             {location.region && <span className="detail-badge">🗺️ {location.region}</span>}
