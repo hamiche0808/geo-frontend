@@ -144,63 +144,105 @@ const COUNTRIES = [
   { code: 'GB', name: 'Royaume-Uni', flag: '🇬🇧' },
 ];
 
-// ===== Fuseaux horaires IANA par code pays (pour l'heure locale réelle) =====
-const COUNTRY_TZ = {
-  'FR': 'Europe/Paris',
-  'BE': 'Europe/Brussels',
-  'DE': 'Europe/Berlin',
-  'IT': 'Europe/Rome',
-  'ES': 'Europe/Madrid',
-  'GB': 'Europe/London',
-  'PT': 'Europe/Lisbon',
-  'NL': 'Europe/Amsterdam',
-  'LU': 'Europe/Luxembourg',
-  'CH': 'Europe/Zurich',
-  'AT': 'Europe/Vienna',
-  'DK': 'Europe/Copenhagen',
-  'SE': 'Europe/Stockholm',
-  'NO': 'Europe/Oslo',
-  'FI': 'Europe/Helsinki',
-  'PL': 'Europe/Warsaw',
-  'CZ': 'Europe/Prague',
-  'SK': 'Europe/Bratislava',
-  'HU': 'Europe/Budapest',
-  'RO': 'Europe/Bucharest',
-  'BG': 'Europe/Sofia',
-  'GR': 'Europe/Athens',
-  'HR': 'Europe/Zagreb',
-  'RS': 'Europe/Belgrade',
-  'IE': 'Europe/Dublin',
-  'IS': 'Atlantic/Reykjavik',
-  'TR': 'Europe/Istanbul',
-  'RU': 'Europe/Moscow',
-  'US': 'America/New_York',
-  'CA': 'America/Toronto',
-  'MX': 'America/Mexico_City',
-  'BR': 'America/Sao_Paulo',
-  'AR': 'America/Argentina/Buenos_Aires',
-  'AU': 'Australia/Sydney',
-  'NZ': 'Pacific/Auckland',
-  'JP': 'Asia/Tokyo',
-  'CN': 'Asia/Shanghai',
-  'IN': 'Asia/Kolkata',
-  'KR': 'Asia/Seoul',
-  'SG': 'Asia/Singapore',
-  'HK': 'Asia/Hong_Kong',
-  'TW': 'Asia/Taipei',
-  'TH': 'Asia/Bangkok',
-  'VN': 'Asia/Ho_Chi_Minh',
-  'MY': 'Asia/Kuala_Lumpur',
-  'PH': 'Asia/Manila',
-  'ID': 'Asia/Jakarta',
-  'MA': 'Africa/Casablanca',
-  'DZ': 'Africa/Algiers',
-  'TN': 'Africa/Tunis',
-  'ZA': 'Africa/Johannesburg',
-  'EG': 'Africa/Cairo',
-  'KE': 'Africa/Nairobi',
-  'NG': 'Africa/Lagos',
-};
+// ===== Fuseaux horaires IANA — fonction intelligente (pays × longitude) =====
+// Pour les pays à fuseau unique, mapping direct.
+// Pour les grands pays (US, CA, RU, AU, BR, MX, ID), on utilise la longitude.
+function getTimezoneForLocation(countryCode, longitude) {
+  // Pays à fuseau unique
+  const SIMPLE = {
+    'FR': 'Europe/Paris',       'BE': 'Europe/Brussels',
+    'DE': 'Europe/Berlin',      'IT': 'Europe/Rome',
+    'ES': 'Europe/Madrid',      'GB': 'Europe/London',
+    'PT': 'Europe/Lisbon',      'NL': 'Europe/Amsterdam',
+    'LU': 'Europe/Luxembourg',  'CH': 'Europe/Zurich',
+    'AT': 'Europe/Vienna',      'DK': 'Europe/Copenhagen',
+    'SE': 'Europe/Stockholm',   'NO': 'Europe/Oslo',
+    'FI': 'Europe/Helsinki',    'PL': 'Europe/Warsaw',
+    'CZ': 'Europe/Prague',      'SK': 'Europe/Bratislava',
+    'HU': 'Europe/Budapest',    'RO': 'Europe/Bucharest',
+    'BG': 'Europe/Sofia',       'GR': 'Europe/Athens',
+    'HR': 'Europe/Zagreb',      'RS': 'Europe/Belgrade',
+    'IE': 'Europe/Dublin',      'IS': 'Atlantic/Reykjavik',
+    'TR': 'Europe/Istanbul',    'AR': 'America/Argentina/Buenos_Aires',
+    'NZ': 'Pacific/Auckland',   'JP': 'Asia/Tokyo',
+    'CN': 'Asia/Shanghai',      'IN': 'Asia/Kolkata',
+    'KR': 'Asia/Seoul',         'SG': 'Asia/Singapore',
+    'HK': 'Asia/Hong_Kong',     'TW': 'Asia/Taipei',
+    'TH': 'Asia/Bangkok',       'VN': 'Asia/Ho_Chi_Minh',
+    'MY': 'Asia/Kuala_Lumpur',  'PH': 'Asia/Manila',
+    'MA': 'Africa/Casablanca',  'DZ': 'Africa/Algiers',
+    'TN': 'Africa/Tunis',       'ZA': 'Africa/Johannesburg',
+    'EG': 'Africa/Cairo',       'KE': 'Africa/Nairobi',
+    'NG': 'Africa/Lagos',
+  };
+  if (SIMPLE[countryCode]) return SIMPLE[countryCode];
+
+  // Pays multi‑timezone : sélection par longitude
+  const lon = longitude != null ? Number(longitude) : NaN;
+
+  if (countryCode === 'US') {
+    if (lon < -140)          return 'Pacific/Honolulu';     // Hawaii
+    if (lon < -125)          return 'America/Anchorage';    // Alaska
+    if (lon < -112.5)        return 'America/Los_Angeles';  // Pacific
+    if (lon < -97.5)         return 'America/Denver';       // Mountain
+    if (lon < -82.5)         return 'America/Chicago';      // Central
+    return 'America/New_York';                               // Eastern
+  }
+  if (countryCode === 'CA') {
+    if (lon < -120)          return 'America/Vancouver';    // Pacific
+    if (lon < -105)          return 'America/Edmonton';     // Mountain
+    if (lon < -90)           return 'America/Winnipeg';     // Central
+    if (lon < -75)           return 'America/Toronto';      // Eastern
+    return 'America/Halifax';                                // Atlantic
+  }
+  if (countryCode === 'RU') {
+    if (lon < 25)            return 'Europe/Kaliningrad';
+    if (lon < 40)            return 'Europe/Moscow';
+    if (lon < 55)            return 'Europe/Samara';
+    if (lon < 70)            return 'Asia/Yekaterinburg';
+    if (lon < 85)            return 'Asia/Omsk';
+    if (lon < 100)           return 'Asia/Krasnoyarsk';
+    if (lon < 115)           return 'Asia/Irkutsk';
+    if (lon < 130)           return 'Asia/Yakutsk';
+    if (lon < 145)           return 'Asia/Vladivostok';
+    if (lon < 160)           return 'Asia/Magadan';
+    return 'Asia/Kamchatka';
+  }
+  if (countryCode === 'AU') {
+    if (lon < 130)           return 'Australia/Perth';      // Western
+    if (lon < 135)           return 'Australia/Darwin';     // NT
+    if (lon < 140)           return 'Australia/Adelaide';   // South
+    if (lon < 150)           return 'Australia/Sydney';     // NSW/ACT/Vic/Tas
+    return 'Australia/Brisbane';                             // Queensland
+  }
+  if (countryCode === 'BR') {
+    if (lon < -60)           return 'America/Rio_Branco';   // -5h
+    if (lon < -45)           return 'America/Manaus';       // -4h
+    return 'America/Sao_Paulo';                              // -3h
+  }
+  if (countryCode === 'MX') {
+    if (lon < -105)          return 'America/Tijuana';      // Pacific
+    if (lon < -95)           return 'America/Chihuahua';    // Mountain
+    return 'America/Mexico_City';                            // Central
+  }
+  if (countryCode === 'ID') {
+    if (lon < 120)           return 'Asia/Jakarta';         // WIB  (UTC+7)
+    if (lon < 135)           return 'Asia/Makassar';        // WITA (UTC+8)
+    return 'Asia/Jayapura';                                  // WIT  (UTC+9)
+  }
+
+  // Fallback solar time (approximation longitude → offset UTC)
+  if (!isNaN(lon)) {
+    const offsetHours = lon / 15;
+    const sign = offsetHours >= 0 ? '+' : '-';
+    const absH = Math.floor(Math.abs(offsetHours));
+    const absM = Math.abs(Math.round((Math.abs(offsetHours) - absH) * 60));
+    const pad = (n) => String(n).padStart(2, '0');
+    return `UTC${sign}${pad(absH)}:${pad(absM)}`;
+  }
+
+  return 'Europe/Paris'; // dernier recours
+}
 
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -608,9 +650,9 @@ function App() {
 
   // ===== Heure locale (temps réel, rafraîchie toutes les 30s) =====
   const [localTimeStr, setLocalTimeStr] = useState('');
-  const getLocalTime = (countryCode) => {
+  const getLocalTime = (countryCode, longitude) => {
     try {
-      const tz = COUNTRY_TZ[countryCode] || 'Europe/Paris';
+      const tz = getTimezoneForLocation(countryCode, longitude);
       return new Intl.DateTimeFormat('fr-FR', {
         timeZone: tz,
         hour: '2-digit',
@@ -622,11 +664,11 @@ function App() {
   // Mise à jour dynamique toutes les 30 secondes
   useEffect(() => {
     if (!location?.country_code) { setLocalTimeStr(''); return; }
-    const update = () => setLocalTimeStr(getLocalTime(location.country_code));
+    const update = () => setLocalTimeStr(getLocalTime(location.country_code, location.longitude));
     update();
     const id = setInterval(update, 30000);
     return () => clearInterval(id);
-  }, [location?.country_code]);
+  }, [location?.country_code, location?.longitude]);
 
   // ===== Mode Recherche =====
   const handleSearch = async (query) => {
