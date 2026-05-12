@@ -10,7 +10,7 @@ import ActivitiesWidget from './ActivitiesWidget';
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
-    'User-Agent': 'GeoLocApp/4.4 (hamiche08.08@gmail.com)',
+    'User-Agent': 'GeoLocApp/4.5 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
     'X-API-Key': 'geoloc-app-key-2026',
   },
@@ -1812,7 +1812,7 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-links">
-          <span className="footer-brand">🌍 GeoLoc v4.4</span>
+          <span className="footer-brand">🌍 GeoLoc v4.5</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
