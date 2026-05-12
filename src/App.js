@@ -202,64 +202,32 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
     if (onChange) onChange(v);
     // Reset erreur dès qu'on tape
     // Min 3 caractères
-    if (v.trim().length >= 3) {
-      setSearching(true);
-      if (debounce.current) clearTimeout(debounce.current);
-      debounce.current = setTimeout(async () => {
-        try {
-          // Appeler les endpoints en parallèle : villes + adresses + (France → API gouvernementale)
-          const promises = [
-            cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => []),
-            cachedGet(`${API}/api/geocode`, { q: v, country, limit: 10 }).catch(() => [])
-          ];
-          // Pour la France, ajouter l'API gouvernementale (meilleure qualité)
-          const isFrance = country === 'FR';
-          if (isFrance) {
-            promises.push(
-              cachedGet(`${API}/api/geocode-fr`, { q: v, limit: 10 }).catch(() => [])
-            );
-          }
-          const results = await Promise.all(promises);
-          const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
-          const addrResp = Array.isArray(results[1]) ? results[1] : (results[1]?.data || []);
-          const gouvResp = isFrance ? (Array.isArray(results[2]) ? results[2] : (results[2]?.data || [])) : null;
-
-          const cities = (cityResp || []).map(c => ({ ...c, _type: 'city' }));
-          const addresses = (addrResp || []).map(a => ({ ...a, _type: 'address' }));
-          // Normaliser les résultats de l'API gouvernementale française
-          let gouvAddresses = [];
-          if (gouvResp && gouvResp.length > 0) {
-            gouvAddresses = gouvResp.map(a => ({
-              ...a,
-              _type: 'address',
-              _source: 'gouv',
-              display_name: a.label,
-              short_address: a.address || a.label,
-              postal_code: a.postcode,
-              country_code: 'FR',
-              country: 'France',
-              street: a.street || a.address,
-              house_number: a.housenumber,
-              department: (a.context && a.context.split(',')[1] ? a.context.split(',')[1].trim() : ''),
-              region: (a.context && a.context.split(',')[2] ? a.context.split(',')[2].trim() : '')
-            }));
-          }
-          // Fusion : adresses françaises (gouvernement) en premier, puis Nominatim, puis villes
-          const merged = [...gouvAddresses, ...addresses, ...cities].slice(0, 15);
-          setSuggestions(merged);
-          setShow(merged.length > 0);
-        } catch { setSuggestions([]); }
-        setSearching(false);
-      }, 800);
+      if (v.trim().length >= 3) {
+        setSearching(true);
+        if (debounce.current) clearTimeout(debounce.current);
+        debounce.current = setTimeout(async () => {
+          try {
+            // Uniquement les villes/localités (pas d'adresses/rues)
+            const promises = [
+              cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => [])
+            ];
+            const results = await Promise.all(promises);
+            const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
+            const filtered = (cityResp || []).filter(c => c.city).slice(0, 15);
+            setSuggestions(filtered);
+            setShow(filtered.length > 0);
+          } catch { setSuggestions([]); }
+          setSearching(false);
+        }, 800);
     } else { setSuggestions([]); setShow(false); setSearching(false); }
   };
 
-  // Formater l'affichage d'une suggestion avec population
+  // Formater l'affichage d'une suggestion avec code postal et pays
   const formatSuggestion = (s) => {
-    const name = s._type === 'address' ? (s.short_address || s.display_name?.split(',')[0]) : s.city;
-    const code = s._type === 'address' ? `${s.city || ''} · ${s.postal_code || ''}` : s.postal_code;
-    const pop = s.population ? ` - ${s.population.toLocaleString()} hab.` : '';
-    return { name, code, pop };
+    const name = s.city || s.display_name?.split(',')[0] || '';
+    const code = s.postal_code ? `(${s.postal_code})` : '';
+    const countryName = s.country || s.country_code || '';
+    return { name, code, countryName };
   };
 
   return (
@@ -279,23 +247,19 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
       {show && suggestions.length > 0 && (
         <ul className="suggestions">
           {suggestions.map((s, idx) => {
-            const { name, code, pop } = formatSuggestion(s);
+            const { name, code, countryName } = formatSuggestion(s);
             return (
               <li key={idx} onMouseDown={() => {
-                setInput(s._type === 'address' ? (s.short_address || s.display_name) : s.city);
+                setInput(s.city);
                 setShow(false);
                 onSelect(s);
               }}>
                 <span className="suggestion-city">
-                  {s._type === 'address' ? '📍 ' : '🏙️ '}
-                  {name}
+                  🏙️ {name}
                 </span>
                 <span className="suggestion-code">
-                  {code}{pop}
+                  {code} {countryName}
                 </span>
-                {s._type === 'address' && s.street && (
-                  <span className="suggestion-street">{s.display_name?.split(',')[0]}</span>
-                )}
               </li>
             );
           })}
@@ -567,47 +531,16 @@ function App() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
         try {
-          // Appeler les endpoints en parallèle : villes + adresses + (France → API gouvernementale)
+          // Uniquement les villes/localités (pas d'adresses/rues)
           const promises = [
-            cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => []),
-            cachedGet(`${API}/api/geocode`, { q: v, country, limit: 10 }).catch(() => [])
+            cachedGet(`${API}/api/search`, { q: v, country, limit: 10 }).catch(() => [])
           ];
-          // Pour la France, ajouter l'API gouvernementale (meilleure qualité)
-          const isFrance = country === 'FR';
-          if (isFrance) {
-            promises.push(
-              cachedGet(`${API}/api/geocode-fr`, { q: v, limit: 10 }).catch(() => [])
-            );
-          }
           const results = await Promise.all(promises);
           const cityResp = Array.isArray(results[0]) ? results[0] : (results[0]?.data || []);
-          const addrResp = Array.isArray(results[1]) ? results[1] : (results[1]?.data || []);
-          const gouvResp = isFrance ? (Array.isArray(results[2]) ? results[2] : (results[2]?.data || [])) : null;
 
-          const cities = (cityResp || []).map(c => ({ ...c, _type: 'city' }));
-          const addresses = (addrResp || []).map(a => ({ ...a, _type: 'address' }));
-          // Normaliser les résultats de l'API gouvernementale française
-          let gouvAddresses = [];
-          if (gouvResp && gouvResp.length > 0) {
-            gouvAddresses = gouvResp.map(a => ({
-              ...a,
-              _type: 'address',
-              _source: 'gouv',
-              display_name: a.label,
-              short_address: a.address || a.label,
-              postal_code: a.postcode,
-              country_code: 'FR',
-              country: 'France',
-              street: a.street || a.address,
-              house_number: a.housenumber,
-              department: (a.context && a.context.split(',')[1] ? a.context.split(',')[1].trim() : ''),
-              region: (a.context && a.context.split(',')[2] ? a.context.split(',')[2].trim() : '')
-            }));
-          }
-          // Fusion : adresses françaises (gouvernement) en premier, puis Nominatim, puis villes
-          const merged = [...gouvAddresses, ...addresses, ...cities].slice(0, 15);
-          setSuggestions(merged);
-          setShowSuggestions(merged.length > 0);
+          const cities = (cityResp || []).filter(c => c.city).slice(0, 15);
+          setSuggestions(cities);
+          setShowSuggestions(cities.length > 0);
         } catch { setSuggestions([]); }
         setSearchingDebounce(false);
       }, 800);
@@ -615,37 +548,10 @@ function App() {
   };
 
   const selectSuggestion = async (item) => {
-    setSearchInput(item.city || item.display_name?.split(',')[0] || '');
+    setSearchInput(item.city || '');
     setShowSuggestions(false);
     setLoading(true);
     setError(null);
-    
-    // Si c'est une adresse complète, utiliser directement les coordonnées
-    if (item._type === 'address') {
-      const addrLocation = {
-        city: item.city || item.display_name?.split(',')[0] || '',
-        postal_code: item.postal_code || '',
-        country: item.country || '',
-        country_code: item.country_code || 'FR',
-        latitude: item.latitude,
-        longitude: item.longitude,
-        department: item.department || '',
-        region: item.region || '',
-        population: item.population || 0,
-        display_name: item.display_name || ''
-      };
-      // Population INSEE (France) ou Statbel (Belgique)
-      const cc = addrLocation.country_code || '';
-      if ((cc === 'FR' || cc === 'BE' || addrLocation.country === 'France' || addrLocation.country === 'Belgium' || addrLocation.country === 'Belgique') && addrLocation.postal_code) {
-        fetchPopulation(addrLocation.postal_code, addrLocation.city, cc).then(pop => {
-          if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
-        });
-      }
-      setLocation(addrLocation);
-      fetchWeather(item.latitude, item.longitude);
-      setLoading(false);
-      return;
-    }
     
     try {
       const data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country });
@@ -997,6 +903,11 @@ function App() {
       setContactForm({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => { setShowContact(false); setContactStatus(null); }, 2000);
     } catch (e) {
+      console.error('Contact error (full):', e);
+      if (e.response) {
+        console.error('Response status:', e.response.status);
+        console.error('Response data:', e.response.data);
+      }
       let detail = e.response?.data?.detail;
       // Si le détail est un objet/tableau, le formater lisiblement
       if (detail && typeof detail !== 'string') {
@@ -1217,15 +1128,15 @@ function App() {
                 {showSuggestions && suggestions.length > 0 && (
                   <ul className="suggestions">
                     {suggestions.map((s, idx) => {
-                      const pop = s.population ? ` - ${s.population.toLocaleString()} hab.` : '';
+                      const code = s.postal_code ? `(${s.postal_code})` : '';
+                      const countryName = s.country || s.country_code || '';
                       return (
                         <li key={idx} onMouseDown={() => selectSuggestion(s)}>
                           <span className="suggestion-city">
-                            {s._type === 'address' ? '📍 ' : '🏙️ '}
-                            {s._type === 'address' ? (s.short_address || s.display_name?.split(',')[0]) : s.city}
+                            🏙️ {s.city}
                           </span>
                           <span className="suggestion-code">
-                            {s._type === 'address' ? `${s.city || ''} · ${s.postal_code || ''}` : s.postal_code}{pop}
+                            {code} {countryName}
                           </span>
                         </li>
                       );
