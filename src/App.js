@@ -10,7 +10,7 @@ import ActivitiesWidget from './ActivitiesWidget';
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
-    'User-Agent': 'GeoLocApp/4.6 (hamiche08.08@gmail.com)',
+    'User-Agent': 'GeoLocApp/4.7 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
     'X-API-Key': 'geoloc-app-key-2026',
   },
@@ -121,7 +121,13 @@ const MAP_TILES = {
 async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
   try {
     if (!postalCode && !cityName) return null;
-    const endpoint = countryCode === 'BE' ? 'population-be' : 'population-fr';
+    const endpointMap = {
+      'FR': 'population-fr',
+      'BE': 'population-be',
+      'US': 'population-us',
+      'CA': 'population-ca'
+    };
+    const endpoint = endpointMap[countryCode] || 'population-fr';
     const params = { postal_code: postalCode, city_name: cityName };
     const data = await cachedGet(`${API}/api/${endpoint}`, params);
     if (data && Array.isArray(data) && data.length > 0) {
@@ -137,6 +143,7 @@ async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
 const COUNTRIES = [
   { code: 'FR', name: 'France', flag: '🇫🇷' },
   { code: 'BE', name: 'Belgique', flag: '🇧🇪' },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦' },
   { code: 'DE', name: 'Allemagne', flag: '🇩🇪' },
   { code: 'IT', name: 'Italie', flag: '🇮🇹' },
   { code: 'ES', name: 'Espagne', flag: '🇪🇸' },
@@ -730,10 +737,30 @@ function App() {
     
     try {
       setLoadingMessage('🌍 Analyse...');
-      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country, city: item.city });
+      let data;
+      if (item.postal_code) {
+        // Recherche par code postal : appeler l'API détails
+        data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country, city: item.city });
+      } else {
+        // Pas de code postal (ex: Toronto) : utiliser les données de la suggestion directement
+        data = {
+          city: item.city,
+          postal_code: '',
+          country: item.country || '',
+          country_code: item.country_code || country,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          department: item.department || '',
+          region: item.region || '',
+          population: 0,
+          display_name: item.display_name || ''
+        };
+      }
       // Population INSEE (France) ou Statbel (Belgique)
       const cc2 = data.country_code || '';
-      if ((cc2 === 'FR' || cc2 === 'BE' || data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique') && data.postal_code) {
+      if (cc2 === 'FR' || cc2 === 'BE' || cc2 === 'US' || cc2 === 'CA' || 
+          data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique' ||
+          data.country === 'United States' || data.country === 'Canada') {
         setLoadingMessage('👥 Population...');
         fetchPopulation(data.postal_code, data.city, cc2).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
@@ -772,7 +799,9 @@ function App() {
       };
       // Population INSEE (France) ou Statbel (Belgique)
       const cc3 = addrData.country_code || '';
-      if ((cc3 === 'FR' || cc3 === 'BE' || addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique') && addrData.postal_code) {
+      if (cc3 === 'FR' || cc3 === 'BE' || cc3 === 'US' || cc3 === 'CA' ||
+          addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique' ||
+          addrData.country === 'United States' || addrData.country === 'Canada') {
         fetchPopulation(addrData.postal_code, addrData.city, cc3).then(pop => {
           if (pop != null) {
             const updated = { ...addrData, population: pop };
@@ -788,10 +817,29 @@ function App() {
     
     // Sinon, ville normale : chercher les détails via l'API
     try {
-      const locResp = await cachedGet(`${API}/api/location/${encodeURIComponent(data.postal_code)}`, { country: data.country_code || countryForLookup, city: data.city });
+      let locResp;
+      if (data.postal_code) {
+        locResp = await cachedGet(`${API}/api/location/${encodeURIComponent(data.postal_code)}`, { country: data.country_code || countryForLookup, city: data.city });
+      } else {
+        // Pas de code postal (ex: Toronto) : utiliser les données de la suggestion directement
+        locResp = {
+          city: data.city,
+          postal_code: '',
+          country: data.country || countryForLookup,
+          country_code: data.country_code || countryForLookup,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          department: data.department || '',
+          region: data.region || '',
+          population: data.population || 0,
+          display_name: data.display_name || ''
+        };
+      }
       // Population INSEE (France) ou Statbel (Belgique)
       const cc4 = locResp.country_code || '';
-      if ((cc4 === 'FR' || cc4 === 'BE' || locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique') && locResp.postal_code) {
+      if (cc4 === 'FR' || cc4 === 'BE' || cc4 === 'US' || cc4 === 'CA' ||
+          locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique' ||
+          locResp.country === 'United States' || locResp.country === 'Canada') {
         fetchPopulation(locResp.postal_code, locResp.city, cc4).then(pop => {
           if (pop != null) {
             const updated = { ...locResp, population: pop };
@@ -811,9 +859,10 @@ function App() {
         country_code: data.country_code || countryForLookup,
         latitude: data.latitude,
         longitude: data.longitude,
-        department: '',
-        region: '',
-        population: data.population || 0
+        department: data.department || '',
+        region: data.region || '',
+        population: data.population || 0,
+        display_name: data.display_name || ''
       };
       if (side === 'A') setCityA(fallback);
       else setCityB(fallback);
@@ -875,16 +924,36 @@ function App() {
     }
     
     try {
-      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry, city: cityData.city });
+      let data;
+      if (cityData.postal_code) {
+        data = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry, city: cityData.city });
+      } else {
+        data = {
+          city: cityData.city,
+          postal_code: '',
+          country: cityData.country || lookupCountry,
+          country_code: cityData.country_code || lookupCountry,
+          latitude: cityData.latitude,
+          longitude: cityData.longitude,
+          department: cityData.department || '',
+          region: cityData.region || '',
+          population: 0,
+          display_name: cityData.display_name || ''
+        };
+      }
       newWp[idx] = data;
     } catch {
       newWp[idx] = {
         city: cityData.city,
-        postal_code: cityData.postal_code,
+        postal_code: cityData.postal_code || '',
         country: cityData.country || lookupCountry,
         country_code: cityData.country_code || lookupCountry,
         latitude: cityData.latitude,
         longitude: cityData.longitude,
+        department: cityData.department || '',
+        region: cityData.region || '',
+        population: 0,
+        display_name: cityData.display_name || ''
       };
     }
     newWpC[idx] = lookupCountry;
@@ -1599,7 +1668,7 @@ function App() {
                 </>
               ) : (
                 <>
-                  <h2>{location.city} <span className="postal-code">({location.postal_code})</span></h2>
+                  <h2>{location.city} {location.postal_code ? <span className="postal-code">({location.postal_code})</span> : ''}</h2>
                   <p className="country-name">{location.country}</p>
                 </>
               )}
@@ -1611,7 +1680,7 @@ function App() {
           <div className="details">
             {location.department && <span className="detail-badge">📍 {location.department}</span>}
             {location.region && <span className="detail-badge">🗺️ {location.region}</span>}
-            {location.population > 0 && <span className="detail-badge">👥 {location.population.toLocaleString()} hab.</span>}
+            {location.population > 0 && <div className="population-badge"><span className="pop-icon">👤</span><span className="pop-label">Population :</span><span className="pop-value">{location.population.toLocaleString('fr-FR')}</span><span className="pop-unit">habitants</span></div>}
             {location.is_address && <span className="detail-badge address-badge">📍 Adresse précise</span>}
           </div>
           {weather && weather.current && !weather.error && (
@@ -1665,9 +1734,14 @@ function App() {
           <span>⭐ </span>
           {favorites.slice(0, 5).map((f, idx) => (
             <button key={idx} className="fav-chip" onClick={async () => {
-              setSearchInput(f.postal_code);
+              setSearchInput(f.postal_code || f.city || '');
               try {
-                const data = await cachedGet(`${API}/api/location/${encodeURIComponent(f.postal_code)}`, { country: f.country_code || country });
+                let data;
+                if (f.postal_code) {
+                  data = await cachedGet(`${API}/api/location/${encodeURIComponent(f.postal_code)}`, { country: f.country_code || country });
+                } else {
+                  data = f;
+                }
                 setLocation(data);
               } catch { setLocation(f); }
               setMode('search');
@@ -1686,16 +1760,21 @@ function App() {
               const idx = e.target.value;
               if (idx === '') return;
               const h = history[idx];
-              setSearchInput(h.postal_code);
+              setSearchInput(h.postal_code || h.city || '');
               try {
-                const data = await cachedGet(`${API}/api/location/${encodeURIComponent(h.postal_code)}`, { country: h.country_code || country });
+                let data;
+                if (h.postal_code) {
+                  data = await cachedGet(`${API}/api/location/${encodeURIComponent(h.postal_code)}`, { country: h.country_code || country });
+                } else {
+                  data = h;
+                }
                 setLocation(data);
               } catch { setLocation(h); }
               e.target.value = '';
             }}>
             <option value="">📋 Historique des recherches</option>
             {history.slice(0, 5).map((h, idx) => (
-              <option key={idx} value={idx}>{h.city} ({h.postal_code}) - {h.country_code}</option>
+              <option key={idx} value={idx}>{h.city}{h.postal_code ? ` (${h.postal_code})` : ''} - {h.country_code}</option>
             ))}
           </select>
         </div>
@@ -1759,7 +1838,7 @@ function App() {
             {mode === 'search' && location && (
               <Marker position={[location.latitude, location.longitude]} icon={getFlagIcon(location.country_code)}>
                 <Popup>
-                  <b>{location.city}</b><br />{location.postal_code}<br />{location.country}
+                  <b>{location.city}</b><br />{location.postal_code ? <>{location.postal_code}<br /></> : ''}{location.country}
                 </Popup>
               </Marker>
             )}
@@ -1812,7 +1891,7 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-links">
-          <span className="footer-brand">🌍 GeoLoc v4.6</span>
+          <span className="footer-brand">🌍 GeoLoc v4.7</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>

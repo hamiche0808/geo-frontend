@@ -1429,6 +1429,45 @@ body.dark-mode .btn-qr { background: transparent; }
   color: white !important;
 }
 
+/* ===== Badge Population stylisé ===== */
+.population-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 100%);
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #d0d8f0;
+  font-size: 0.92em;
+}
+.population-badge .pop-icon {
+  font-size: 1.1em;
+  opacity: 0.8;
+}
+.population-badge .pop-label {
+  color: #5a6d8a;
+  font-weight: 500;
+  font-size: 0.88em;
+}
+.population-badge .pop-value {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 1.05em;
+  letter-spacing: 0.3px;
+}
+.population-badge .pop-unit {
+  color: #7f8c9b;
+  font-size: 0.82em;
+  font-weight: 400;
+}
+body.dark-mode .population-badge {
+  background: linear-gradient(135deg, #1a2744 0%, #1f2a4a 100%);
+  border-color: #2a3a5a;
+}
+body.dark-mode .population-badge .pop-label { color: #8fa8c8; }
+body.dark-mode .population-badge .pop-value { color: #e0e8f0; }
+body.dark-mode .population-badge .pop-unit { color: #7a8a9a; }
+
 .suggestion-street {
   display: block;
   font-size: 0.75em;
