@@ -440,6 +440,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [cityImage, setCityImage] = useState(null); // URL de la miniature ville
+  const [fallbackImgError, setFallbackImgError] = useState(false); // Erreur chargement image fallback
   const [modeProfile, setModeProfile] = useState('driving'); // driving | cycling | walking
   const [favorites, setFavorites] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
@@ -665,7 +666,8 @@ function App() {
 
   // ===== Miniature ville (Wikipedia) =====
   useEffect(() => {
-    if (!location?.city) { setCityImage(null); return; }
+    if (!location?.city) { setCityImage(null); setFallbackImgError(false); return; }
+    setFallbackImgError(false);
     const city = location.city;
     const country = location.country || 'France';
     // Essayer Wikipedia en français puis en anglais
@@ -1379,7 +1381,7 @@ function App() {
 
         {/* Onglets */}
         <div className="tabs">
-          <button className={`tab ${mode === 'search' ? 'active' : ''}`} onClick={() => { setMode('search'); setError(''); }}>🔍 Recherche</button>
+          <button className={`tab ${mode === 'search' ? 'active' : ''}`} onClick={() => { setMode('search'); setError(''); setLocation(null); setSearchInput(''); setWeather(null); setCityImage(null); setFallbackImgError(false); }}>🏠 {lang === 'fr' ? 'Accueil' : 'Home'}</button>
           <button className={`tab ${mode === 'distance' ? 'active' : ''}`} onClick={() => { setMode('distance'); setError(''); }}>🗺️ Itinéraire</button>
           <button className="tab tab-dark" onClick={() => setDarkMode(!darkMode)} title="Mode sombre">
             {darkMode ? '☀️' : '🌙'}
@@ -1691,9 +1693,15 @@ function App() {
         <div className="result-info">
           <div className="city-header">
             {cityImage ? (
-              <img src={cityImage} alt={location.city} className="city-thumbnail" onError={() => setCityImage(null)} />
-            ) : (
+              <a href={`https://${lang}.wikipedia.org/wiki/${encodeURIComponent(location.city)}`} target="_blank" rel="noopener noreferrer" className="city-thumbnail-link" title={lang === 'fr' ? 'Voir sur Wikipédia' : 'View on Wikipedia'}>
+                <img src={cityImage} alt={location.city} className="city-thumbnail" loading="lazy" onError={() => setCityImage(null)} />
+              </a>
+            ) : fallbackImgError ? (
               <div className="city-thumbnail-fallback">🏙️</div>
+            ) : (
+              <div className="city-thumbnail-fallback">
+                <img src={`https://source.unsplash.com/featured/80x80/?${encodeURIComponent(location.country || 'landscape')},landscape`} alt={location.country || ''} className="city-thumbnail-fallback-img" loading="lazy" onError={() => setFallbackImgError(true)} />
+              </div>
             )}
             <div className="city-info">
               {location.display_name ? (
