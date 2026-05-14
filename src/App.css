@@ -840,6 +840,110 @@ body.dark-mode .tab-dark { background: rgba(255, 255, 255, 0.15); }
 .weather-detail { color: var(--text-secondary); font-size: 0.85em; margin-left: 4px; }
 .weather-detail-sub { font-size: 0.75em; opacity: 0.7; margin-left: 2px; white-space: nowrap; }
 
+/* ===== Animations météo CSS (GPU accéléré, 0 JS) ===== */
+.weather-widget {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Soleil : pulsation douce ---- */
+.weather-anim-sunny .weather-icon {
+  display: inline-block;
+  animation: sun-pulse 4s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.15) rotate(15deg); }
+}
+
+/* ---- Nuageux : dérive horizontale ---- */
+.weather-anim-cloudy .weather-icon {
+  display: inline-block;
+  animation: cloud-drift 6s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes cloud-drift {
+  0%, 100% { transform: translateX(-5px); }
+  50%      { transform: translateX(5px); }
+}
+
+/* ---- Pluie : lignes fines animées avec ::after ---- */
+.weather-anim-rainy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    transparent, transparent 6px,
+    rgba(150, 180, 255, 0.25) 6px, rgba(150, 180, 255, 0.25) 7px
+  );
+  animation: rain-fall 0.4s linear infinite;
+  will-change: transform;
+  border-radius: inherit;
+}
+@keyframes rain-fall {
+  from { transform: translateY(-10px); }
+  to   { transform: translateY(10px); }
+}
+
+/* ---- Neige : flocons plus lents et espacés ---- */
+.weather-anim-snowy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    transparent, transparent 10px,
+    rgba(255, 255, 255, 0.45) 10px, rgba(255, 255, 255, 0.45) 12px
+  );
+  animation: snow-fall 2s linear infinite;
+  will-change: transform;
+  border-radius: inherit;
+}
+@keyframes snow-fall {
+  from { transform: translateY(-15px) rotate(0deg); }
+  to   { transform: translateY(15px) rotate(10deg); }
+}
+
+/* ---- Brouillard : variation d'opacité ---- */
+.weather-anim-foggy .weather-icon {
+  display: inline-block;
+  animation: fog-pulse 5s ease-in-out infinite;
+  will-change: opacity;
+}
+@keyframes fog-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.05); }
+}
+
+/* ---- Orage : flash lumineux bref ---- */
+.weather-anim-stormy .weather-icon {
+  display: inline-block;
+  animation: storm-flash 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes storm-flash {
+  0%, 94%, 100% { transform: scale(1); opacity: 1; }
+  95%           { transform: scale(1.2); opacity: 0.3; }
+  97%           { transform: scale(1); opacity: 1; }
+}
+
+/* Désactiver les animations si l'utilisateur préfère les réduire */
+@media (prefers-reduced-motion: reduce) {
+  .weather-anim-sunny .weather-icon,
+  .weather-anim-cloudy .weather-icon,
+  .weather-anim-foggy .weather-icon,
+  .weather-anim-stormy .weather-icon {
+    animation: none !important;
+  }
+  .weather-anim-rainy::after,
+  .weather-anim-snowy::after {
+    animation: none !important;
+    display: none !important;
+  }
+}
+
 /* Prévisions 3 jours */
 .forecast-bar {
   display: flex;
