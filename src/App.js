@@ -117,7 +117,7 @@ const MAP_TILES = {
   }
 };
 
-// Récupérer la population d'une commune (France → INSEE, Belgique → Statbel)
+// Récupérer la population d'une commune (France → INSEE, Belgique → Statbel, US → Census)
 async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
   try {
     if (!postalCode && !cityName) return null;
@@ -130,11 +130,20 @@ async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
     const endpoint = endpointMap[countryCode] || 'population-fr';
     const params = { postal_code: postalCode, city_name: cityName };
     const data = await cachedGet(`${API}/api/${endpoint}`, params);
-    if (data && Array.isArray(data) && data.length > 0) {
-      return data[0].population;
+    
+    // Réponse sous forme de tableau : [{ population: XXX }]
+    if (Array.isArray(data) && data.length > 0) {
+      const pop = data[0].population;
+      if (pop != null) return pop;
     }
-    if (data && data.length > 0) {
-      return data[0].population;
+    // Réponse sous forme d'objet direct : { population: XXX }
+    if (data && data.population != null) {
+      return data.population;
+    }
+    // Réponse avec une clé 'data' contenant le tableau
+    if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+      const pop = data.data[0].population;
+      if (pop != null) return pop;
     }
   } catch { /* ignore */ }
   return null;
@@ -586,16 +595,43 @@ function App() {
     localStorage.setItem('geoHistory', JSON.stringify(newHistory));
   };
 
-  // ===== Météo via Open-Meteo (actuelle + 3 jours) =====
+  // ===== Météo via Open-Meteo (actuelle + 3 jours) avec UV + Qualité de l'air =====
   const fetchWeather = async (lat, lon) => {
     try {
-      const data = await cachedGet(`${API}/api/weather`, { lat, lon });
+      // Demander l'indice UV et la qualité de l'air au backend
+      const data = await cachedGet(`${API}/api/weather`, { lat, lon, include: 'uv_index,aqi' });
       if (data && !data.error) {
         setWeather(data);
+        // Si le backend ne renvoie pas les données AQI, les récupérer directement depuis Open-Meteo (gratuit)
+        if (data && data.current && data.current.european_aqi == null && data.current.us_aqi == null) {
+          fetchAirQuality(lat, lon);
+        }
       } else {
         setWeather(null);
       }
     } catch { setWeather(null); }
+  };
+
+  // ===== Qualité de l'air via Open-Meteo (gratuit, sans clé) =====
+  const fetchAirQuality = async (lat, lon) => {
+    try {
+      const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,us_aqi`;
+      const resp = await fetch(url);
+      const aqiData = await resp.json();
+      if (aqiData && aqiData.current) {
+        setWeather(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            current: {
+              ...prev.current,
+              european_aqi: aqiData.current.european_aqi,
+              us_aqi: aqiData.current.us_aqi
+            }
+          };
+        });
+      }
+    } catch { /* La qualité de l'air est optionnelle */ }
   };
 
   // ===== Partage =====
@@ -1673,7 +1709,7 @@ function App() {
                 </>
               )}
               {location.latitude && location.longitude && localTimeStr && (
-                <span className="local-time">🕐 {localTimeStr}</span>
+                <span className="local-time">🕐 <span className="local-time-label">{lang === 'fr' ? 'Heure locale' : 'Local time'} :</span> {localTimeStr}</span>
               )}
             </div>
           </div>

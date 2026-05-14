@@ -102,6 +102,44 @@ export default function WeatherWidget({ weather, cityName, lang = 'fr' }) {
         {current.precipitation_probability != null && current.precipitation_probability > 0 && (
           <span className="weather-detail">🌧️ {current.precipitation_probability}%</span>
         )}
+        {current.uv_index != null && (
+          <span className="weather-detail">
+            ☀️ UV {current.uv_index}
+            <span className="weather-detail-sub">
+              {current.uv_index <= 2 ? (lang === 'fr' ? 'Faible' : 'Low') :
+               current.uv_index <= 5 ? (lang === 'fr' ? 'Modéré' : 'Moderate') :
+               current.uv_index <= 7 ? (lang === 'fr' ? 'Élevé' : 'High') :
+               current.uv_index <= 10 ? (lang === 'fr' ? 'Très élevé' : 'Very High') :
+               (lang === 'fr' ? 'Extrême' : 'Extreme')}
+            </span>
+          </span>
+        )}
+        {current.european_aqi != null && (
+          <span className="weather-detail">
+            🌫️ {lang === 'fr' ? 'Indice qualité air' : 'Air Quality'} {current.european_aqi}
+            <span className="weather-detail-sub">
+              {current.european_aqi <= 20 ? (lang === 'fr' ? 'Excellent' : 'Great') :
+               current.european_aqi <= 40 ? (lang === 'fr' ? 'Bon' : 'Good') :
+               current.european_aqi <= 60 ? (lang === 'fr' ? 'Moyen' : 'Fair') :
+               current.european_aqi <= 80 ? (lang === 'fr' ? 'Dégradé' : 'Poor') :
+               current.european_aqi <= 100 ? (lang === 'fr' ? 'Mauvais' : 'Very Poor') :
+               (lang === 'fr' ? 'Très mauvais' : 'Extremely Poor')}
+            </span>
+          </span>
+        )}
+        {current.us_aqi != null && (
+          <span className="weather-detail">
+            🌫️ AQI {current.us_aqi}
+            <span className="weather-detail-sub">
+              {current.us_aqi <= 50 ? (lang === 'fr' ? 'Bon' : 'Good') :
+               current.us_aqi <= 100 ? (lang === 'fr' ? 'Modéré' : 'Moderate') :
+               current.us_aqi <= 150 ? (lang === 'fr' ? 'Malsain (sensibles)' : 'Unhealthy (Sensitive)') :
+               current.us_aqi <= 200 ? (lang === 'fr' ? 'Malsain' : 'Unhealthy') :
+               current.us_aqi <= 300 ? (lang === 'fr' ? 'Très malsain' : 'Very Unhealthy') :
+               (lang === 'fr' ? 'Dangereux' : 'Hazardous')}
+            </span>
+          </span>
+        )}
       </div>
 
       {/* Prévisions 4 jours */}
