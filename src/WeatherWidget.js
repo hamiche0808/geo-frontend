@@ -53,16 +53,8 @@ export function getSmartActivities(weatherCode) {
 // ===== Classe d'animation CSS selon le code WMO =====
 export function getWeatherAnimationClass(code) {
   if (code === 0 || code === 1) return 'weather-anim-sunny';
-  if (code === 2) return 'weather-anim-cloudy';
-  if (code === 3) return 'weather-anim-cloudy';
-  if (code >= 45 && code <= 48) return 'weather-anim-foggy';
-  if (code >= 51 && code <= 55) return 'weather-anim-rainy';
-  if (code >= 61 && code <= 65) return 'weather-anim-rainy';
-  if (code >= 71 && code <= 75) return 'weather-anim-snowy';
-  if (code >= 80 && code <= 82) return 'weather-anim-rainy';
-  if (code >= 85 && code <= 86) return 'weather-anim-snowy';
-  if (code >= 95) return 'weather-anim-stormy';
-  return '';
+  if (code === 2 || code === 3) return 'weather-anim-cloudy';
+  return ''; // Pas d'animation pour le mauvais temps
 }
 
 // ===== WMO codes description (affichage lisible) =====
