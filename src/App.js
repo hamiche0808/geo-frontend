@@ -10,7 +10,7 @@ import ActivitiesWidget from './ActivitiesWidget';
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
-    'User-Agent': 'GeoLocApp/4.7 (hamiche08.08@gmail.com)',
+    'User-Agent': 'GeoLocApp/4.9 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
     'X-API-Key': 'geoloc-app-key-2026',
   },
@@ -125,7 +125,9 @@ async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
       'FR': 'population-fr',
       'BE': 'population-be',
       'US': 'population-us',
-      'CA': 'population-ca'
+      'CA': 'population-ca',
+      'DZ': 'population-dz',
+      'MA': 'population-ma',
     };
     const endpoint = endpointMap[countryCode] || 'population-fr';
     const params = { postal_code: postalCode, city_name: cityName };
@@ -153,6 +155,8 @@ const COUNTRIES = [
   { code: 'FR', name: 'France', flag: '🇫🇷' },
   { code: 'BE', name: 'Belgique', flag: '🇧🇪' },
   { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+  { code: 'DZ', name: 'Algérie', flag: '🇩🇿' },
+  { code: 'MA', name: 'Maroc', flag: '🇲🇦' },
   { code: 'DE', name: 'Allemagne', flag: '🇩🇪' },
   { code: 'IT', name: 'Italie', flag: '🇮🇹' },
   { code: 'ES', name: 'Espagne', flag: '🇪🇸' },
@@ -797,8 +801,10 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc2 = data.country_code || '';
       if (cc2 === 'FR' || cc2 === 'BE' || cc2 === 'US' || cc2 === 'CA' || 
+          cc2 === 'DZ' || cc2 === 'MA' ||
           data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique' ||
-          data.country === 'United States' || data.country === 'Canada') {
+          data.country === 'United States' || data.country === 'Canada' ||
+          data.country === 'Algérie' || data.country === 'Maroc') {
         setLoadingMessage('👥 Population...');
         fetchPopulation(data.postal_code, data.city, cc2).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
@@ -838,8 +844,10 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc3 = addrData.country_code || '';
       if (cc3 === 'FR' || cc3 === 'BE' || cc3 === 'US' || cc3 === 'CA' ||
+          cc3 === 'DZ' || cc3 === 'MA' ||
           addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique' ||
-          addrData.country === 'United States' || addrData.country === 'Canada') {
+          addrData.country === 'United States' || addrData.country === 'Canada' ||
+          addrData.country === 'Algérie' || addrData.country === 'Maroc') {
         fetchPopulation(addrData.postal_code, addrData.city, cc3).then(pop => {
           if (pop != null) {
             const updated = { ...addrData, population: pop };
@@ -876,8 +884,10 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc4 = locResp.country_code || '';
       if (cc4 === 'FR' || cc4 === 'BE' || cc4 === 'US' || cc4 === 'CA' ||
+          cc4 === 'DZ' || cc4 === 'MA' ||
           locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique' ||
-          locResp.country === 'United States' || locResp.country === 'Canada') {
+          locResp.country === 'United States' || locResp.country === 'Canada' ||
+          locResp.country === 'Algérie' || locResp.country === 'Maroc') {
         fetchPopulation(locResp.postal_code, locResp.city, cc4).then(pop => {
           if (pop != null) {
             const updated = { ...locResp, population: pop };
@@ -1724,7 +1734,7 @@ function App() {
           <div className="details">
             {location.department && <span className="detail-badge">📍 {location.department}</span>}
             {location.region && <span className="detail-badge">🗺️ {location.region}</span>}
-            {location.population > 0 && <div className="population-badge"><span className="pop-icon">👤</span><span className="pop-label">Population :</span><span className="pop-value">{location.population.toLocaleString('fr-FR')}</span><span className="pop-unit">habitants</span></div>}
+            <div className="population-badge"><span className="pop-icon">👤</span><span className="pop-label">Population :</span>{location.population > 0 ? <><span className="pop-value">{location.population.toLocaleString('fr-FR')}</span><span className="pop-unit">habitants</span></> : <span className="pop-value pop-unknown">Non spécifiée</span>}</div>
             {location.is_address && <span className="detail-badge address-badge">📍 Adresse précise</span>}
           </div>
           {weather && weather.current && !weather.error && (
@@ -1749,6 +1759,21 @@ function App() {
           </div>
 
           <div className="actions">
+            <button className="btn-route-from-here" onClick={() => {
+              setMode('distance');
+              if (location) {
+                setCityA(location);
+                setCountryA(location.country_code || 'FR');
+              }
+              setError('');
+              // Focus sur le champ arrivée après un court délai (rendu React)
+              setTimeout(() => {
+                const arrivalInput = document.querySelector('.distance-multi .city-input-wrapper:last-child input');
+                if (arrivalInput) arrivalInput.focus();
+              }, 300);
+            }}>
+              🚗 Calculer un itinéraire à partir d'ici
+            </button>
             <button className="btn-share" onClick={shareApp}>📤 Partager</button>
             <button className="btn-qr" onClick={() => setShowQR(!showQR)}>
               📱 {showQR ? 'Masquer QR' : 'QR Code'}
@@ -1935,7 +1960,7 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-links">
-          <span className="footer-brand">🌍 GeoLoc v4.7</span>
+          <span className="footer-brand">🌍 GeoLoc v4.9</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>

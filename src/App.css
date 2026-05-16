@@ -972,15 +972,34 @@ body.dark-mode .forecast-day:hover {
 body.dark-mode .btn-share { background: transparent; }
 .btn-share:hover { background: #34a853; color: white; }
 
-.btn-fav {
-  padding: 8px 20px;
+.btn-route-from-here {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.85em;
   cursor: pointer;
-  font-size: 0.95em;
-  background: #f0f0f0;
-  color: #333;
-  transition: all 0.3s;
+  transition: all 0.2s;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+.btn-route-from-here:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+body.dark-mode .btn-route-from-here {
+  background: linear-gradient(135deg, #4a5ecf 0%, #5a3a8a 100%);
+}
+
+.btn-fav {
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 body.dark-mode .btn-fav { background: #2a2a4a; color: #e0e0e0; }
 .btn-fav:hover { background: #e0e0e0; }
@@ -1498,6 +1517,14 @@ body.dark-mode .btn-qr { background: transparent; }
   color: #7f8c9b;
   font-size: 0.82em;
   font-weight: 400;
+}
+.population-badge .pop-unknown {
+  color: #e67e22;
+  font-style: italic;
+  font-size: 0.9em;
+}
+body.dark-mode .population-badge .pop-unknown {
+  color: #f0b060;
 }
 body.dark-mode .population-badge {
   background: linear-gradient(135deg, #1a2744 0%, #1f2a4a 100%);
