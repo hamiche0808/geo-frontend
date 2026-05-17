@@ -128,6 +128,7 @@ async function fetchPopulation(postalCode, cityName, countryCode = 'FR') {
       'CA': 'population-ca',
       'DZ': 'population-dz',
       'MA': 'population-ma',
+      'TN': 'population-tn',
     };
     const endpoint = endpointMap[countryCode] || 'population-fr';
     const params = { postal_code: postalCode, city_name: cityName };
@@ -157,6 +158,7 @@ const COUNTRIES = [
   { code: 'CA', name: 'Canada', flag: '🇨🇦' },
   { code: 'DZ', name: 'Algérie', flag: '🇩🇿' },
   { code: 'MA', name: 'Maroc', flag: '🇲🇦' },
+  { code: 'TN', name: 'Tunisie', flag: '🇹🇳' },
   { code: 'DE', name: 'Allemagne', flag: '🇩🇪' },
   { code: 'IT', name: 'Italie', flag: '🇮🇹' },
   { code: 'ES', name: 'Espagne', flag: '🇪🇸' },
@@ -801,10 +803,10 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc2 = data.country_code || '';
       if (cc2 === 'FR' || cc2 === 'BE' || cc2 === 'US' || cc2 === 'CA' || 
-          cc2 === 'DZ' || cc2 === 'MA' ||
+          cc2 === 'DZ' || cc2 === 'MA' || cc2 === 'TN' ||
           data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique' ||
           data.country === 'United States' || data.country === 'Canada' ||
-          data.country === 'Algérie' || data.country === 'Maroc') {
+          data.country === 'Algérie' || data.country === 'Maroc' || data.country === 'Tunisie') {
         setLoadingMessage('👥 Population...');
         fetchPopulation(data.postal_code, data.city, cc2).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
@@ -844,10 +846,10 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc3 = addrData.country_code || '';
       if (cc3 === 'FR' || cc3 === 'BE' || cc3 === 'US' || cc3 === 'CA' ||
-          cc3 === 'DZ' || cc3 === 'MA' ||
+          cc3 === 'DZ' || cc3 === 'MA' || cc3 === 'TN' ||
           addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique' ||
           addrData.country === 'United States' || addrData.country === 'Canada' ||
-          addrData.country === 'Algérie' || addrData.country === 'Maroc') {
+          addrData.country === 'Algérie' || addrData.country === 'Maroc' || addrData.country === 'Tunisie') {
         fetchPopulation(addrData.postal_code, addrData.city, cc3).then(pop => {
           if (pop != null) {
             const updated = { ...addrData, population: pop };
@@ -884,10 +886,10 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc4 = locResp.country_code || '';
       if (cc4 === 'FR' || cc4 === 'BE' || cc4 === 'US' || cc4 === 'CA' ||
-          cc4 === 'DZ' || cc4 === 'MA' ||
+          cc4 === 'DZ' || cc4 === 'MA' || cc4 === 'TN' ||
           locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique' ||
           locResp.country === 'United States' || locResp.country === 'Canada' ||
-          locResp.country === 'Algérie' || locResp.country === 'Maroc') {
+          locResp.country === 'Algérie' || locResp.country === 'Maroc' || locResp.country === 'Tunisie') {
         fetchPopulation(locResp.postal_code, locResp.city, cc4).then(pop => {
           if (pop != null) {
             const updated = { ...locResp, population: pop };
