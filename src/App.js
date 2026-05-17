@@ -477,7 +477,6 @@ function App() {
   const [cityImage, setCityImage] = useState(null); // URL de la miniature ville
   const [fallbackImgError, setFallbackImgError] = useState(false); // Erreur chargement image fallback
   const [modeProfile, setModeProfile] = useState('driving'); // driving | cycling | walking
-  const [favorites, setFavorites] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
 
   // Fond de carte + plein ecran
@@ -535,15 +534,11 @@ function App() {
 
   const debounceRef = useRef(null);
 
-  // Charger l'historique et les favoris
+  // Charger l'historique
   useEffect(() => {
     try {
       const saved = localStorage.getItem('geoHistory');
       if (saved) setHistory(JSON.parse(saved));
-    } catch (e) { /* ignore */ }
-    try {
-      const saved = localStorage.getItem('geoFavorites');
-      if (saved) setFavorites(JSON.parse(saved));
     } catch (e) { /* ignore */ }
   }, []);
 
@@ -558,11 +553,6 @@ function App() {
       })
       .catch(() => { /* taux non disponibles, on ignore */ });
   }, []);
-
-  // Sauvegarder les favoris
-  useEffect(() => {
-    localStorage.setItem('geoFavorites', JSON.stringify(favorites));
-  }, [favorites]);
 
   // Mode sombre
   useEffect(() => {
@@ -1117,16 +1107,6 @@ function App() {
     setDuration(null);
     setRouteCoords(null);
     setShowFuelCalc(false);
-  };
-
-  // ===== Favoris =====
-  const isFavorite = (entry) => favorites.some(f => f.postal_code === entry.postal_code && f.country_code === entry.country_code);
-  const toggleFavorite = (entry) => {
-    if (isFavorite(entry)) {
-      setFavorites(favorites.filter(f => !(f.postal_code === entry.postal_code && f.country_code === entry.country_code)));
-    } else {
-      setFavorites([entry, ...favorites].slice(0, 10));
-    }
   };
 
   // ===== Géolocalisation =====
@@ -1937,11 +1917,6 @@ function App() {
             <button className="btn-export" onClick={exportPdf} disabled={exporting}>
               {exporting ? '⏳' : '📄'} Export PDF
             </button>
-            {location && (
-              <button className="btn-fav" onClick={() => toggleFavorite(location)}>
-                {isFavorite(location) ? '💛 Retirer des favoris' : '🤍 Ajouter aux favoris'}
-              </button>
-            )}
           </div>
           {showQR && (
             <div className="qr-section">
@@ -1950,30 +1925,6 @@ function App() {
               <p className="qr-hint">Scannez pour ouvrir cette page</p>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Favoris */}
-      {favorites.length > 0 && (
-        <div className="favorites-bar">
-          <span>⭐ </span>
-          {favorites.slice(0, 5).map((f, idx) => (
-            <button key={idx} className="fav-chip" onClick={async () => {
-              setSearchInput(f.postal_code || f.city || '');
-              try {
-                let data;
-                if (f.postal_code) {
-                  data = await cachedGet(`${API}/api/location/${encodeURIComponent(f.postal_code)}`, { country: f.country_code || country });
-                } else {
-                  data = f;
-                }
-                setLocation(data);
-              } catch { setLocation(f); }
-              setMode('search');
-            }}>
-              {f.city} <small>({f.country_code})</small>
-            </button>
-          ))}
         </div>
       )}
 
@@ -2371,7 +2322,7 @@ function App() {
                   </div>
                   <div className="legal-section">
                     <h3>2. Stockage local</h3>
-                    <p>Les favoris et l'historique sont stockés localement dans votre navigateur (localStorage). Aucune donnée n'est transmise à nos serveurs.</p>
+                    <p>L'historique est stocké localement dans votre navigateur (localStorage). Aucune donnée n'est transmise à nos serveurs.</p>
                   </div>
                   <div className="legal-section">
                     <h3>3. Services tiers</h3>

@@ -802,40 +802,6 @@ body.dark-mode .history-dropdown {
 
 body.dark-mode .tab-dark { background: rgba(255, 255, 255, 0.15); }
 
-/* Favoris */
-.favorites-bar {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 10px auto;
-  max-width: 600px;
-  padding: 10px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-}
-
-.fav-chip {
-  padding: 6px 14px;
-  border: 2px solid var(--accent);
-  border-radius: 20px;
-  background: var(--badge-bg);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.fav-chip:hover {
-  background: var(--accent);
-  color: white;
-}
-
-.fav-chip small { opacity: 0.6; margin-left: 4px; }
-
-/* Bouton favoris */
 /* Météo */
 .weather-info {
   display: flex;
