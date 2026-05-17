@@ -476,9 +476,11 @@ function App() {
   // Taux de change (devises)
   const [exchangeRates, setExchangeRates] = useState(null);
 
-  // Guide touristique IA
-  const [aiGuide, setAiGuide] = useState(null);
-  const [aiGuideLoading, setAiGuideLoading] = useState(false);
+  // Guide touristique IA conversationnel
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatStarted, setChatStarted] = useState(false);
 
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
@@ -672,25 +674,39 @@ function App() {
     } catch { /* La qualité de l'air est optionnelle */ }
   };
 
-  // ===== Guide touristique IA via backend Gemini =====
-  const fetchAiGuide = async () => {
-    if (!location) return;
-    setAiGuideLoading(true);
-    setAiGuide(null);
+  // ===== Chat conversationnel IA via backend Gemini =====
+  const sendChatMessage = async (text) => {
+    if (!location || !text.trim()) return;
+    const userMsg = { role: 'user', text: text.trim() };
+    const updatedMessages = [...chatMessages, userMsg];
+    setChatMessages(updatedMessages);
+    setChatInput('');
+    setChatLoading(true);
     try {
-      const data = await cachedGet(`${API}/api/ai/guide`, {
+      const resp = await API_CLIENT.post(`${API}/api/ai/chat`, {
         city: location.city,
-        country: location.country,
         country_code: location.country_code,
         lang: lang,
+        messages: updatedMessages,
       });
-      setAiGuide(data.guide || data.text || JSON.stringify(data));
+      const reply = resp.data.response || resp.data.guide || '...';
+      setChatMessages(prev => [...prev, { role: 'model', text: reply }]);
     } catch {
-      setAiGuide(lang === 'fr'
-        ? '❌ Erreur lors de la génération du guide touristique. Réessayez plus tard.'
-        : '❌ Error generating the tourist guide. Please try again later.');
+      const errMsg = lang === 'fr'
+        ? '❌ Erreur lors de la génération de la réponse. Réessayez.'
+        : '❌ Error generating the response. Please retry.';
+      setChatMessages(prev => [...prev, { role: 'model', text: errMsg }]);
     }
-    setAiGuideLoading(false);
+    setChatLoading(false);
+  };
+
+  // Démarrer le chat automatiquement avec une première question
+  const startChat = () => {
+    setChatStarted(true);
+    const firstQuestion = lang === 'fr'
+      ? `Quels sont les meilleurs endroits à visiter à ${location.city} et quelle spécialité locale goûter ?`
+      : `What are the best places to visit in ${location.city} and what local specialty should I try?`;
+    sendChatMessage(firstQuestion);
   };
 
   // ===== Partage =====
@@ -1818,24 +1834,51 @@ function App() {
             </>
           )}
 
-          {/* Guide touristique IA */}
-          {location?.country_code && (
+          {/* Chat Guide Touristiqu IA conversationnel */}
+          {location?.country_code && !chatStarted && (
             <div className="ai-guide-section">
-              <button className="ai-guide-btn" onClick={fetchAiGuide} disabled={aiGuideLoading}>
-                {aiGuideLoading ? '⏳ Génération...' : '🤖 Guide Touristique IA'}
+              <button className="ai-guide-btn" onClick={startChat} disabled={chatLoading}>
+                {chatLoading ? '⏳ Démarrage...' : '🤖 Guide Touristique IA'}
               </button>
-              {aiGuideLoading && (
-                <div className="ai-guide-loading">
-                  <div className="ai-guide-spinner"></div>
-                  <span>{lang === 'fr' ? 'Génération du guide...' : 'Generating guide...'}</span>
-                </div>
-              )}
-              {aiGuide && !aiGuideLoading && (
-                <div className="ai-guide-result">
-                  <button className="ai-guide-close" onClick={() => setAiGuide(null)} title={lang === 'fr' ? 'Fermer' : 'Close'}>✕</button>
-                  <div className="ai-guide-content">{aiGuide}</div>
-                </div>
-              )}
+            </div>
+          )}
+
+          {chatStarted && (
+            <div className="chat-section">
+              <div className="chat-header">
+                <span>🤖 Guide IA - {location.city}</span>
+                <button className="chat-close-btn" onClick={() => { setChatStarted(false); setChatMessages([]); }} title={lang === 'fr' ? 'Fermer' : 'Close'}>✕</button>
+              </div>
+              <div className="chat-messages">
+                {chatMessages.map((msg, idx) => (
+                  <div key={idx} className={`chat-msg ${msg.role === 'user' ? 'chat-msg-user' : 'chat-msg-model'}`}>
+                    <div className="chat-msg-avatar">{msg.role === 'user' ? '👤' : '🤖'}</div>
+                    <div className="chat-msg-bubble">{msg.text}</div>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="chat-msg chat-msg-model">
+                    <div className="chat-msg-avatar">🤖</div>
+                    <div className="chat-msg-bubble chat-msg-typing">
+                      <span>.</span><span>.</span><span>.</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="chat-input-area">
+                <input
+                  type="text"
+                  className="chat-input"
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !chatLoading) sendChatMessage(chatInput); }}
+                  placeholder={lang === 'fr' ? 'Posez une question...' : 'Ask a question...'}
+                  disabled={chatLoading}
+                />
+                <button className="chat-send-btn" onClick={() => sendChatMessage(chatInput)} disabled={chatLoading || !chatInput.trim()}>
+                  {chatLoading ? '⏳' : '➤'}
+                </button>
+              </div>
             </div>
           )}
 
