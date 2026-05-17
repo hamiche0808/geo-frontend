@@ -856,15 +856,16 @@ function App() {
   }, [location?.country_code, location?.longitude]);
 
   // ===== Mode Recherche =====
-  const handleSearch = async (query) => {
+  const handleSearch = async (query, countryOverride) => {
     const term = (query || searchInput).trim();
+    const countryCode = countryOverride || country;
     if (!term) return;
     setError(null);
     setLoading(true);
     setLoadingMessage('🔍 Recherche...');
     try {
       setLoadingMessage('📡 Connexion...');
-      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(term)}`, { country });
+      const data = await cachedGet(`${API}/api/location/${encodeURIComponent(term)}`, { country: countryCode });
       setLoadingMessage('🌍 Analyse...');
       setLocation(data);
       saveToHistory(data);
@@ -882,17 +883,22 @@ function App() {
 
   // ===== Ville au hasard (Random Voyage) =====
   const handleRandomVoyage = () => {
+    // Nettoyer l'ancien affichage pour éviter les mélanges
+    setLocation(null);
+    setWeather(null);
+    setCityImage(null);
+    setFallbackImgError(false);
+    setError(null);
     // Choisir un pays aléatoire parmi ceux qui ont des villes dans SAMPLE_CITIES
     const codes = Object.keys(SAMPLE_CITIES);
     const randomCode = codes[Math.floor(Math.random() * codes.length)];
     const cities = SAMPLE_CITIES[randomCode];
     const randomCity = cities[Math.floor(Math.random() * cities.length)];
-    // Mettre à jour le sélecteur de pays
+    // Mettre à jour le sélecteur de pays et le champ de recherche
     setCountry(randomCode);
-    // Remplir le champ de recherche
     setSearchInput(randomCity);
-    // Déclencher la recherche
-    setTimeout(() => handleSearch(randomCity), 100);
+    // Déclencher la recherche immédiatement avec le bon pays (pas de setTimeout)
+    handleSearch(randomCity, randomCode);
   };
 
   const handleInputChange = (e) => {
@@ -1584,10 +1590,15 @@ function App() {
               <button onClick={() => handleSearch()} disabled={loading || searchingDebounce}>
                 {loading ? '⏳' : searchingDebounce ? '⏳' : '🔍 Rechercher'}
               </button>
-              <button className="btn-random" onClick={handleRandomVoyage} disabled={loading} title={lang === 'fr' ? 'Ville au hasard' : 'Random city'}>
-                🎲 {lang === 'fr' ? 'Lancer le dé' : 'Roll the dice'}
-              </button>
             </>
+          )}
+
+          {mode === 'search' && (
+            <div className="random-row">
+              <button className="btn-random" onClick={handleRandomVoyage} disabled={loading} title={lang === 'fr' ? 'Ville au hasard' : 'Random city'}>
+                🎲 {lang === 'fr' ? 'Ville au Hasard' : 'Random City'} 🎲
+              </button>
+            </div>
           )}
 
           {mode === 'distance' && (

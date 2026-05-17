@@ -364,29 +364,52 @@ header h1 {
   background: rgba(255, 255, 255, 0.4) !important;
 }
 
-.btn-random {
-  font-size: 0.95em !important;
-  padding: 7px 14px !important;
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-radius: 20px !important;
+.random-row {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.3s !important;
+  justify-content: center;
+  margin: 12px auto 4px;
+  width: 100%;
+  max-width: 500px;
+}
+.btn-random {
+  font-size: 0.95em;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.35), rgba(118, 75, 162, 0.35));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 30px;
+  color: white;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  width: 70%;
+  max-width: 320px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 .btn-random:hover {
-  background: rgba(255, 255, 255, 0.45) !important;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.55), rgba(118, 75, 162, 0.55));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .btn-random:active {
-  transform: scale(0.95) rotate(10deg);
+  transform: translateY(0px) scale(0.98);
 }
 .btn-random:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   transform: none !important;
+  box-shadow: none !important;
+}
+body.dark-mode .btn-random {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
+  border-color: rgba(255, 255, 255, 0.2);
+}
+body.dark-mode .btn-random:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.45), rgba(118, 75, 162, 0.45));
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 /* ===== Autocomplétion ===== */
