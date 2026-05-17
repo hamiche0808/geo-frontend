@@ -1497,7 +1497,7 @@ function App() {
             {locating ? '⏳' : '📍'}
           </button>
           <select value={country} onChange={(e) => setCountry(e.target.value)} className="country-select">
-            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.code})</option>)}
+            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
           </select>
 
           {mode === 'search' && (
@@ -1547,7 +1547,7 @@ function App() {
                 <CityInput label="Départ" value={cityA?.city || ''} country={countryA}
                   placeholder="Paris" onSelect={(data) => handleDistanceCity(data, 'A')} />
                 <select className="country-select-mini" value={countryA} onChange={(e) => setCountryA(e.target.value)}>
-                  {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag} {c.code}</option>)}
+                  {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag}</option>)}
                 </select>
               </div>
 
@@ -1578,7 +1578,7 @@ function App() {
                         newC[idx] = e.target.value;
                         setWaypointCountries(newC);
                       }}>
-                      {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag} {c.code}</option>)}
+                      {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag}</option>)}
                     </select>
                   </div>
                   <button className="btn-remove-wp" onClick={() => removeWaypoint(idx)} title="Supprimer cet arrêt">✕</button>
@@ -1602,7 +1602,7 @@ function App() {
                 <CityInput label="Arrivée" value={cityB?.city || ''} country={countryB}
                   placeholder="Marseille" onSelect={(data) => handleDistanceCity(data, 'B')} />
                 <select className="country-select-mini" value={countryB} onChange={(e) => setCountryB(e.target.value)}>
-                  {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag} {c.code}</option>)}
+                  {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag}</option>)}
                 </select>
               </div>
             </div>
