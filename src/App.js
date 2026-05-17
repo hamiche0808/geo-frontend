@@ -559,6 +559,13 @@ function App() {
     document.body.className = darkMode ? 'dark-mode' : '';
   }, [darkMode]);
 
+  // Reset du chat IA quand on change de ville ou pays
+  useEffect(() => {
+    setChatStarted(false);
+    setChatMessages([]);
+    setChatInput('');
+  }, [location]);
+
   // Lecture des paramètres d'URL pour le partage + white-label
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
