@@ -485,6 +485,23 @@ body.dark-mode .error { color: #ff8888; }
   margin-bottom: 10px;
 }
 
+/* ===== Badge devise ===== */
+.currency-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  background: #e8f5e9;
+  color: #2e7d32;
+  white-space: nowrap;
+}
+body.dark-mode .currency-badge {
+  background: #1b3a1b;
+  color: #81c784;
+}
+
 .details {
   display: flex;
   gap: 8px;
@@ -2520,4 +2537,98 @@ body.dark-mode .city-thumbnail-link:hover {
 
 body.dark-mode .city-thumbnail-fallback {
   background: linear-gradient(135deg, #2a2a4a, #1a1a2e);
+}
+
+/* ===== Guide Touristique IA ===== */
+.ai-guide-section {
+  margin: 16px 0;
+  text-align: center;
+}
+.ai-guide-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 24px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+.ai-guide-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+.ai-guide-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.ai-guide-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f5f0ff;
+  border-radius: 12px;
+  color: #667eea;
+  font-weight: 500;
+}
+body.dark-mode .ai-guide-loading {
+  background: #1f1a3a;
+  color: #b0a0ff;
+}
+.ai-guide-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e0d8ff;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.ai-guide-result {
+  position: relative;
+  margin-top: 12px;
+  padding: 16px 16px 16px 20px;
+  background: #f8f6ff;
+  border: 1px solid #e0d8ff;
+  border-radius: 12px;
+  text-align: left;
+  font-size: 0.9em;
+  line-height: 1.6;
+  color: #333;
+  max-height: 400px;
+  overflow-y: auto;
+}
+body.dark-mode .ai-guide-result {
+  background: #1a1a2e;
+  border-color: #333355;
+  color: #e0e0e0;
+}
+.ai-guide-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #999;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+}
+.ai-guide-close:hover {
+  background: rgba(0,0,0,0.05);
+  color: #333;
+}
+body.dark-mode .ai-guide-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: #ccc;
+}
+.ai-guide-content {
+  white-space: pre-wrap;
+  word-break: break-word;
 }

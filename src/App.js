@@ -10,7 +10,7 @@ import ActivitiesWidget from './ActivitiesWidget';
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
   headers: {
-    'User-Agent': 'GeoLocApp/4.9 (hamiche08.08@gmail.com)',
+    'User-Agent': 'GeoLocApp/5.0 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
     'X-API-Key': 'geoloc-app-key-2026',
   },
@@ -79,6 +79,18 @@ function getFlagIcon(countryCode) {
 }
 
 const API = process.env.REACT_APP_API_URL || 'https://geo-app-1-z314.onrender.com';
+
+// ===== Mapping pays → devise =====
+const CURRENCY_MAP = {
+  FR: 'EUR', BE: 'EUR', DE: 'EUR', IT: 'EUR', ES: 'EUR', PT: 'EUR', NL: 'EUR', AT: 'EUR', IE: 'EUR', GR: 'EUR', FI: 'EUR',
+  DZ: 'DZD', MA: 'MAD', TN: 'TND',
+  US: 'USD', CA: 'CAD', GB: 'GBP', CH: 'CHF', JP: 'JPY', CN: 'CNY', AU: 'AUD', NZ: 'NZD',
+};
+const CURRENCY_NAMES = {
+  EUR: 'Euro', DZD: 'Dinar algérien', MAD: 'Dirham marocain', TND: 'Dinar tunisien',
+  USD: 'Dollar américain', CAD: 'Dollar canadien', GBP: 'Livre sterling',
+  CHF: 'Franc suisse', JPY: 'Yen japonais', CNY: 'Yuan chinois', AUD: 'Dollar australien', NZD: 'Dollar néo-zélandais',
+};
 
 // ===== Traductions FR / EN =====
 const TR = {
@@ -461,6 +473,13 @@ function App() {
   const [customPrimary, setCustomPrimary] = useState('');
   const [customAccent, setCustomAccent] = useState('');
 
+  // Taux de change (devises)
+  const [exchangeRates, setExchangeRates] = useState(null);
+
+  // Guide touristique IA
+  const [aiGuide, setAiGuide] = useState(null);
+  const [aiGuideLoading, setAiGuideLoading] = useState(false);
+
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
 
@@ -507,6 +526,18 @@ function App() {
       const saved = localStorage.getItem('geoFavorites');
       if (saved) setFavorites(JSON.parse(saved));
     } catch (e) { /* ignore */ }
+  }, []);
+
+  // ===== Récupérer les taux de change au démarrage (open.er-api.com, gratuit) =====
+  useEffect(() => {
+    fetch('https://open.er-api.com/v6/latest/EUR')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.result === 'success' && data.rates) {
+          setExchangeRates(data.rates);
+        }
+      })
+      .catch(() => { /* taux non disponibles, on ignore */ });
   }, []);
 
   // Sauvegarder les favoris
@@ -639,6 +670,27 @@ function App() {
         });
       }
     } catch { /* La qualité de l'air est optionnelle */ }
+  };
+
+  // ===== Guide touristique IA via backend Gemini =====
+  const fetchAiGuide = async () => {
+    if (!location) return;
+    setAiGuideLoading(true);
+    setAiGuide(null);
+    try {
+      const data = await cachedGet(`${API}/api/ai/guide`, {
+        city: location.city,
+        country: location.country,
+        country_code: location.country_code,
+        lang: lang,
+      });
+      setAiGuide(data.guide || data.text || JSON.stringify(data));
+    } catch {
+      setAiGuide(lang === 'fr'
+        ? '❌ Erreur lors de la génération du guide touristique. Réessayez plus tard.'
+        : '❌ Error generating the tourist guide. Please try again later.');
+    }
+    setAiGuideLoading(false);
   };
 
   // ===== Partage =====
@@ -1720,12 +1772,32 @@ function App() {
                 <>
                   <h2>{location.display_name.split(',')[0]}</h2>
                   <p className="address-full">{location.display_name}</p>
-                  <p className="country-name">{location.country}</p>
+                  <p className="country-name">
+                {location.country}
+                {location.country_code && CURRENCY_MAP[location.country_code] && exchangeRates && (
+                  <span className="currency-badge">
+                    {CURRENCY_MAP[location.country_code] === 'EUR'
+                      ? '💰 Euro'
+                      : `💰 ${CURRENCY_NAMES[CURRENCY_MAP[location.country_code]] || CURRENCY_MAP[location.country_code]} (1 € = ${exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(2)} ${CURRENCY_MAP[location.country_code]})`
+                    }
+                  </span>
+                )}
+              </p>
                 </>
               ) : (
                 <>
                   <h2>{location.city} {location.postal_code ? <span className="postal-code">({location.postal_code})</span> : ''}</h2>
-                  <p className="country-name">{location.country}</p>
+                  <p className="country-name">
+                {location.country}
+                {location.country_code && CURRENCY_MAP[location.country_code] && exchangeRates && (
+                  <span className="currency-badge">
+                    {CURRENCY_MAP[location.country_code] === 'EUR'
+                      ? '💰 Euro'
+                      : `💰 ${CURRENCY_NAMES[CURRENCY_MAP[location.country_code]] || CURRENCY_MAP[location.country_code]} (1 € = ${exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(2)} ${CURRENCY_MAP[location.country_code]})`
+                    }
+                  </span>
+                )}
+              </p>
                 </>
               )}
               {location.latitude && location.longitude && localTimeStr && (
@@ -1745,6 +1817,28 @@ function App() {
               <ActivitiesWidget weatherCode={weather.current.weathercode} cityName={location?.city} lang={lang} />
             </>
           )}
+
+          {/* Guide touristique IA */}
+          {location?.country_code && (
+            <div className="ai-guide-section">
+              <button className="ai-guide-btn" onClick={fetchAiGuide} disabled={aiGuideLoading}>
+                {aiGuideLoading ? '⏳ Génération...' : '🤖 Guide Touristique IA'}
+              </button>
+              {aiGuideLoading && (
+                <div className="ai-guide-loading">
+                  <div className="ai-guide-spinner"></div>
+                  <span>{lang === 'fr' ? 'Génération du guide...' : 'Generating guide...'}</span>
+                </div>
+              )}
+              {aiGuide && !aiGuideLoading && (
+                <div className="ai-guide-result">
+                  <button className="ai-guide-close" onClick={() => setAiGuide(null)} title={lang === 'fr' ? 'Fermer' : 'Close'}>✕</button>
+                  <div className="ai-guide-content">{aiGuide}</div>
+                </div>
+              )}
+            </div>
+          )}
+
           <p className="coords">Coordonnées : {location.latitude}, {location.longitude}</p>
 
           {/* POIs (liens affiliés) */}
