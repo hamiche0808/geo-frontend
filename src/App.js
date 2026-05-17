@@ -176,6 +176,7 @@ const COUNTRIES = [
   { code: 'ES', name: 'Espagne', flag: '🇪🇸' },
   { code: 'US', name: 'États-Unis', flag: '🇺🇸' },
   { code: 'GB', name: 'Royaume-Uni', flag: '🇬🇧' },
+  { code: 'JP', name: 'Japon', flag: '🇯🇵' },
 ];
 
 // ===== Fuseaux horaires IANA — fonction intelligente (pays × longitude) =====
@@ -871,7 +872,7 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc2 = data.country_code || '';
       if (cc2 === 'FR' || cc2 === 'BE' || cc2 === 'US' || cc2 === 'CA' || 
-          cc2 === 'DZ' || cc2 === 'MA' || cc2 === 'TN' ||
+          cc2 === 'DZ' || cc2 === 'MA' || cc2 === 'TN' || cc2 === 'JP' ||
           data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique' ||
           data.country === 'United States' || data.country === 'Canada' ||
           data.country === 'Algérie' || data.country === 'Maroc' || data.country === 'Tunisie') {
@@ -914,7 +915,7 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc3 = addrData.country_code || '';
       if (cc3 === 'FR' || cc3 === 'BE' || cc3 === 'US' || cc3 === 'CA' ||
-          cc3 === 'DZ' || cc3 === 'MA' || cc3 === 'TN' ||
+          cc3 === 'DZ' || cc3 === 'MA' || cc3 === 'TN' || cc3 === 'JP' ||
           addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique' ||
           addrData.country === 'United States' || addrData.country === 'Canada' ||
           addrData.country === 'Algérie' || addrData.country === 'Maroc' || addrData.country === 'Tunisie') {
@@ -954,7 +955,7 @@ function App() {
       // Population INSEE (France) ou Statbel (Belgique)
       const cc4 = locResp.country_code || '';
       if (cc4 === 'FR' || cc4 === 'BE' || cc4 === 'US' || cc4 === 'CA' ||
-          cc4 === 'DZ' || cc4 === 'MA' || cc4 === 'TN' ||
+          cc4 === 'DZ' || cc4 === 'MA' || cc4 === 'TN' || cc4 === 'JP' ||
           locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique' ||
           locResp.country === 'United States' || locResp.country === 'Canada' ||
           locResp.country === 'Algérie' || locResp.country === 'Maroc' || locResp.country === 'Tunisie') {
