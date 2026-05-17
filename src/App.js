@@ -85,11 +85,13 @@ const CURRENCY_MAP = {
   FR: 'EUR', BE: 'EUR', DE: 'EUR', IT: 'EUR', ES: 'EUR', PT: 'EUR', NL: 'EUR', AT: 'EUR', IE: 'EUR', GR: 'EUR', FI: 'EUR',
   DZ: 'DZD', MA: 'MAD', TN: 'TND',
   US: 'USD', CA: 'CAD', GB: 'GBP', CH: 'CHF', JP: 'JPY', CN: 'CNY', AU: 'AUD', NZ: 'NZD',
+  SE: 'SEK', NO: 'NOK', DK: 'DKK', PL: 'PLN',
 };
 const CURRENCY_NAMES = {
   EUR: 'Euro', DZD: 'Dinar algérien', MAD: 'Dirham marocain', TND: 'Dinar tunisien',
   USD: 'Dollar américain', CAD: 'Dollar canadien', GBP: 'Livre sterling',
   CHF: 'Franc suisse', JPY: 'Yen japonais', CNY: 'Yuan chinois', AUD: 'Dollar australien', NZD: 'Dollar néo-zélandais',
+  SEK: 'Couronne suédoise', NOK: 'Couronne norvégienne', DKK: 'Couronne danoise', PLN: 'Zloty polonais',
 };
 
 // ===== Traductions FR / EN =====
@@ -177,6 +179,20 @@ const COUNTRIES = [
   { code: 'US', name: 'États-Unis', flag: '🇺🇸' },
   { code: 'GB', name: 'Royaume-Uni', flag: '🇬🇧' },
   { code: 'JP', name: 'Japon', flag: '🇯🇵' },
+  { code: 'CH', name: 'Suisse', flag: '🇨🇭' },
+  { code: 'PT', name: 'Portugal', flag: '🇵🇹' },
+  { code: 'NL', name: 'Pays-Bas', flag: '🇳🇱' },
+  { code: 'AT', name: 'Autriche', flag: '🇦🇹' },
+  { code: 'IE', name: 'Irlande', flag: '🇮🇪' },
+  { code: 'GR', name: 'Grèce', flag: '🇬🇷' },
+  { code: 'FI', name: 'Finlande', flag: '🇫🇮' },
+  { code: 'CN', name: 'Chine', flag: '🇨🇳' },
+  { code: 'NZ', name: 'Nouvelle-Zélande', flag: '🇳🇿' },
+  { code: 'SE', name: 'Suède', flag: '🇸🇪' },
+  { code: 'NO', name: 'Norvège', flag: '🇳🇴' },
+  { code: 'DK', name: 'Danemark', flag: '🇩🇰' },
+  { code: 'PL', name: 'Pologne', flag: '🇵🇱' },
+  { code: 'AU', name: 'Australie', flag: '🇦🇺' },
 ];
 
 // ===== Fuseaux horaires IANA — fonction intelligente (pays × longitude) =====
