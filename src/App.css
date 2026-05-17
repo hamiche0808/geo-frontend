@@ -496,6 +496,8 @@ body.dark-mode .error { color: #ff8888; }
   background: #e8f5e9;
   color: #2e7d32;
   white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 body.dark-mode .currency-badge {
   background: #1b3a1b;

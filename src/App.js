@@ -1797,8 +1797,8 @@ function App() {
                 {location.country_code && CURRENCY_MAP[location.country_code] && exchangeRates && (
                   <span className="currency-badge">
                     {CURRENCY_MAP[location.country_code] === 'EUR'
-                      ? '💰 Euro'
-                      : `💰 ${CURRENCY_NAMES[CURRENCY_MAP[location.country_code]] || CURRENCY_MAP[location.country_code]} (1 € = ${exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(2)} ${CURRENCY_MAP[location.country_code]})`
+                      ? '💱 Euro'
+                      : `💱 1 € = ${exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(2)} ${CURRENCY_MAP[location.country_code]}`
                     }
                   </span>
                 )}
@@ -1812,8 +1812,8 @@ function App() {
                 {location.country_code && CURRENCY_MAP[location.country_code] && exchangeRates && (
                   <span className="currency-badge">
                     {CURRENCY_MAP[location.country_code] === 'EUR'
-                      ? '💰 Euro'
-                      : `💰 ${CURRENCY_NAMES[CURRENCY_MAP[location.country_code]] || CURRENCY_MAP[location.country_code]} (1 € = ${exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(2)} ${CURRENCY_MAP[location.country_code]})`
+                      ? '💱 Euro'
+                      : `💱 1 € = ${exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(2)} ${CURRENCY_MAP[location.country_code]}`
                     }
                   </span>
                 )}
