@@ -195,44 +195,6 @@ const COUNTRIES = [
   { code: 'AU', name: 'Australie', flag: '🇦🇺' },
 ];
 
-// ===== Sélecteur de pays personnalisé avec drapeau image =====
-function CountrySelect({ value, onChange, className, mini }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  // Fermer au clic extérieur
-  useEffect(() => {
-    const handleClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-  const selected = COUNTRIES.find(c => c.code === value) || COUNTRIES[0];
-  const flagUrl = `https://flagcdn.com/28x21/${selected.code.toLowerCase()}.png`;
-  return (
-    <div className={`custom-country-select ${className || ''}`} ref={ref}>
-      <button type="button" className="custom-country-btn" onClick={() => setOpen(!open)}>
-        <img src={flagUrl} alt="" className="custom-flag-img" loading="lazy" />
-        {mini ? selected.code : `${selected.name} (${selected.code})`}
-        <span className="custom-arrow">{open ? '▲' : '▼'}</span>
-      </button>
-      {open && (
-        <div className="custom-country-dropdown">
-          {COUNTRIES.map(c => {
-            const url = `https://flagcdn.com/28x21/${c.code.toLowerCase()}.png`;
-            return (
-              <div key={c.code} className={`custom-country-item ${c.code === value ? 'selected' : ''}`}
-                onClick={() => { onChange(c.code); setOpen(false); }}>
-                <img src={url} alt="" className="custom-flag-img" loading="lazy" />
-                <span className="custom-country-name">{mini ? c.code : c.name}</span>
-                {!mini && <span className="custom-country-code">{c.code}</span>}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ===== Fuseaux horaires IANA — fonction intelligente (pays × longitude) =====
 // Pour les pays à fuseau unique, mapping direct.
 // Pour les grands pays (US, CA, RU, AU, BR, MX, ID), on utilise la longitude.
@@ -516,7 +478,6 @@ function App() {
   const [fallbackImgError, setFallbackImgError] = useState(false); // Erreur chargement image fallback
   const [modeProfile, setModeProfile] = useState('driving'); // driving | cycling | walking
   const [favorites, setFavorites] = useState([]);
-  const [viewingFavorite, setViewingFavorite] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
 
   // Fond de carte + plein ecran
@@ -747,13 +708,6 @@ function App() {
       });
       const reply = resp.data.response || resp.data.guide || '...';
       setChatMessages(prev => [...prev, { role: 'model', text: reply }]);
-      // Mettre à jour le guide IA dans les favoris si cette ville est déjà favorite
-      if (isFavorite(location)) {
-        // Utiliser updatedMessages (qui contient déjà le message user) + la nouvelle réponse IA
-        const allModelText = [...updatedMessages.filter(m => m.role === 'model'), { role: 'model', text: reply }]
-          .map(m => m.text).join('\n\n');
-        updateFavoriteAiGuide(location, allModelText);
-      }
     } catch {
       const errMsg = lang === 'fr'
         ? '❌ Erreur lors de la génération de la réponse. Réessayez.'
@@ -1165,72 +1119,14 @@ function App() {
     setShowFuelCalc(false);
   };
 
-  // ===== Favoris (v6.0 — Mode Hors-Ligne) =====
+  // ===== Favoris =====
   const isFavorite = (entry) => favorites.some(f => f.postal_code === entry.postal_code && f.country_code === entry.country_code);
-
-  // Construire un objet favori complet avec toutes les données pour le mode hors-ligne
-  const captureFavoriteData = (entry) => {
-    const currencyCode = entry.country_code ? CURRENCY_MAP[entry.country_code] : null;
-    const rate = currencyCode && currencyCode !== 'EUR' && exchangeRates ? exchangeRates[currencyCode] : null;
-    return {
-      // Données de localisation
-      city: entry.city,
-      postal_code: entry.postal_code || '',
-      country: entry.country || '',
-      country_code: entry.country_code || '',
-      latitude: entry.latitude,
-      longitude: entry.longitude,
-      department: entry.department || '',
-      region: entry.region || '',
-      population: entry.population || 0,
-      display_name: entry.display_name || '',
-      // Météo sauvegardée
-      weather: weather || null,
-      // Taux de change
-      currency_code: currencyCode,
-      exchange_rate: rate,
-      // Guide IA — dernier message du modèle (sauvegardé séparément)
-      aiGuideText: '',
-      // Horodatage
-      savedAt: Date.now(),
-    };
-  };
-
   const toggleFavorite = (entry) => {
     if (isFavorite(entry)) {
       setFavorites(favorites.filter(f => !(f.postal_code === entry.postal_code && f.country_code === entry.country_code)));
     } else {
-      // Sauvegarder toutes les données disponibles
-      const favData = captureFavoriteData(entry);
-      // Capturer le texte du guide IA si disponible
-      const modelMessages = chatMessages.filter(m => m.role === 'model');
-      if (modelMessages.length > 0) {
-        favData.aiGuideText = modelMessages.map(m => m.text).join('\n\n');
-      }
-      setFavorites([favData, ...favorites].slice(0, 20));
-      setError('⭐ Ville ajoutée aux favoris !');
-      setTimeout(() => setError(''), 2000);
+      setFavorites([entry, ...favorites].slice(0, 10));
     }
-  };
-
-  // Mettre à jour le guide IA dans un favori existant (appelé après réception du guide)
-  const updateFavoriteAiGuide = (entry, text) => {
-    if (!text || !entry) return;
-    setFavorites(prev => prev.map(f => {
-      if (f.postal_code === entry.postal_code && f.country_code === entry.country_code) {
-        return { ...f, aiGuideText: text };
-      }
-      return f;
-    }));
-  };
-
-  // Sélectionner un favori pour affichage hors-ligne complet
-  const selectFavorite = (fav) => {
-    setViewingFavorite(fav);
-  };
-
-  const clearViewingFavorite = () => {
-    setViewingFavorite(null);
   };
 
   // ===== Géolocalisation =====
@@ -1584,9 +1480,6 @@ function App() {
         <div className="tabs">
           <button className={`tab ${mode === 'search' ? 'active' : ''}`} onClick={() => { setMode('search'); setError(''); setLocation(null); setSearchInput(''); setWeather(null); setCityImage(null); setFallbackImgError(false); }}>🏠 {lang === 'fr' ? 'Accueil' : 'Home'}</button>
           <button className={`tab ${mode === 'distance' ? 'active' : ''}`} onClick={() => { setMode('distance'); setError(''); }}>🗺️ Itinéraire</button>
-          <button className={`tab ${mode === 'favorites' ? 'active' : ''}`} onClick={() => { setMode('favorites'); setError(''); setViewingFavorite(null); }}>
-            ⭐ {lang === 'fr' ? 'Favoris' : 'Favorites'}{favorites.length > 0 ? <sup style={{background:'#ff4444', color:'white', borderRadius:'50%', padding:'1px 6px', fontSize:'0.6em', marginLeft:'3px'}}>{favorites.length}</sup> : ''}
-          </button>
           <button className="tab tab-dark" onClick={() => setDarkMode(!darkMode)} title="Mode sombre">
             {darkMode ? '☀️' : '🌙'}
           </button>
@@ -1603,7 +1496,9 @@ function App() {
           <button className="btn-locate" onClick={locateMe} disabled={locating} title="Ma position">
             {locating ? '⏳' : '📍'}
           </button>
-          <CountrySelect value={country} onChange={setCountry} className="country-select" />
+          <select value={country} onChange={(e) => setCountry(e.target.value)} className="country-select">
+            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.code})</option>)}
+          </select>
 
           {mode === 'search' && (
             <>
@@ -1651,7 +1546,9 @@ function App() {
               <div className="city-with-country waypoint-main">
                 <CityInput label="Départ" value={cityA?.city || ''} country={countryA}
                   placeholder="Paris" onSelect={(data) => handleDistanceCity(data, 'A')} />
-                <CountrySelect value={countryA} onChange={setCountryA} className="country-select-mini" mini />
+                <select className="country-select-mini" value={countryA} onChange={(e) => setCountryA(e.target.value)}>
+                  {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag} {c.code}</option>)}
+                </select>
               </div>
 
               {/* Bouton inverser départ/arrivée */}
@@ -1675,9 +1572,14 @@ function App() {
                     <CityInput label={`Arrêt ${idx + 1}`} value={wp?.city || ''} country={waypointCountries[idx] || 'FR'}
                       placeholder={`Arrêt ${idx + 1}`}
                       onSelect={(data) => handleWaypointSelect(data, idx)} />
-                    <CountrySelect value={waypointCountries[idx] || 'FR'}
-                      onChange={(v) => { const newC = [...waypointCountries]; newC[idx] = v; setWaypointCountries(newC); }}
-                      className="country-select-mini" mini />
+                    <select className="country-select-mini" value={waypointCountries[idx] || 'FR'}
+                      onChange={(e) => {
+                        const newC = [...waypointCountries];
+                        newC[idx] = e.target.value;
+                        setWaypointCountries(newC);
+                      }}>
+                      {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag} {c.code}</option>)}
+                    </select>
                   </div>
                   <button className="btn-remove-wp" onClick={() => removeWaypoint(idx)} title="Supprimer cet arrêt">✕</button>
                   <div className="waypoint-connector">
@@ -1699,7 +1601,9 @@ function App() {
               <div className="city-with-country waypoint-main">
                 <CityInput label="Arrivée" value={cityB?.city || ''} country={countryB}
                   placeholder="Marseille" onSelect={(data) => handleDistanceCity(data, 'B')} />
-                <CountrySelect value={countryB} onChange={setCountryB} className="country-select-mini" mini />
+                <select className="country-select-mini" value={countryB} onChange={(e) => setCountryB(e.target.value)}>
+                  {COUNTRIES.map(c => <option key={c.code} value={c.code} title={c.name}>{c.flag} {c.code}</option>)}
+                </select>
               </div>
             </div>
 
@@ -1899,16 +1803,7 @@ function App() {
             <div className="city-info">
               {location.display_name ? (
                 <>
-                  <h2>
-                    {location.display_name.split(',')[0]}
-                    <button
-                      className="star-icon-btn"
-                      onClick={(e) => { e.stopPropagation(); toggleFavorite(location); }}
-                      title={isFavorite(location) ? (lang === 'fr' ? 'Retirer des favoris' : 'Remove from favorites') : (lang === 'fr' ? 'Ajouter aux favoris' : 'Add to favorites')}
-                    >
-                      {isFavorite(location) ? '⭐' : '☆'}
-                    </button>
-                  </h2>
+                  <h2>{location.display_name.split(',')[0]}</h2>
                   <p className="address-full">{location.display_name}</p>
                   <p className="country-name">
                 {location.country}
@@ -1924,15 +1819,7 @@ function App() {
                 </>
               ) : (
                 <>
-                  <h2>{location.city} {location.postal_code ? <span className="postal-code">({location.postal_code})</span> : ''}
-                    <button
-                      className="star-icon-btn"
-                      onClick={(e) => { e.stopPropagation(); toggleFavorite(location); }}
-                      title={isFavorite(location) ? (lang === 'fr' ? 'Retirer des favoris' : 'Remove from favorites') : (lang === 'fr' ? 'Ajouter aux favoris' : 'Add to favorites')}
-                    >
-                      {isFavorite(location) ? '⭐' : '☆'}
-                    </button>
-                  </h2>
+                  <h2>{location.city} {location.postal_code ? <span className="postal-code">({location.postal_code})</span> : ''}</h2>
                   <p className="country-name">
                 {location.country}
                 {location.country_code && CURRENCY_MAP[location.country_code] && exchangeRates && (
@@ -2052,10 +1939,9 @@ function App() {
             </button>
             {location && (
               <button className="btn-fav" onClick={() => toggleFavorite(location)}>
-                {isFavorite(location) ? '⭐ Retirer des favoris' : '☆ Ajouter aux favoris'}
+                {isFavorite(location) ? '💛 Retirer des favoris' : '🤍 Ajouter aux favoris'}
               </button>
             )}
-            
           </div>
           {showQR && (
             <div className="qr-section">
@@ -2067,205 +1953,27 @@ function App() {
         </div>
       )}
 
-      {/* ===== Onglet Favoris (v6.0 Mode Hors-Ligne) ===== */}
-      {mode === 'favorites' && (
-        <div className="favorites-page">
-          <div className="favorites-header">
-            <h2>⭐ {lang === 'fr' ? 'Mes Favoris' : 'My Favorites'}</h2>
-            <p className="favorites-subtitle">{lang === 'fr' ? 'Consultables sans connexion internet' : 'Available offline'}</p>
-          </div>
-
-          {favorites.length === 0 ? (
-            <div className="favorites-empty">
-              <span className="favorites-empty-icon">⭐</span>
-              <p>{lang === 'fr' ? 'Aucune ville favorite pour le moment.' : 'No favorite cities yet.'}</p>
-              <p className="favorites-empty-hint">
-                {lang === 'fr'
-                  ? 'Effectuez une recherche, générez le guide IA, puis cliquez sur ⭐ pour sauvegarder.'
-                  : 'Search for a city, generate the AI guide, then click ⭐ to save.'}
-              </p>
-            </div>
-          ) : viewingFavorite ? (
-            /* ---- Détail d'un favori (consultation hors-ligne) ---- */
-            <div className="favorite-detail">
-              <button className="fav-back-btn" onClick={clearViewingFavorite}>
-                ← {lang === 'fr' ? 'Retour à la liste' : 'Back to list'}
-              </button>
-
-              <div className="result-info" style={{borderLeftColor: viewingFavorite.weather ? '#4CAF50' : 'var(--accent)'}}>
-                {/* En-tête ville */}
-                <div className="city-header">
-                  <div className="city-info">
-                    <h2>
-                      {viewingFavorite.city}
-                      {viewingFavorite.postal_code && (
-                        <span className="postal-code"> ({viewingFavorite.postal_code})</span>
-                      )}
-                    </h2>
-                    <p className="country-name">
-                      {viewingFavorite.country || viewingFavorite.country_code}
-                      {viewingFavorite.currency_code && (
-                        <span className="currency-badge">
-                          {viewingFavorite.currency_code === 'EUR'
-                            ? '💰 Euro'
-                            : `💰 ${CURRENCY_NAMES[viewingFavorite.currency_code] || viewingFavorite.currency_code}${viewingFavorite.exchange_rate ? ` (1 € = ${viewingFavorite.exchange_rate.toFixed(2)} ${viewingFavorite.currency_code})` : ''}`
-                          }
-                        </span>
-                      )}
-                    </p>
-                    {viewingFavorite.latitude && viewingFavorite.longitude && (
-                      <span className="local-time">
-                        🕐 {lang === 'fr' ? 'Heure locale' : 'Local time'} : {
-                          (() => {
-                            try {
-                              const tz = getTimezoneForLocation(viewingFavorite.country_code, viewingFavorite.longitude);
-                              return new Intl.DateTimeFormat('fr-FR', {
-                                timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit'
-                              }).format(new Date());
-                            } catch { return ''; }
-                          })()
-                        }
-                      </span>
-                    )}
-                    {/* Bouton favoris (retirer) dans la fiche détail */}
-                    <button
-                      className="fav-star-btn"
-                      onClick={() => {
-                        toggleFavorite(viewingFavorite);
-                        // Retour à la liste après retrait
-                        setViewingFavorite(null);
-                      }}
-                      title={lang === 'fr' ? 'Retirer des favoris' : 'Remove from favorites'}
-                    >
-                      ⭐
-                    </button>
-                  </div>
-                </div>
-
-                {/* Détails */}
-                <div className="details">
-                  {viewingFavorite.department && <span className="detail-badge">📍 {viewingFavorite.department}</span>}
-                  {viewingFavorite.region && <span className="detail-badge">🗺️ {viewingFavorite.region}</span>}
-                  <div className="population-badge">
-                    <span className="pop-icon">👤</span>
-                    <span className="pop-label">Population :</span>
-                    {viewingFavorite.population > 0 ? (
-                      <>
-                        <span className="pop-value">
-                          {typeof viewingFavorite.population === 'number'
-                            ? viewingFavorite.population.toLocaleString('fr-FR')
-                            : viewingFavorite.population}
-                        </span>
-                        <span className="pop-unit">habitants</span>
-                      </>
-                    ) : (
-                      <span className="pop-value pop-unknown">Non spécifiée</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Météo sauvegardée (hors-ligne) */}
-                {viewingFavorite.weather && viewingFavorite.weather.current && !viewingFavorite.weather.error && (
-                  <div className="weather-info offline-weather">
-                    <span className="weather-icon">
-                      {(() => {
-                        const code = viewingFavorite.weather.current.weathercode;
-                        if (code === 0) return '☀️';
-                        if (code <= 2) return '🌤️';
-                        if (code === 3) return '☁️';
-                        if (code >= 45 && code <= 48) return '🌫️';
-                        if (code >= 51 && code <= 55) return '🌦️';
-                        if (code >= 61 && code <= 65) return '🌧️';
-                        if (code >= 71 && code <= 75) return '🌨️';
-                        if (code >= 80 && code <= 82) return '🌦️';
-                        if (code >= 95) return '⛈️';
-                        return '🌡️';
-                      })()}
-                    </span>
-                    <span className="weather-temp">
-                      {Math.round(viewingFavorite.weather.current.temperature)}°C
-                    </span>
-                    <span className="weather-desc">{viewingFavorite.weather.current.description}</span>
-                    <span className="weather-detail">💨 {viewingFavorite.weather.current.windspeed} km/h</span>
-                    {viewingFavorite.weather.current.humidity != null && (
-                      <span className="weather-detail">💧 {viewingFavorite.weather.current.humidity}%</span>
-                    )}
-                    <span className="weather-detail" style={{fontSize:'0.75em', opacity:0.6}}>
-                      💾 {lang === 'fr' ? 'Données sauvegardées' : 'Saved data'}
-                    </span>
-                  </div>
-                )}
-
-                {/* Guide IA sauvegardé */}
-                {viewingFavorite.aiGuideText && (
-                  <div className="fav-ai-guide">
-                    <div className="fav-ai-guide-header">
-                      <span>🤖 Guide Touristique IA</span>
-                    </div>
-                    <div className="fav-ai-guide-content">
-                      {viewingFavorite.aiGuideText.split('\n').map((line, i) => (
-                        <p key={i}>{line || '\u00A0'}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Coordonnées */}
-                <p className="coords">
-                  Coordonnées : {viewingFavorite.latitude}, {viewingFavorite.longitude}
-                  <span className="saved-date">
-                    {' '}💾 {lang === 'fr' ? 'Sauvegardé le' : 'Saved on'} {new Date(viewingFavorite.savedAt).toLocaleDateString('fr-FR', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}
-                  </span>
-                </p>
-              </div>
-            </div>
-          ) : (
-            /* ---- Liste des favoris ---- */
-            <div className="favorites-list">
-              {favorites.map((fav, idx) => {
-                const flagCode = fav.country_code ? fav.country_code.toLowerCase() : 'fr';
-                const flagUrl = `https://flagcdn.com/28x21/${flagCode}.png`;
-                return (
-                  <div key={idx} className="favorite-card" onClick={() => selectFavorite(fav)}>
-                    <div className="fav-card-flag">
-                      <img src={flagUrl} alt="" className="custom-flag-img" loading="lazy"
-                        onError={(e) => { e.target.style.display = 'none'; }} />
-                    </div>
-                    <div className="fav-card-info">
-                      <div className="fav-card-city">
-                        {fav.city}
-                        {fav.postal_code && <span className="postal-code"> ({fav.postal_code})</span>}
-                      </div>
-                      <div className="fav-card-country">
-                        {fav.country || fav.country_code}
-                        {fav.currency_code && (
-                          <span className="fav-card-currency">
-                            {' '}{fav.currency_code === 'EUR' ? '💶' : '💱'} {fav.currency_code}
-                          </span>
-                        )}
-                      </div>
-                      <div className="fav-card-meta">
-                        {fav.weather && fav.weather.current && (
-                          <span className="fav-card-weather">
-                            🌡️ {Math.round(fav.weather.current.temperature)}°C
-                          </span>
-                        )}
-                        {fav.population > 0 && (
-                          <span className="fav-card-pop">
-                            👥 {typeof fav.population === 'number' ? fav.population.toLocaleString('fr-FR') : fav.population}
-                          </span>
-                        )}
-                        {fav.aiGuideText && (
-                          <span className="fav-card-guide">🤖 Guide</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="fav-card-arrow">›</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+      {/* Favoris */}
+      {favorites.length > 0 && (
+        <div className="favorites-bar">
+          <span>⭐ </span>
+          {favorites.slice(0, 5).map((f, idx) => (
+            <button key={idx} className="fav-chip" onClick={async () => {
+              setSearchInput(f.postal_code || f.city || '');
+              try {
+                let data;
+                if (f.postal_code) {
+                  data = await cachedGet(`${API}/api/location/${encodeURIComponent(f.postal_code)}`, { country: f.country_code || country });
+                } else {
+                  data = f;
+                }
+                setLocation(data);
+              } catch { setLocation(f); }
+              setMode('search');
+            }}>
+              {f.city} <small>({f.country_code})</small>
+            </button>
+          ))}
         </div>
       )}
 
