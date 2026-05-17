@@ -1835,7 +1835,7 @@ function App() {
           {location?.country_code && !chatStarted && (
             <div className="ai-guide-section">
               <button className="ai-guide-btn" onClick={startChat} disabled={chatLoading}>
-                {chatLoading ? '⏳ Démarrage...' : '🤖 Guide Touristique IA'}
+                {chatLoading ? '⏳ Démarrage...' : '🤖 Mon guide touristique IA'}
               </button>
             </div>
           )}
