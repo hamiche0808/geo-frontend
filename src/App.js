@@ -195,6 +195,36 @@ const COUNTRIES = [
   { code: 'AU', name: 'Australie', flag: '🇦🇺' },
 ];
 
+// ===== Échantillon de villes pour le bouton "Ville au hasard" =====
+const SAMPLE_CITIES = {
+  FR: ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille', 'Rennes', 'Reims', 'Saint-Étienne', 'Le Havre', 'Toulon', 'Grenoble', 'Dijon', 'Angers', 'Nîmes', 'Villeurbanne'],
+  BE: ['Bruxelles', 'Anvers', 'Gand', 'Charleroi', 'Liège', 'Bruges', 'Namur', 'Louvain', 'Mons', 'Alost'],
+  CA: ['Montréal', 'Toronto', 'Vancouver', 'Québec', 'Ottawa', 'Calgary', 'Edmonton', 'Winnipeg', 'Halifax', 'Mississauga'],
+  DZ: ['Alger', 'Oran', 'Constantine', 'Annaba', 'Blida', 'Sétif', 'Tlemcen', 'Sidi Bel Abbès', 'Skikda', 'Batna'],
+  MA: ['Casablanca', 'Rabat', 'Marrakech', 'Fès', 'Tanger', 'Agadir', 'Meknès', 'Oujda', 'Kénitra', 'Tétouan'],
+  TN: ['Tunis', 'Sfax', 'Sousse', 'Kairouan', 'Bizerte', 'Gabès', 'Ariana', 'Gafsa', 'Monastir', 'Ben Gardane'],
+  DE: ['Berlin', 'Hambourg', 'Munich', 'Cologne', 'Francfort', 'Stuttgart', 'Düsseldorf', 'Leipzig', 'Dortmund', 'Essen'],
+  IT: ['Rome', 'Milan', 'Naples', 'Turin', 'Palerme', 'Bologne', 'Florence', 'Catane', 'Venise', 'Vérone'],
+  ES: ['Madrid', 'Barcelone', 'Valence', 'Séville', 'Bilbao', 'Málaga', 'Saragosse', 'Murcie', 'Palma', 'Grenade'],
+  US: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphie', 'San Antonio', 'San Diego', 'Dallas', 'San Francisco', 'Boston', 'Seattle', 'Denver', 'Miami', 'Atlanta'],
+  GB: ['Londres', 'Birmingham', 'Manchester', 'Glasgow', 'Liverpool', 'Édimbourg', 'Leeds', 'Bristol', 'Sheffield', 'Cardiff'],
+  JP: ['Tokyo', 'Osaka', 'Yokohama', 'Nagoya', 'Sapporo', 'Fukuoka', 'Kobe', 'Kyoto', 'Kawasaki', 'Saitama'],
+  CH: ['Zurich', 'Genève', 'Bâle', 'Berne', 'Lausanne', 'Winterthour', 'Lucerne', 'Saint-Gall', 'Lugano', 'Bienne'],
+  PT: ['Lisbonne', 'Porto', 'Braga', 'Coimbra', 'Funchal', 'Amadora', 'Setúbal', 'Aveiro', 'Évora', 'Faro'],
+  NL: ['Amsterdam', 'Rotterdam', 'La Haye', 'Utrecht', 'Eindhoven', 'Groningue', 'Tilbourg', 'Almere', 'Breda', 'Nimègue'],
+  AT: ['Vienne', 'Salzbourg', 'Graz', 'Linz', 'Innsbruck', 'Klagenfurt', 'Villach', 'Wels', 'Sankt Pölten', 'Dornbirn'],
+  IE: ['Dublin', 'Cork', 'Galway', 'Limerick', 'Waterford', 'Drogheda', 'Kilkenny', 'Wexford', 'Sligo', 'Dundalk'],
+  GR: ['Athènes', 'Thessalonique', 'Patras', 'Héraklion', 'Larissa', 'Volos', 'Ioannina', 'La Canée', 'Rhodes', 'Le Pirée'],
+  FI: ['Helsinki', 'Espoo', 'Tampere', 'Turku', 'Vantaa', 'Oulu', 'Lahti', 'Jyväskylä', 'Kuopio', 'Pori'],
+  CN: ['Pékin', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Nankin', 'Wuhan', 'Hangzhou', 'Xi\'an', 'Chongqing'],
+  NZ: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton', 'Tauranga', 'Napier', 'Dunedin', 'Palmerston North', 'Nelson', 'Rotorua'],
+  SE: ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Linköping', 'Västerås', 'Örebro', 'Helsingborg', 'Norrköping', 'Jönköping'],
+  NO: ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Drammen', 'Fredrikstad', 'Kristiansand', 'Tromsø', 'Sandnes', 'Bodø'],
+  DK: ['Copenhague', 'Aarhus', 'Odense', 'Aalborg', 'Esbjerg', 'Randers', 'Kolding', 'Horsens', 'Vejle', 'Roskilde'],
+  PL: ['Varsovie', 'Cracovie', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Lublin', 'Katowice'],
+  AU: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adélaïde', 'Gold Coast', 'Newcastle', 'Canberra', 'Wollongong', 'Sunshine Coast'],
+};
+
 // ===== Fuseaux horaires IANA — fonction intelligente (pays × longitude) =====
 // Pour les pays à fuseau unique, mapping direct.
 // Pour les grands pays (US, CA, RU, AU, BR, MX, ID), on utilise la longitude.
@@ -783,6 +813,7 @@ function App() {
 
   // ===== Heure locale (temps réel, rafraîchie toutes les 30s) =====
   const [localTimeStr, setLocalTimeStr] = useState('');
+  const [timeOffsetStr, setTimeOffsetStr] = useState('');
   const getLocalTime = (countryCode, longitude) => {
     try {
       const tz = getTimezoneForLocation(countryCode, longitude);
@@ -794,10 +825,31 @@ function App() {
       }).format(new Date());
     } catch { return ''; }
   };
+  // Calcul du décalage horaire par rapport au navigateur
+  const getTimeOffsetStr = (countryCode, longitude) => {
+    try {
+      const tz = getTimezoneForLocation(countryCode, longitude);
+      // Offset du navigateur (minutes, positif pour UTC+)
+      const browserOffset = -new Date().getTimezoneOffset();
+      // Offset de la destination
+      const now = new Date();
+      const utcNow = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+      const tzNow = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+      const destOffset = (tzNow - utcNow) / 60000;
+      const diffMin = destOffset - browserOffset;
+      if (Math.abs(diffMin) < 30) return ', même heure que vous';
+      const hours = diffMin / 60;
+      const sign = hours > 0 ? '+' : '';
+      return ` (${sign}${hours.toFixed(1).replace('.0', '')}h par rapport à vous)`;
+    } catch { return ''; }
+  };
   // Mise à jour dynamique toutes les 30 secondes
   useEffect(() => {
-    if (!location?.country_code) { setLocalTimeStr(''); return; }
-    const update = () => setLocalTimeStr(getLocalTime(location.country_code, location.longitude));
+    if (!location?.country_code) { setLocalTimeStr(''); setTimeOffsetStr(''); return; }
+    const update = () => {
+      setLocalTimeStr(getLocalTime(location.country_code, location.longitude));
+      setTimeOffsetStr(getTimeOffsetStr(location.country_code, location.longitude));
+    };
     update();
     const id = setInterval(update, 30000);
     return () => clearInterval(id);
@@ -826,6 +878,21 @@ function App() {
       setError(errMsg);
       setLocation(null);
     } finally { setLoading(false); setLoadingMessage(''); }
+  };
+
+  // ===== Ville au hasard (Random Voyage) =====
+  const handleRandomVoyage = () => {
+    // Choisir un pays aléatoire parmi ceux qui ont des villes dans SAMPLE_CITIES
+    const codes = Object.keys(SAMPLE_CITIES);
+    const randomCode = codes[Math.floor(Math.random() * codes.length)];
+    const cities = SAMPLE_CITIES[randomCode];
+    const randomCity = cities[Math.floor(Math.random() * cities.length)];
+    // Mettre à jour le sélecteur de pays
+    setCountry(randomCode);
+    // Remplir le champ de recherche
+    setSearchInput(randomCity);
+    // Déclencher la recherche
+    setTimeout(() => handleSearch(randomCity), 100);
   };
 
   const handleInputChange = (e) => {
@@ -1517,6 +1584,9 @@ function App() {
               <button onClick={() => handleSearch()} disabled={loading || searchingDebounce}>
                 {loading ? '⏳' : searchingDebounce ? '⏳' : '🔍 Rechercher'}
               </button>
+              <button className="btn-random" onClick={handleRandomVoyage} disabled={loading} title={lang === 'fr' ? 'Ville au hasard' : 'Random city'}>
+                🎲
+              </button>
             </>
           )}
 
@@ -1821,7 +1891,7 @@ function App() {
                 </>
               )}
               {location.latitude && location.longitude && localTimeStr && (
-                <span className="local-time">🕐 <span className="local-time-label">{lang === 'fr' ? 'Heure locale' : 'Local time'} :</span> {localTimeStr}</span>
+                <span className="local-time">🕐 <span className="local-time-label">{lang === 'fr' ? 'Heure locale' : 'Local time'} :</span> {localTimeStr}{timeOffsetStr}</span>
               )}
             </div>
           </div>
@@ -2074,7 +2144,7 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-links">
-          <span className="footer-brand">🌍 GeoLoc v4.9</span>
+          <span className="footer-brand">🌍 GeoLoc v5.1</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>

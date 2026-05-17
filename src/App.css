@@ -364,6 +364,29 @@ header h1 {
   background: rgba(255, 255, 255, 0.4) !important;
 }
 
+.btn-random {
+  font-size: 1.3em !important;
+  padding: 6px 10px !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-radius: 50% !important;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s !important;
+  cursor: pointer;
+}
+.btn-random:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  transform: scale(1.15) rotate(15deg);
+}
+.btn-random:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 /* ===== Autocomplétion ===== */
 .suggestions {
   position: absolute;
