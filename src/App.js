@@ -1585,7 +1585,7 @@ function App() {
                 {loading ? '⏳' : searchingDebounce ? '⏳' : '🔍 Rechercher'}
               </button>
               <button className="btn-random" onClick={handleRandomVoyage} disabled={loading} title={lang === 'fr' ? 'Ville au hasard' : 'Random city'}>
-                🎲
+                🎲 {lang === 'fr' ? 'Lancer le dé' : 'Roll the dice'}
               </button>
             </>
           )}

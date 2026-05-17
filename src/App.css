@@ -365,21 +365,23 @@ header h1 {
 }
 
 .btn-random {
-  font-size: 1.3em !important;
-  padding: 6px 10px !important;
+  font-size: 0.95em !important;
+  padding: 7px 14px !important;
   background: rgba(255, 255, 255, 0.25) !important;
-  border-radius: 50% !important;
-  width: 40px;
-  height: 40px;
+  border-radius: 20px !important;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
   transition: all 0.3s !important;
   cursor: pointer;
+  white-space: nowrap;
 }
 .btn-random:hover {
-  background: rgba(255, 255, 255, 0.5) !important;
-  transform: scale(1.15) rotate(15deg);
+  background: rgba(255, 255, 255, 0.45) !important;
+  transform: scale(1.05);
+}
+.btn-random:active {
+  transform: scale(0.95) rotate(10deg);
 }
 .btn-random:disabled {
   opacity: 0.4;
