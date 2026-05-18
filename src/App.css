@@ -872,6 +872,8 @@ body.dark-mode .tab-dark { background: rgba(255, 255, 255, 0.15); }
 .weather-wind { color: var(--text-secondary); font-size: 0.9em; }
 .weather-detail { color: var(--text-secondary); font-size: 0.85em; margin-left: 4px; }
 .weather-detail-sub { font-size: 0.75em; opacity: 0.7; margin-left: 2px; white-space: nowrap; }
+.weather-sun { color: #e6a817 !important; font-weight: 600; }
+body.dark-mode .weather-sun { color: #f0c040 !important; }
 
 /* ===== Animations météo CSS (GPU accéléré, 0 JS) ===== */
 .weather-widget {

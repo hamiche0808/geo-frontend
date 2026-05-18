@@ -110,6 +110,11 @@ export default function WeatherWidget({ weather, cityName, lang = 'fr' }) {
         {current.precipitation_probability != null && current.precipitation_probability > 0 && (
           <span className="weather-detail">🌧️ {current.precipitation_probability}%</span>
         )}
+        {current.sunrise && current.sunset && (
+          <span className="weather-detail weather-sun">
+            🌅 {current.sunrise} — {current.sunset}
+          </span>
+        )}
         {current.uv_index != null && (
           <span className="weather-detail">
             ☀️ UV {current.uv_index}
