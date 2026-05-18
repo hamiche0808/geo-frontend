@@ -1912,11 +1912,15 @@ function App() {
             <div className="population-badge"><span className="pop-icon">👤</span><span className="pop-label">Population :</span>{location.population > 0 ? <><span className="pop-value">{location.population.toLocaleString('fr-FR')}</span><span className="pop-unit">habitants</span></> : <span className="pop-value pop-unknown">Non spécifiée</span>}</div>
             {location.is_address && <span className="detail-badge address-badge">📍 Adresse précise</span>}
           </div>
-          {weather && weather.current && !weather.error && (
+          {weather && weather.current && !weather.error ? (
             <>
               <WeatherWidget weather={weather} cityName={location?.city} lang={lang} />
               <ActivitiesWidget weatherCode={weather.current.weathercode} cityName={location?.city} lang={lang} />
             </>
+          ) : location && !loading && (
+            <div className="weather-fallback">
+              🌤️ {lang === 'fr' ? 'Météo temporairement indisponible' : 'Weather temporarily unavailable'}
+            </div>
           )}
 
           {/* Chat Guide Touristiqu IA conversationnel */}

@@ -881,6 +881,23 @@ body.dark-mode .weather-sun { color: #f0c040 !important; }
   overflow: hidden;
 }
 
+/* ---- Fallback météo indisponible ---- */
+.weather-fallback {
+  text-align: center;
+  padding: 12px 16px;
+  margin: 12px auto;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+body.dark-mode .weather-fallback {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 /* ---- Soleil : pulsation douce ---- */
 .weather-anim-sunny .weather-icon {
   display: inline-block;
