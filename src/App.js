@@ -598,12 +598,20 @@ function App() {
 
   // Écouter les mises à jour PWA automatiques
   useEffect(() => {
-    const handler = () => {
+    const autoHandler = () => {
       setError('🔄 Mise à jour détectée — rechargement...');
       setTimeout(() => setError(''), 3000);
     };
-    window.addEventListener('sw-update-applied', handler);
-    return () => window.removeEventListener('sw-update-applied', handler);
+    // Mise à jour trouvée via le bouton manuel → afficher le message inline
+    const foundHandler = () => {
+      setUpdateCheckMsg('found');
+    };
+    window.addEventListener('sw-update-applied', autoHandler);
+    window.addEventListener('sw-update-found', foundHandler);
+    return () => {
+      window.removeEventListener('sw-update-applied', autoHandler);
+      window.removeEventListener('sw-update-found', foundHandler);
+    };
   }, []);
   // ===== Fin mise à jour automatique =====
 
@@ -2257,36 +2265,68 @@ function App() {
             </label>
             <div style={{display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap'}}>
               <button onClick={() => {
-                // Fermer le menu paramètres
-                setShowSettings(false);
                 if (window.checkForUpdates) {
                   const ok = window.checkForUpdates();
                   if (ok) {
                     setUpdateCheckMsg('checking');
-                    setError(lang === 'fr' ? '🔄 Vérification des mises à jour...' : '🔄 Checking for updates...');
                     // Si aucun update trouvé après 4s, afficher "À jour"
                     const timeoutId = setTimeout(() => {
                       setUpdateCheckMsg(prev => {
                         if (prev === 'checking') {
-                          setError(lang === 'fr' ? '✅ Aucune mise à jour disponible' : '✅ Already up to date');
-                          setTimeout(() => { setError(''); setUpdateCheckMsg(null); }, 3000);
-                          return null;
+                          setUpdateCheckMsg('uptodate');
+                          setTimeout(() => setUpdateCheckMsg(null), 4000);
+                          return 'uptodate';
                         }
                         return prev;
                       });
                     }, 4000);
                     window.__updateCheckTimeout = timeoutId;
                   } else {
-                    setError('❌ Impossible de vérifier les mises à jour');
-                    setTimeout(() => setError(''), 4000);
+                    setUpdateCheckMsg('error');
+                    setTimeout(() => setUpdateCheckMsg(null), 4000);
                   }
                 } else {
-                  setError('❌ Service Worker non disponible, rechargez la page');
-                  setTimeout(() => setError(''), 4000);
+                  setUpdateCheckMsg('nosw');
+                  setTimeout(() => setUpdateCheckMsg(null), 4000);
                 }
               }} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer'}}>
                 🔄 {lang === 'fr' ? 'Vérifier les mises à jour' : 'Check for updates'}
               </button>
+              {/* Message de statut visible */}
+              {updateCheckMsg === 'checking' && (
+                <span style={{fontSize:'13px', color:'var(--text-secondary)'}}>
+                  🔄 {lang === 'fr' ? 'Vérification...' : 'Checking...'}
+                </span>
+              )}
+              {updateCheckMsg === 'uptodate' && (
+                <span style={{fontSize:'13px', color:'#27ae60'}}>
+                  ✅ {lang === 'fr' ? 'Application à jour' : 'App is up to date'}
+                </span>
+              )}
+              {updateCheckMsg === 'found' && (
+                <span style={{fontSize:'13px', color:'#e67e22', cursor:'pointer', textDecoration:'underline'}}
+                      onClick={() => { if (window.applyUpdate) window.applyUpdate(); }}>
+                  🔄 {lang === 'fr' ? 'Mise à jour disponible — cliquer pour appliquer' : 'Update available — click to apply'}
+                </span>
+              )}
+              {updateCheckMsg === 'error' && (
+                <span style={{fontSize:'13px', color:'#e74c3c'}}>
+                  ❌ {lang === 'fr' ? 'Erreur de vérification' : 'Check failed'}
+                </span>
+              )}
+              {updateCheckMsg === 'nosw' && (
+                <span style={{fontSize:'13px', color:'#e74c3c'}}>
+                  ❌ {lang === 'fr' ? 'Service Worker indisponible' : 'Service Worker unavailable'}
+                </span>
+              )}
+            </div>
+
+            {/* Indicateur discret du backend actif */}
+            <div style={{marginTop:'12px', fontSize:'12px', color:'var(--text-secondary)', display:'flex', alignItems:'center', gap:'6px', borderTop:'1px solid var(--border)', paddingTop:'10px'}}>
+              <span style={{display:'inline-block', width:'8px', height:'8px', borderRadius:'50%', background: railFallbackActive ? '#e67e22' : '#27ae60'}}></span>
+              {railFallbackActive
+                ? (lang === 'fr' ? '🛡️ Backup : Render' : '🛡️ Backup: Render')
+                : (lang === 'fr' ? '🚆 Principal : Railway' : '🚆 Primary: Railway')}
             </div>
 
             {pwaInstallAvailable && (

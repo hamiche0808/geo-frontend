@@ -46,16 +46,22 @@ if ('serviceWorker' in navigator) {
             // ID unique pour cette mise à jour (timestamp + random)
             currentUpdateId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
 
-            // MISE À JOUR AUTOMATIQUE : quelque soit la plateforme (desktop, mobile, PWA)
-            // On envoie immédiatement SKIP_WAITING pour activer la nouvelle version
-            if (waitingWorker) {
-              waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+            if (manualUpdateCheck) {
+              // Vérification manuelle via le bouton → ne pas recharger automatiquement
+              manualUpdateCheck = false;
+              window.dispatchEvent(new CustomEvent('sw-update-found', {
+                detail: { updateId: currentUpdateId }
+              }));
+            } else {
+              // MISE À JOUR AUTOMATIQUE : on applique immédiatement
+              if (waitingWorker) {
+                waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+              }
+              // Notifier l'UI qu'une mise à jour a été détectée et appliquée
+              window.dispatchEvent(new CustomEvent('sw-update-applied', {
+                detail: { updateId: currentUpdateId }
+              }));
             }
-
-            // Notifier l'UI qu'une mise à jour a été détectée et appliquée (notification discrète)
-            window.dispatchEvent(new CustomEvent('sw-update-applied', {
-              detail: { updateId: currentUpdateId }
-            }));
           }
         });
       });
@@ -74,6 +80,9 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// Drapeau : la vérification manuelle est en cours (bouton "Vérifier")
+let manualUpdateCheck = false;
 
 // Exposer la fonction de mise à jour pour App.js
 window.applyUpdate = function() {
@@ -95,7 +104,9 @@ window.applyUpdate = function() {
 // Exposer la vérification manuelle de mise à jour
 window.checkForUpdates = function() {
   if (swRegistration) {
+    manualUpdateCheck = true; // Indique que c'est une vérification manuelle
     swRegistration.update();
+    setTimeout(() => { manualUpdateCheck = false; }, 5000); // Reset après 5s
     return true;
   }
   return false;

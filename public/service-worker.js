@@ -21,8 +21,8 @@ self.addEventListener('activate', event => {
 // Stratégie : Network First (site frais en ligne) / Stale-while-revalidate (assets)
 self.addEventListener('fetch', event => {
   const { request } = event;
-  // Ne pas intercepter les appels vers l'API
-  if (request.url.includes('/api/') || request.url.includes('render.com')) {
+  // Ne pas intercepter les appels vers l'API (Railway + Render)
+  if (request.url.includes('/api/') || request.url.includes('railway.app') || request.url.includes('render.com')) {
     return;
   }
   // Navigation (pages HTML) : Network First
