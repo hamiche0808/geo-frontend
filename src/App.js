@@ -80,6 +80,20 @@ async function cachedGet(url, params = {}) {
   return resp.data;
 }
 
+// ===== Tracking admin (stats anonymes) =====
+let _trackDebounce = {};
+function trackSearch(city) {
+  if (!city) return;
+  const key = 's_' + city;
+  if (_trackDebounce[key]) return; // Évite les doublons 5s
+  _trackDebounce[key] = setTimeout(() => { delete _trackDebounce[key]; }, 5000);
+  // Appel asynchrone silencieux (fire & forget)
+  apiPost(`${API}/api/admin/track`, { type: 'search', city }).catch(() => {});
+}
+function trackServer(server) {
+  apiPost(`${API}/api/admin/track`, { type: 'server', server }).catch(() => {});
+}
+
 // Helper pour les appels POST avec fallback Railway → Render
 async function apiPost(url, data, config = {}) {
   if (!railFallbackActive) {
@@ -563,6 +577,11 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [customPrimary, setCustomPrimary] = useState('');
   const [customAccent, setCustomAccent] = useState('');
+  // Admin secret
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminPin, setAdminPin] = useState('');
+  const [adminStats, setAdminStats] = useState(null);
+  const [adminError, setAdminError] = useState('');
 
   // Taux de change (devises)
   const [exchangeRates, setExchangeRates] = useState(null);
@@ -923,6 +942,9 @@ function App() {
       setLocation(data);
       saveToHistory(data);
       setShowSuggestions(false);
+      // Tracker la recherche + serveur utilisé pour les stats admin
+      trackSearch(data.city);
+      trackServer(railFallbackActive ? 'render' : 'railway');
       // Charger la météo
       setLoadingMessage('🌤️ Météo...');
       fetchWeather(data.latitude, data.longitude);
@@ -2373,8 +2395,120 @@ function App() {
             <p style={{marginTop:'20px', opacity:0.6, fontSize:'12px'}}>
               {lang === 'fr' ? 'Les couleurs sont réinitialisées au rechargement de la page.' : 'Colors reset on page reload.'}
             </p>
+
+            {/* 🔒 Admin secret — accessible uniquement à mon créateur */}
+            <div style={{marginTop:'25px', borderTop:'1px dashed var(--border)', paddingTop:'15px', textAlign:'center'}}>
+              <button onClick={() => setShowAdminLogin(true)}
+                style={{padding:'6px 14px', borderRadius:'20px', border:'1px solid var(--border)', cursor:'pointer', fontSize:'12px', opacity:0.5, background:'transparent'}}>
+                🔒 Admin
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* ===== Admin Dashboard (après connexion) ===== */}
+        {showAdminLogin && (
+          <div className="modal-overlay" onClick={() => { setShowAdminLogin(false); setAdminPin(''); setAdminStats(null); setAdminError(''); }}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}
+              style={{maxWidth:'480px', textAlign:'center'}}>
+              
+              {!adminStats ? (
+                <>
+                  <h3>🔒 {lang === 'fr' ? 'Accès Admin' : 'Admin Access'}</h3>
+                  <p style={{fontSize:'13px', color:'var(--text-secondary)', margin:'10px 0'}}>
+                    {lang === 'fr' ? 'Code secret requis' : 'Secret code required'}
+                  </p>
+                  <input type="password" value={adminPin} onChange={e => { setAdminPin(e.target.value); setAdminError(''); }}
+                    placeholder="••••••"
+                    style={{padding:'10px 16px', borderRadius:'8px', border:'2px solid var(--border)', width:'80%', maxWidth:'200px', textAlign:'center', fontSize:'18px', letterSpacing:'4px', background:'var(--bg)', color:'var(--text)'}} />
+                  {adminError && <p style={{color:'#e74c3c', fontSize:'13px', margin:'8px 0'}}>{adminError}</p>}
+                  <div style={{display:'flex', gap:'10px', justifyContent:'center', marginTop:'12px'}}>
+                    <button onClick={async () => {
+                      if (!adminPin.trim()) { setAdminError('Code requis'); return; }
+                      try {
+                        const resp = await API_CLIENT.get(`${API}/api/admin/stats`, { params: { token: adminPin.trim() } });
+                        setAdminStats(resp.data);
+                      } catch (e) {
+                        if (e?.response?.status === 403) setAdminError('⛔ Mauvais code');
+                        else setAdminError('❌ Erreur réseau');
+                      }
+                    }} style={{padding:'10px 24px', borderRadius:'8px', border:'none', background:'var(--accent)', color:'white', cursor:'pointer'}}>
+                      🔓 {lang === 'fr' ? 'Connexion' : 'Login'}
+                    </button>
+                    <button onClick={() => { setShowAdminLogin(false); setAdminPin(''); setAdminStats(null); setAdminError(''); }}
+                      style={{padding:'10px 24px', borderRadius:'8px', border:'1px solid var(--border)', cursor:'pointer', background:'transparent', color:'var(--text)'}}>
+                      {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 style={{marginBottom:'5px'}}>📊 {lang === 'fr' ? 'Tableau de Bord' : 'Dashboard'}</h3>
+                  <p style={{fontSize:'12px', color:'var(--text-secondary)', marginBottom:'15px'}}>
+                    {lang === 'fr' ? 'Statistiques du mois' : 'Monthly statistics'} · {adminStats.month}
+                  </p>
+
+                  {/* Compteur recherches */}
+                  <div className="admin-stat-card">
+                    <div className="admin-stat-icon">🔍</div>
+                    <div className="admin-stat-value">{adminStats.total_searches}</div>
+                    <div className="admin-stat-label">{lang === 'fr' ? 'Recherches ce mois-ci' : 'Searches this month'}</div>
+                  </div>
+
+                  {/* Top 3 villes */}
+                  <div style={{textAlign:'left', margin:'15px 0'}}>
+                    <h4 style={{fontSize:'14px', margin:'0 0 8px'}}>🏆 {lang === 'fr' ? 'Top 3 des villes' : 'Top 3 cities'}</h4>
+                    {adminStats.top_cities && adminStats.top_cities.length > 0 ? (
+                      <ol style={{margin:0, paddingLeft:'20px'}}>
+                        {adminStats.top_cities.map((c, i) => (
+                          <li key={i} style={{fontSize:'14px', margin:'4px 0'}}>
+                            {c.city} <span style={{color:'var(--text-secondary)', fontSize:'12px'}}>({c.count}×)</span>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p style={{fontSize:'13px', color:'var(--text-secondary)'}}>
+                        {lang === 'fr' ? 'Aucune recherche ce mois-ci' : 'No searches this month'}
+                      </p>
+                    )}
+                    {adminStats.total_cities > 3 && (
+                      <p style={{fontSize:'11px', color:'var(--text-secondary)', margin:'5px 0 0'}}>
+                        {lang === 'fr' ? `et ${adminStats.total_cities - 3} autre(s) ville(s)` : `and ${adminStats.total_cities - 3} other city(ies)`}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Combat de serveurs */}
+                  <div style={{margin:'15px 0'}}>
+                    <h4 style={{fontSize:'14px', margin:'0 0 8px'}}>⚔️ {lang === 'fr' ? 'Serveurs' : 'Servers'}</h4>
+                    <div style={{display:'flex', gap:'20px', justifyContent:'center', flexWrap:'wrap'}}>
+                      <div style={{background:'rgba(39,174,96,0.1)', borderRadius:'12px', padding:'12px 20px', minWidth:'100px'}}>
+                        <div style={{fontSize:'20px', fontWeight:'bold', color:'#27ae60'}}>🚆 {adminStats.servers?.railway || 0}</div>
+                        <div style={{fontSize:'11px', color:'var(--text-secondary)'}}>Railway</div>
+                      </div>
+                      <div style={{background:'rgba(230,126,34,0.1)', borderRadius:'12px', padding:'12px 20px', minWidth:'100px'}}>
+                        <div style={{fontSize:'20px', fontWeight:'bold', color:'#e67e22'}}>🛡️ {adminStats.servers?.render || 0}</div>
+                        <div style={{fontSize:'11px', color:'var(--text-secondary)'}}>Render</div>
+                      </div>
+                    </div>
+                    {adminStats.servers?.railway + adminStats.servers?.render > 0 && (
+                      <p style={{fontSize:'11px', color:'var(--text-secondary)', marginTop:'6px'}}>
+                        {lang === 'fr'
+                          ? `Ratio Railway : ${Math.round(adminStats.servers.railway / (adminStats.servers.railway + adminStats.servers.render) * 100)}%`
+                          : `Railway ratio: ${Math.round(adminStats.servers.railway / (adminStats.servers.railway + adminStats.servers.render) * 100)}%`}
+                      </p>
+                    )}
+                  </div>
+
+                  <button onClick={() => { setShowAdminLogin(false); setAdminPin(''); setAdminStats(null); setAdminError(''); }}
+                    style={{padding:'10px 24px', borderRadius:'8px', border:'none', background:'var(--accent)', color:'white', cursor:'pointer', marginTop:'10px'}}>
+                    {lang === 'fr' ? 'Fermer' : 'Close'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       )}
 
       {/* Admin panel (messages) */}
