@@ -2408,6 +2408,7 @@ function App() {
             </div>
           </div>
         </div>
+      )}
 
         {/* ===== Admin Dashboard (après connexion) ===== */}
         {showAdminLogin && (
@@ -2512,7 +2513,6 @@ function App() {
             </div>
           </div>
         )}
-      )}
 
       {/* Admin panel (messages) */}
       {showAdmin && (
