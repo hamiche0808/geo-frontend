@@ -2398,9 +2398,12 @@ function App() {
 
             {/* 🔒 Admin secret — accessible uniquement à mon créateur */}
             <div style={{marginTop:'25px', borderTop:'1px dashed var(--border)', paddingTop:'15px', textAlign:'center'}}>
+              <p style={{fontSize:'11px', color:'var(--text-secondary)', margin:'0 0 8px', opacity:0.4}}>
+                ──── {lang === 'fr' ? 'Espace créateur' : 'Creator area'} ────
+              </p>
               <button onClick={() => setShowAdminLogin(true)}
-                style={{padding:'6px 14px', borderRadius:'20px', border:'1px solid var(--border)', cursor:'pointer', fontSize:'12px', opacity:0.5, background:'transparent'}}>
-                🔒 Admin
+                style={{padding:'10px 24px', borderRadius:'30px', border:'2px solid var(--accent)', cursor:'pointer', fontSize:'14px', fontWeight:600, background:'transparent', color:'var(--accent)', letterSpacing:'0.5px'}}>
+                🔒 {lang === 'fr' ? 'Tableau de bord Admin' : 'Admin Dashboard'}
               </button>
             </div>
           </div>
