@@ -54,13 +54,44 @@ function setToCache(url, data) {
 }
 
 // Version avec cache pour les appels GET
+// Fallback automatique Railway → Render si timeout (>3s) ou erreur
+let railFallbackActive = false; // sticky fallback : éviter d'attendre 3s à chaque requête si Railway est down
 async function cachedGet(url, params = {}) {
   const cacheKey = url + JSON.stringify(params);
   const cached = getFromCache(cacheKey);
   if (cached) return cached;
-  const resp = await API_CLIENT.get(url, { params });
+
+  if (!railFallbackActive) {
+    // Essayer Railway (timeout 3s) — l'URL contient déjà API_RAILWAY car API = API_RAILWAY
+    try {
+      const resp = await RAILWAY_CLIENT.get(url, { params });
+      setToCache(cacheKey, resp.data);
+      return resp.data;
+    } catch (primaryErr) {
+      console.warn('⚠️ Railway indisponible, bascule vers Render :', primaryErr.message);
+      railFallbackActive = true; // sticky : on ne réessaie pas Railway avant rechargement page
+    }
+  }
+
+  // Fallback Render : remplacer le domaine Railway par Render
+  const renderUrl = url.replace(API_RAILWAY, API_FALLBACK);
+  const resp = await API_CLIENT.get(renderUrl, { params });
   setToCache(cacheKey, resp.data);
   return resp.data;
+}
+
+// Helper pour les appels POST avec fallback Railway → Render
+async function apiPost(url, data, config = {}) {
+  if (!railFallbackActive) {
+    try {
+      return await RAILWAY_CLIENT.post(url, data, config);
+    } catch (e) {
+      console.warn('⚠️ Railway POST indisponible, bascule vers Render :', e.message);
+      railFallbackActive = true;
+    }
+  }
+  const renderUrl = url.replace(API_RAILWAY, API_FALLBACK);
+  return await API_CLIENT.post(renderUrl, data, config);
 }
 
 // Icône de drapeau dynamique selon le pays
@@ -78,7 +109,21 @@ function getFlagIcon(countryCode) {
   });
 }
 
-const API = process.env.REACT_APP_API_URL || 'https://geo-app-1-z314.onrender.com';
+// ===== Backend URLs (Railway principal, Render fallback) =====
+const API_RAILWAY = 'https://geo-api-production-b1af.up.railway.app';
+const API_RENDER  = 'https://geo-app-1-z314.onrender.com';
+const API = process.env.REACT_APP_API_URL || API_RAILWAY;
+const API_FALLBACK = API_RENDER;
+
+// Railway-specific Axios client avec timeout 3s
+const RAILWAY_CLIENT = axios.create({
+  headers: {
+    'User-Agent': 'GeoLocApp/5.0 (hamiche08.08@gmail.com)',
+    'Accept': 'application/json',
+    'X-API-Key': 'geoloc-app-key-2026',
+  },
+  timeout: 3000
+});
 
 // ===== Mapping pays → devise =====
 const CURRENCY_MAP = {
@@ -727,7 +772,7 @@ function App() {
     setChatInput('');
     setChatLoading(true);
     try {
-      const resp = await API_CLIENT.post(`${API}/api/ai/chat`, {
+      const resp = await apiPost(`${API}/api/ai/chat`, {
         city: location.city,
         country_code: location.country_code,
         lang: lang,
@@ -1253,7 +1298,7 @@ function App() {
         weather: weather || null,
         fuel_cost: showFuelCalc ? calculateFuelCost().toFixed(2) : null
       };
-      const resp = await API_CLIENT.post(`${API}/api/export/pro-pdf`, payload, { responseType: 'blob', timeout: 30000 });
+      const resp = await apiPost(`${API}/api/export/pro-pdf`, payload, { responseType: 'blob', timeout: 30000 });
       const blob = new Blob([resp.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1340,7 +1385,7 @@ function App() {
     setContactStatus('sending');
     setContactErrorMsg('');
     try {
-      await API_CLIENT.post(`${API}/api/contact`, contactForm, { timeout: 10000 });
+      await apiPost(`${API}/api/contact`, contactForm, { timeout: 10000 });
       setContactStatus('done');
       setContactErrorMsg('');
       setContactForm({ name: '', email: '', subject: '', message: '' });
@@ -1402,9 +1447,20 @@ function App() {
       url += `&waypoints=${encodeURIComponent(waypointsParam)}`;
     }
 
-    API_CLIENT.get(url)
-      .then(res => res.data)
-      .then(data => {
+    // Fallback Railway → Render pour les directions
+    const fetchDirections = async () => {
+      if (!railFallbackActive) {
+        try {
+          return await RAILWAY_CLIENT.get(url).then(r => r.data);
+        } catch (e) {
+          console.warn('⚠️ Railway directions indisponible, fallback Render :', e.message);
+          railFallbackActive = true;
+        }
+      }
+      const renderUrl = url.replace(API_RAILWAY, API_FALLBACK);
+      return await API_CLIENT.get(renderUrl).then(r => r.data);
+    };
+    fetchDirections().then(data => {
         if (data.distance) {
           const km = data.distance / 1000;
           const coords = data.route_coords || [];
