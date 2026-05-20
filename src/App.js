@@ -1030,6 +1030,27 @@ function App() {
     setLoadingMessage('🔍 Recherche...');
     try {
       setLoadingMessage('📡 Connexion...');
+      // Si le terme ne ressemble pas à un code postal, chercher d'abord via /api/search
+      if (!term.match(/^\d/) && !countryOverride) {
+        const suggestions = await cachedGet(`${API}/api/search`, { q: term, country: countryCode, limit: 5 });
+        if (suggestions && suggestions.length > 0) {
+          const best = suggestions[0];
+          // Utiliser les données de la suggestion directement
+          setLoadingMessage('🌍 Analyse...');
+          const data = buildLocationFromData(best, countryCode);
+          setLocation(data);
+          saveToHistory(data);
+          setShowSuggestions(false);
+          trackSearch(data.city);
+          trackServer(railFallbackActive ? 'render' : 'railway');
+          setLoadingMessage('🌤️ Météo...');
+          fetchWeather(data.latitude, data.longitude);
+          setLoadingMessage('🖼️ Ville...');
+          setLoading(false);
+          setLoadingMessage('');
+          return;
+        }
+      }
       const data = await cachedGet(`${API}/api/location/${encodeURIComponent(term)}`, { country: countryCode });
       setLoadingMessage('🌍 Analyse...');
       setLocation(data);
@@ -1043,7 +1064,7 @@ function App() {
       fetchWeather(data.latitude, data.longitude);
       setLoadingMessage('🖼️ Ville...');
     } catch (err) {
-      const errMsg = err?.response?.status === 404 ? 'Code postal non trouvé.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
+      const errMsg = err?.response?.status === 404 || (err?.response?.data?.detail || '').includes('non trouvé') ? 'Ville non trouvée.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
       setError(errMsg);
       setLocation(null);
     } finally { setLoading(false); setLoadingMessage(''); }
