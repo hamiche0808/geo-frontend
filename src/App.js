@@ -634,8 +634,8 @@ function App() {
   // Langue + parametres
   const [lang, setLang] = useState('fr');
   const [showSettings, setShowSettings] = useState(false);
-  const [customPrimary, setCustomPrimary] = useState('');
-  const [customAccent, setCustomAccent] = useState('');
+  const [customPrimary, setCustomPrimary] = useState(() => localStorage.getItem('geoloc_primary_color') || '');
+  const [customAccent, setCustomAccent] = useState(() => localStorage.getItem('geoloc_accent_color') || '');
   // Admin secret
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPin, setAdminPin] = useState('');
@@ -750,6 +750,30 @@ function App() {
   useEffect(() => {
     document.body.className = darkMode ? 'dark-mode' : '';
   }, [darkMode]);
+
+  // Persistance des couleurs personnalisées
+  useEffect(() => {
+    if (customPrimary) {
+      localStorage.setItem('geoloc_primary_color', customPrimary);
+      document.documentElement.style.setProperty('--wl-primary', customPrimary);
+      const header = document.querySelector('header');
+      if (header) header.style.background = customPrimary;
+    } else {
+      localStorage.removeItem('geoloc_primary_color');
+      document.documentElement.style.removeProperty('--wl-primary');
+      const header = document.querySelector('header');
+      if (header) header.style.background = '';
+    }
+  }, [customPrimary]);
+  useEffect(() => {
+    if (customAccent) {
+      localStorage.setItem('geoloc_accent_color', customAccent);
+      document.documentElement.style.setProperty('--accent', customAccent);
+    } else {
+      localStorage.removeItem('geoloc_accent_color');
+      document.documentElement.style.removeProperty('--accent');
+    }
+  }, [customAccent]);
 
   // Reset du chat IA quand on change de ville ou pays
   useEffect(() => {
@@ -2291,67 +2315,6 @@ function App() {
               {darkMode ? '☀️ ' + (lang === 'fr' ? 'Clair' : 'Light') : '🌙 ' + (lang === 'fr' ? 'Sombre' : 'Dark')}
             </button>
 
-            <label style={{display:'block', margin:'15px 0 5px'}}>
-              {lang === 'fr' ? 'Mise à jour' : 'Update'}
-            </label>
-            <div style={{display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap'}}>
-              <button onClick={() => {
-                if (window.checkForUpdates) {
-                  const ok = window.checkForUpdates();
-                  if (ok) {
-                    setUpdateCheckMsg('checking');
-                    // Si aucun update trouvé après 4s, afficher "À jour"
-                    const timeoutId = setTimeout(() => {
-                      setUpdateCheckMsg(prev => {
-                        if (prev === 'checking') {
-                          setUpdateCheckMsg('uptodate');
-                          setTimeout(() => setUpdateCheckMsg(null), 4000);
-                          return 'uptodate';
-                        }
-                        return prev;
-                      });
-                    }, 4000);
-                    window.__updateCheckTimeout = timeoutId;
-                  } else {
-                    setUpdateCheckMsg('error');
-                    setTimeout(() => setUpdateCheckMsg(null), 4000);
-                  }
-                } else {
-                  setUpdateCheckMsg('nosw');
-                  setTimeout(() => setUpdateCheckMsg(null), 4000);
-                }
-              }} style={{padding:'8px 16px', borderRadius:'6px', border:'1px solid #ccc', cursor:'pointer'}}>
-                🔄 {lang === 'fr' ? 'Vérifier les mises à jour' : 'Check for updates'}
-              </button>
-              {/* Message de statut visible */}
-              {updateCheckMsg === 'checking' && (
-                <span style={{fontSize:'13px', color:'var(--text-secondary)'}}>
-                  🔄 {lang === 'fr' ? 'Vérification...' : 'Checking...'}
-                </span>
-              )}
-              {updateCheckMsg === 'uptodate' && (
-                <span style={{fontSize:'13px', color:'#27ae60'}}>
-                  ✅ {lang === 'fr' ? 'Application à jour' : 'App is up to date'}
-                </span>
-              )}
-              {updateCheckMsg === 'found' && (
-                <span style={{fontSize:'13px', color:'#e67e22', cursor:'pointer', textDecoration:'underline'}}
-                      onClick={() => { if (window.applyUpdate) window.applyUpdate(); }}>
-                  🔄 {lang === 'fr' ? 'Mise à jour disponible — cliquer pour appliquer' : 'Update available — click to apply'}
-                </span>
-              )}
-              {updateCheckMsg === 'error' && (
-                <span style={{fontSize:'13px', color:'#e74c3c'}}>
-                  ❌ {lang === 'fr' ? 'Erreur de vérification' : 'Check failed'}
-                </span>
-              )}
-              {updateCheckMsg === 'nosw' && (
-                <span style={{fontSize:'13px', color:'#e74c3c'}}>
-                  ❌ {lang === 'fr' ? 'Service Worker indisponible' : 'Service Worker unavailable'}
-                </span>
-              )}
-            </div>
-
             {/* Indicateur discret du backend actif */}
             <div style={{marginTop:'12px', fontSize:'12px', color:'var(--text-secondary)', display:'flex', alignItems:'center', gap:'6px', borderTop:'1px solid var(--border)', paddingTop:'10px'}}>
               <span style={{display:'inline-block', width:'8px', height:'8px', borderRadius:'50%', background: railFallbackActive ? '#e67e22' : '#27ae60'}}></span>
@@ -2402,7 +2365,7 @@ function App() {
             </div>
 
             <p style={{marginTop:'20px', opacity:0.6, fontSize:'12px'}}>
-              {lang === 'fr' ? 'Les couleurs sont réinitialisées au rechargement de la page.' : 'Colors reset on page reload.'}
+              {lang === 'fr' ? 'Les couleurs sont sauvegardées automatiquement.' : 'Colors are saved automatically.'}
             </p>
 
             {/* 🔒 Admin secret — accessible uniquement à mon créateur */}
