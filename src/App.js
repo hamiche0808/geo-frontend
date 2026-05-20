@@ -1904,48 +1904,6 @@ function App() {
             </div>
           )}
 
-          {/* Coût carburant */}
-          <div className="fuel-cost-section">
-            <button className="btn-fuel-toggle" onClick={() => setShowFuelCalc(!showFuelCalc)}>
-              ⛽ {showFuelCalc ? 'Masquer' : 'Estimer'} le coût carburant
-            </button>
-            {showFuelCalc && (
-              <div className="fuel-calc">
-                <div className="fuel-row">
-                  <label>Consommation :</label>
-                  <input type="number" value={fuelConsumption} min="0" step="0.1"
-                    onChange={(e) => setFuelConsumption(parseFloat(e.target.value) || 0)}
-                    className="fuel-input" /> L/100km
-                </div>
-                <div className="fuel-row">
-                  <label>Carburant :</label>
-                  <select value={fuelType} onChange={(e) => {
-                    setFuelType(e.target.value);
-                    if (e.target.value === 'essence') setFuelPrice(1.85);
-                    else if (e.target.value === 'diesel') setFuelPrice(1.75);
-                    else if (e.target.value === 'electrique') setFuelPrice(0.25);
-                    else setFuelPrice(1.85);
-                  }} className="fuel-select">
-                    <option value="essence">⛽ Essence</option>
-                    <option value="diesel">🛢️ Diesel</option>
-                    <option value="electrique">⚡ Électrique</option>
-                    <option value="gpl">🔥 GPL</option>
-                  </select>
-                </div>
-                <div className="fuel-row">
-                  <label>Prix au litre :</label>
-                  <input type="number" value={fuelPrice} min="0" step="0.01"
-                    onChange={(e) => setFuelPrice(parseFloat(e.target.value) || 0)}
-                    className="fuel-input" /> €/L
-                </div>
-                <div className="fuel-result">
-                  <strong>💰 Coût estimé : {calculateFuelCost().toFixed(2)} €</strong>
-                  <small>({distance} km × {fuelConsumption}L/100km × {fuelPrice}€/L)</small>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* POIs (liens affiliés) */}
           {(cityA || cityB) && (
             <div className="poi-section">
