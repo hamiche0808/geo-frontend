@@ -1,0 +1,13 @@
+services:
+  - type: static
+    name: geo-frontend
+    buildCommand: npm run build
+    staticPublishPath: ./build
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+    envVars:
+      - key: CI
+        value: false

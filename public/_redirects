@@ -1,2 +1,2 @@
-# SPA : toutes les routes → index.html (nécessaire pour Netlify)
+# SPA : toutes les routes → index.html (supporté par Render, Netlify, etc.)
 /*    /index.html    200
