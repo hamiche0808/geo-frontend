@@ -1031,7 +1031,8 @@ function App() {
     try {
       setLoadingMessage('📡 Connexion...');
       // Si le terme ne ressemble pas à un code postal, chercher d'abord via /api/search
-      if (!term.match(/^\d/) && !countryOverride) {
+      // (même avec countryOverride, pour que les villes de SAMPLE_CITIES passent par le search endpoint)
+      if (!term.match(/^\d/)) {
         const suggestions = await cachedGet(`${API}/api/search`, { q: term, country: countryCode, limit: 5 });
         if (suggestions && suggestions.length > 0) {
           const best = suggestions[0];
@@ -1078,16 +1079,25 @@ function App() {
     setCityImage(null);
     setFallbackImgError(false);
     setError(null);
-    // Choisir un pays aléatoire parmi ceux qui ont des villes dans SAMPLE_CITIES
-    const codes = Object.keys(SAMPLE_CITIES);
-    const randomCode = codes[Math.floor(Math.random() * codes.length)];
-    const cities = SAMPLE_CITIES[randomCode];
+    // Utiliser le pays actuellement sélectionné dans le menu déroulant
+    const currentCode = country;
+    const cities = SAMPLE_CITIES[currentCode];
+    if (!cities || cities.length === 0) {
+      // Sécurité : si le pays actuel n'a pas de villes définies, prendre le premier pays disponible
+      const codes = Object.keys(SAMPLE_CITIES);
+      const fallbackCode = codes[0];
+      const fallbackCities = SAMPLE_CITIES[fallbackCode];
+      const randomCity = fallbackCities[Math.floor(Math.random() * fallbackCities.length)];
+      setCountry(fallbackCode);
+      setSearchInput(randomCity);
+      handleSearch(randomCity, fallbackCode);
+      return;
+    }
     const randomCity = cities[Math.floor(Math.random() * cities.length)];
-    // Mettre à jour le sélecteur de pays et le champ de recherche
-    setCountry(randomCode);
+    // Mettre à jour le champ de recherche
     setSearchInput(randomCity);
-    // Déclencher la recherche immédiatement avec le bon pays (pas de setTimeout)
-    handleSearch(randomCity, randomCode);
+    // Déclencher la recherche immédiatement avec le pays actuel
+    handleSearch(randomCity, currentCode);
   };
 
   const handleInputChange = (e) => {
