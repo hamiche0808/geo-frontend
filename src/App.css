@@ -2741,3 +2741,75 @@ body.dark-mode .chat-msg-model .chat-msg-bubble {
   color: var(--text-secondary);
   margin-top: 2px;
 }
+
+/* ===== Boutons Google Maps & Waze ===== */
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.btn-nav {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #fff;
+}
+
+.btn-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-nav:active {
+  transform: translateY(0);
+}
+
+.btn-nav-gmaps {
+  background: linear-gradient(135deg, #4285F4, #34A853);
+}
+
+.btn-nav-gmaps:hover {
+  background: linear-gradient(135deg, #3b77e0, #2d9548);
+}
+
+.btn-nav-waze {
+  background: linear-gradient(135deg, #33CCFF, #1B9CFC);
+}
+
+.btn-nav-waze:hover {
+  background: linear-gradient(135deg, #2ab8e6, #1589e0);
+}
+
+.btn-nav-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.btn-nav-label {
+  white-space: nowrap;
+}
+
+/* Responsive : empiler sur mobile */
+@media (max-width: 500px) {
+  .nav-buttons {
+    flex-direction: column;
+  }
+  .btn-nav {
+    min-width: unset;
+    width: 100%;
+  }
+}

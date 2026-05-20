@@ -1838,7 +1838,6 @@ function App() {
                         </span>
                       )}
                     </span>
-                    {idx === 0 && <span className="alt-badge">Recommandé</span>}
                   </button>
                 ))}
               </div>
@@ -1878,6 +1877,32 @@ function App() {
               {' '}{modeProfile === 'driving' ? 'Voiture' : modeProfile === 'cycling' ? 'Vélo' : 'Piéton'}
             </span>
           </p>
+
+          {/* Boutons Google Maps & Waze */}
+          {cityA && cityB && (
+            <div className="nav-buttons">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(cityA?.city || `${cityA?.latitude},${cityA?.longitude}`)}&destination=${encodeURIComponent(cityB?.city || `${cityB?.latitude},${cityB?.longitude}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-nav btn-nav-gmaps"
+                title="Ouvrir l'itinéraire dans Google Maps"
+              >
+                <span className="btn-nav-icon">🗺️</span>
+                <span className="btn-nav-label">Ouvrir avec Google Maps</span>
+              </a>
+              <a
+                href={`https://www.waze.com/ul?ll=${cityB.latitude},${cityB.longitude}&navigate=yes`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-nav btn-nav-waze"
+                title="Ouvrir l'itinéraire dans Waze"
+              >
+                <span className="btn-nav-icon">🚙</span>
+                <span className="btn-nav-label">Ouvrir avec Waze</span>
+              </a>
+            </div>
+          )}
 
           {/* Coût carburant */}
           <div className="fuel-cost-section">
