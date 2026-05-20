@@ -27,7 +27,10 @@ API_CLIENT.interceptors.response.use(
   }
 );
 
-// ===== Cache Session (sessionStorage) =====
+// ===== Cache Session (sessionStorage)  =====
+const CACHE_TTL = 600000; // 10 minutes
+const CACHE_MAX_ENTRIES = 50; // limite pour ne pas saturer le stockage
+
 function getCacheKey(url) {
   return 'geoCache:' + url;
 }
@@ -37,8 +40,7 @@ function getFromCache(url) {
     const item = sessionStorage.getItem(key);
     if (item) {
       const parsed = JSON.parse(item);
-      // Cache valide 10 minutes
-      if (Date.now() - parsed.ts < 600000) {
+      if (Date.now() - parsed.ts < CACHE_TTL) {
         return parsed.data;
       }
       sessionStorage.removeItem(key);
@@ -50,6 +52,17 @@ function setToCache(url, data) {
   try {
     const key = getCacheKey(url);
     sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+    // Nettoyer les entrées les plus vieilles si trop nombreuses
+    const keys = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith('geoCache:')) keys.push({ key: k, ts: JSON.parse(sessionStorage.getItem(k)).ts });
+    }
+    if (keys.length > CACHE_MAX_ENTRIES) {
+      keys.sort((a, b) => a.ts - b.ts);
+      const toRemove = keys.slice(0, keys.length - CACHE_MAX_ENTRIES);
+      toRemove.forEach(k => sessionStorage.removeItem(k.key));
+    }
   } catch (e) { /* ignore */ }
 }
 
@@ -509,6 +522,50 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
   );
 });
 
+// ===== Helpers pour réduire la duplication =====
+const POP_COUNTRIES = ['FR','BE','US','CA','DZ','MA','TN','JP',
+  'France','Belgium','Belgique','United States','Canada',
+  'Algérie','Maroc','Tunisie'];
+function shouldFetchPopulation(countryCode, countryName) {
+  return POP_COUNTRIES.includes(countryCode) || POP_COUNTRIES.includes(countryName);
+}
+function buildLocationFromData(data, defaultCountry) {
+  return {
+    city: data.city || '',
+    postal_code: data.postal_code || '',
+    country: data.country || '',
+    country_code: data.country_code || defaultCountry || 'FR',
+    latitude: data.latitude,
+    longitude: data.longitude,
+    department: data.department || '',
+    region: data.region || '',
+    population: data.population || 0,
+    display_name: data.display_name || '',
+    is_address: data._type === 'address' || data.is_address || false
+  };
+}
+
+// ===== Composant QR Code avec fallback si le serveur est down =====
+function QRCodeView({ url, lang }) {
+  const [qrError, setQrError] = useState(false);
+  if (qrError) {
+    return (
+      <div className="qr-section">
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+          📱 {lang === 'fr' ? 'QR Code indisponible' : 'QR Code unavailable'}
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="qr-section">
+      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(url)}`}
+        alt="QR Code" className="qr-image" onError={() => setQrError(true)} />
+      <p className="qr-hint">{lang === 'fr' ? 'Scannez pour ouvrir l\'application' : 'Scan to open the app'}</p>
+    </div>
+  );
+}
+
 // ========== Application principale ==========
 function App() {
   const [mode, setMode] = useState('search'); // 'search' | 'distance'
@@ -555,6 +612,7 @@ function App() {
   const [userCity, setUserCity] = useState(null);
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState('');
+  const [notification, setNotification] = useState('');
   const [country, setCountry] = useState('FR');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -564,6 +622,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [cityImage, setCityImage] = useState(null); // URL de la miniature ville
+  const [cityImageLoading, setCityImageLoading] = useState(false); // chargement en cours
   const [fallbackImgError, setFallbackImgError] = useState(false); // Erreur chargement image fallback
   const [modeProfile, setModeProfile] = useState('driving'); // driving | cycling | walking
   const [darkMode, setDarkMode] = useState(false);
@@ -594,6 +653,19 @@ function App() {
 
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  // Détection hors-ligne
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline = () => setIsOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', goOnline);
+    };
+  }, []);
 
   // Écouter la disponibilité d'installation PWA
   useEffect(() => {
@@ -646,14 +718,32 @@ function App() {
 
   // ===== Récupérer les taux de change au démarrage (open.er-api.com, gratuit) =====
   useEffect(() => {
-    fetch('https://open.er-api.com/v6/latest/EUR')
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.result === 'success' && data.rates) {
-          setExchangeRates(data.rates);
+    // Essayer le cache d'abord
+    try {
+      const cached = sessionStorage.getItem('geoCache:exchangeRates');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < 3600000) { // 1h de cache
+          setExchangeRates(parsed.data);
+          return;
         }
-      })
-      .catch(() => { /* taux non disponibles, on ignore */ });
+      }
+    } catch {}
+    // Sinon fetch avec retry
+    const fetchRates = (attempt = 0) => {
+      fetch('https://open.er-api.com/v6/latest/EUR')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.result === 'success' && data.rates) {
+            setExchangeRates(data.rates);
+            try { sessionStorage.setItem('geoCache:exchangeRates', JSON.stringify({ ts: Date.now(), data: data.rates })); } catch {}
+          }
+        })
+        .catch(() => {
+          if (attempt < 2) setTimeout(() => fetchRates(attempt + 1), 1000);
+        });
+    };
+    fetchRates();
   }, []);
 
   // Mode sombre
@@ -844,8 +934,8 @@ function App() {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(`${shareText}\n${url}`).then(() => {
-        setError('Lien de l\'application copié !');
-        setTimeout(() => setError(''), 2000);
+        setNotification('📋 Lien de l\'application copié !');
+        setTimeout(() => setNotification(''), 2500);
       }).catch(() => {});
     }
   };
@@ -856,8 +946,9 @@ function App() {
 
   // ===== Miniature ville (Wikipedia) =====
   useEffect(() => {
-    if (!location?.city) { setCityImage(null); setFallbackImgError(false); return; }
+    if (!location?.city) { setCityImage(null); setCityImageLoading(false); setFallbackImgError(false); return; }
     setFallbackImgError(false);
+    setCityImageLoading(true);
     const city = location.city;
     const country = location.country || 'France';
     // Essayer Wikipedia en français puis en anglais
@@ -873,12 +964,14 @@ function App() {
             const page = Object.values(pages)[0];
             if (page?.thumbnail?.source) {
               setCityImage(page.thumbnail.source);
+              setCityImageLoading(false);
               return;
             }
           }
         } catch { /* ignore */ }
       }
       setCityImage(null);
+      setCityImageLoading(false);
     };
     fetchImage();
   }, [location?.city, location?.country]);
@@ -1013,32 +1106,15 @@ function App() {
       setLoadingMessage('🌍 Analyse...');
       let data;
       if (item.postal_code) {
-        // Recherche par code postal : appeler l'API détails
         data = await cachedGet(`${API}/api/location/${encodeURIComponent(item.postal_code)}`, { country: item.country_code || country, city: item.city });
       } else {
-        // Pas de code postal (ex: Toronto) : utiliser les données de la suggestion directement
-        data = {
-          city: item.city,
-          postal_code: '',
-          country: item.country || '',
-          country_code: item.country_code || country,
-          latitude: item.latitude,
-          longitude: item.longitude,
-          department: item.department || '',
-          region: item.region || '',
-          population: 0,
-          display_name: item.display_name || ''
-        };
+        data = buildLocationFromData(item, country);
       }
-      // Population INSEE (France) ou Statbel (Belgique)
-      const cc2 = data.country_code || '';
-      if (cc2 === 'FR' || cc2 === 'BE' || cc2 === 'US' || cc2 === 'CA' || 
-          cc2 === 'DZ' || cc2 === 'MA' || cc2 === 'TN' || cc2 === 'JP' ||
-          data.country === 'France' || data.country === 'Belgium' || data.country === 'Belgique' ||
-          data.country === 'United States' || data.country === 'Canada' ||
-          data.country === 'Algérie' || data.country === 'Maroc' || data.country === 'Tunisie') {
+      // Population pour les pays supportés
+      const cc = data.country_code || '';
+      if (shouldFetchPopulation(cc, data.country)) {
         setLoadingMessage('👥 Population...');
-        fetchPopulation(data.postal_code, data.city, cc2).then(pop => {
+        fetchPopulation(data.postal_code, data.city, cc).then(pop => {
           if (pop != null) setLocation(prev => ({ ...prev, population: pop }));
         });
       }
@@ -1053,43 +1129,36 @@ function App() {
     } finally { setLoading(false); setLoadingMessage(''); }
   };
 
+  // ===== Helper pour la population côté itinéraire =====
+  const fetchPopForCity = (locData, side) => {
+    const cc = locData.country_code || '';
+    if (shouldFetchPopulation(cc, locData.country)) {
+      fetchPopulation(locData.postal_code, locData.city, cc).then(pop => {
+        if (pop != null) {
+          const updated = { ...locData, population: pop };
+          if (side === 'A') setCityA(updated);
+          else if (side === 'B') setCityB(updated);
+          else if (side === 'wp') setWaypoints(prev => {
+            const newWp = [...prev];
+            newWp[newWp.length - 1] = { ...newWp[newWp.length - 1], population: pop };
+            return newWp;
+          });
+        }
+      });
+    }
+  };
+
   // ===== Mode Itinéraire =====
   const handleDistanceCity = async (cityData, side) => {
     const data = cityData;
     const countryForLookup = side === 'A' ? (countryA || 'FR') : (countryB || 'FR');
+    const setter = (val) => { if (side === 'A') setCityA(val); else setCityB(val); };
     
     // Si c'est une adresse complète, on a déjà les coordonnées exactes
     if (data._type === 'address') {
-      const addrData = {
-        city: data.city || data.display_name?.split(',')[0] || '',
-        postal_code: data.postal_code || '',
-        country: data.country || countryForLookup,
-        country_code: data.country_code || countryForLookup,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        department: data.department || '',
-        region: data.region || '',
-        population: data.population || 0,
-        display_name: data.display_name || '',
-        is_address: true
-      };
-      // Population INSEE (France) ou Statbel (Belgique)
-      const cc3 = addrData.country_code || '';
-      if (cc3 === 'FR' || cc3 === 'BE' || cc3 === 'US' || cc3 === 'CA' ||
-          cc3 === 'DZ' || cc3 === 'MA' || cc3 === 'TN' || cc3 === 'JP' ||
-          addrData.country === 'France' || addrData.country === 'Belgium' || addrData.country === 'Belgique' ||
-          addrData.country === 'United States' || addrData.country === 'Canada' ||
-          addrData.country === 'Algérie' || addrData.country === 'Maroc' || addrData.country === 'Tunisie') {
-        fetchPopulation(addrData.postal_code, addrData.city, cc3).then(pop => {
-          if (pop != null) {
-            const updated = { ...addrData, population: pop };
-            if (side === 'A') setCityA(updated);
-            else setCityB(updated);
-          }
-        });
-      }
-      if (side === 'A') setCityA(addrData);
-      else setCityB(addrData);
+      const addrData = { ...buildLocationFromData(data, countryForLookup), is_address: true };
+      fetchPopForCity(addrData, side);
+      setter(addrData);
       return;
     }
     
@@ -1099,53 +1168,12 @@ function App() {
       if (data.postal_code) {
         locResp = await cachedGet(`${API}/api/location/${encodeURIComponent(data.postal_code)}`, { country: data.country_code || countryForLookup, city: data.city });
       } else {
-        // Pas de code postal (ex: Toronto) : utiliser les données de la suggestion directement
-        locResp = {
-          city: data.city,
-          postal_code: '',
-          country: data.country || countryForLookup,
-          country_code: data.country_code || countryForLookup,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          department: data.department || '',
-          region: data.region || '',
-          population: data.population || 0,
-          display_name: data.display_name || ''
-        };
+        locResp = buildLocationFromData(data, countryForLookup);
       }
-      // Population INSEE (France) ou Statbel (Belgique)
-      const cc4 = locResp.country_code || '';
-      if (cc4 === 'FR' || cc4 === 'BE' || cc4 === 'US' || cc4 === 'CA' ||
-          cc4 === 'DZ' || cc4 === 'MA' || cc4 === 'TN' || cc4 === 'JP' ||
-          locResp.country === 'France' || locResp.country === 'Belgium' || locResp.country === 'Belgique' ||
-          locResp.country === 'United States' || locResp.country === 'Canada' ||
-          locResp.country === 'Algérie' || locResp.country === 'Maroc' || locResp.country === 'Tunisie') {
-        fetchPopulation(locResp.postal_code, locResp.city, cc4).then(pop => {
-          if (pop != null) {
-            const updated = { ...locResp, population: pop };
-            if (side === 'A') setCityA(updated);
-            else setCityB(updated);
-          }
-        });
-      }
-      if (side === 'A') setCityA(locResp);
-      else setCityB(locResp);
+      fetchPopForCity(locResp, side);
+      setter(locResp);
     } catch {
-      // Fallback : utiliser les données de la suggestion (latitude/longitude déjà présentes)
-      const fallback = {
-        city: data.city,
-        postal_code: data.postal_code,
-        country: data.country || countryForLookup,
-        country_code: data.country_code || countryForLookup,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        department: data.department || '',
-        region: data.region || '',
-        population: data.population || 0,
-        display_name: data.display_name || ''
-      };
-      if (side === 'A') setCityA(fallback);
-      else setCityB(fallback);
+      setter(buildLocationFromData(data, countryForLookup));
     }
   };
 
@@ -1182,21 +1210,8 @@ function App() {
     const newWpC = [...waypointCountries];
     const lookupCountry = cityData.country_code || waypointCountries[idx] || 'FR';
     
-    // Si c'est une adresse complète, on a déjà les coordonnées exactes
     if (cityData._type === 'address') {
-      newWp[idx] = {
-        city: cityData.city || cityData.display_name?.split(',')[0] || '',
-        postal_code: cityData.postal_code || '',
-        country: cityData.country || lookupCountry,
-        country_code: cityData.country_code || lookupCountry,
-        latitude: cityData.latitude,
-        longitude: cityData.longitude,
-        department: cityData.department || '',
-        region: cityData.region || '',
-        population: 0,
-        display_name: cityData.display_name || '',
-        is_address: true
-      };
+      newWp[idx] = { ...buildLocationFromData(cityData, lookupCountry), is_address: true };
       newWpC[idx] = lookupCountry;
       setWaypoints(newWp);
       setWaypointCountries(newWpC);
@@ -1204,37 +1219,13 @@ function App() {
     }
     
     try {
-      let data;
       if (cityData.postal_code) {
-        data = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry, city: cityData.city });
+        newWp[idx] = await cachedGet(`${API}/api/location/${encodeURIComponent(cityData.postal_code)}`, { country: lookupCountry, city: cityData.city });
       } else {
-        data = {
-          city: cityData.city,
-          postal_code: '',
-          country: cityData.country || lookupCountry,
-          country_code: cityData.country_code || lookupCountry,
-          latitude: cityData.latitude,
-          longitude: cityData.longitude,
-          department: cityData.department || '',
-          region: cityData.region || '',
-          population: 0,
-          display_name: cityData.display_name || ''
-        };
+        newWp[idx] = buildLocationFromData(cityData, lookupCountry);
       }
-      newWp[idx] = data;
     } catch {
-      newWp[idx] = {
-        city: cityData.city,
-        postal_code: cityData.postal_code || '',
-        country: cityData.country || lookupCountry,
-        country_code: cityData.country_code || lookupCountry,
-        latitude: cityData.latitude,
-        longitude: cityData.longitude,
-        department: cityData.department || '',
-        region: cityData.region || '',
-        population: 0,
-        display_name: cityData.display_name || ''
-      };
+      newWp[idx] = buildLocationFromData(cityData, lookupCountry);
     }
     newWpC[idx] = lookupCountry;
     setWaypoints(newWp);
@@ -1267,7 +1258,7 @@ function App() {
   // ===== Géolocalisation =====
   const locateMe = () => {
     if (!navigator.geolocation) {
-      setError('La géolocalisation n\'est pas支持ée par votre navigateur.');
+      setError('La géolocalisation n\'est pas disponible sur votre navigateur.');
       return;
     }
     setLocating(true);
@@ -1773,6 +1764,8 @@ function App() {
         )}
 
         {error && <p className="error">{error}</p>}
+        {notification && <p className="notification">{notification}</p>}
+        {isOffline && <p className="offline-banner">📡 {lang === 'fr' ? 'Vous êtes hors ligne — données en cache uniquement' : 'You are offline — cached data only'}</p>}
       </header>
       {/* Overlay de chargement réactif */}
       {loading && loadingMessage && (
@@ -1930,11 +1923,7 @@ function App() {
             </button>
           </div>
           {showQR && (
-            <div className="qr-section">
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getSearchUrl())}`}
-                alt="QR Code de l'application" className="qr-image" />
-              <p className="qr-hint">Scannez pour ouvrir l'application</p>
-            </div>
+            <QRCodeView url={getSearchUrl()} lang={lang} />
           )}
         </div>
       )}
@@ -1943,9 +1932,13 @@ function App() {
       {mode === 'search' && location && (
         <div className="result-info">
           <div className="city-header">
-            {cityImage ? (
+            {cityImageLoading ? (
+              <div className="city-thumbnail-placeholder">
+                <div className="thumbnail-spinner"></div>
+              </div>
+            ) : cityImage ? (
               <a href={`https://${lang}.wikipedia.org/wiki/${encodeURIComponent(location.city)}`} target="_blank" rel="noopener noreferrer" className="city-thumbnail-link" title={lang === 'fr' ? 'Voir sur Wikipédia' : 'View on Wikipedia'}>
-                <img src={cityImage} alt={location.city} className="city-thumbnail" loading="lazy" onError={() => setCityImage(null)} />
+                <img src={cityImage} alt={location.city} className="city-thumbnail" loading="lazy" onError={() => { setCityImage(null); setCityImageLoading(false); }} />
               </a>
             ) : fallbackImgError ? (
               <div className="city-thumbnail-fallback">🏙️</div>
