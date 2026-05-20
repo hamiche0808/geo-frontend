@@ -1079,25 +1079,16 @@ function App() {
     setCityImage(null);
     setFallbackImgError(false);
     setError(null);
-    // Utiliser le pays actuellement sélectionné dans le menu déroulant
-    const currentCode = country;
-    const cities = SAMPLE_CITIES[currentCode];
-    if (!cities || cities.length === 0) {
-      // Sécurité : si le pays actuel n'a pas de villes définies, prendre le premier pays disponible
-      const codes = Object.keys(SAMPLE_CITIES);
-      const fallbackCode = codes[0];
-      const fallbackCities = SAMPLE_CITIES[fallbackCode];
-      const randomCity = fallbackCities[Math.floor(Math.random() * fallbackCities.length)];
-      setCountry(fallbackCode);
-      setSearchInput(randomCity);
-      handleSearch(randomCity, fallbackCode);
-      return;
-    }
+    // Choisir une ville dans TOUS les pays (voyage surprise !)
+    const codes = Object.keys(SAMPLE_CITIES);
+    const randomCode = codes[Math.floor(Math.random() * codes.length)];
+    const cities = SAMPLE_CITIES[randomCode];
     const randomCity = cities[Math.floor(Math.random() * cities.length)];
-    // Mettre à jour le champ de recherche
+    // Mettre à jour le pays ET le champ de recherche
+    setCountry(randomCode);
     setSearchInput(randomCity);
-    // Déclencher la recherche immédiatement avec le pays actuel
-    handleSearch(randomCity, currentCode);
+    // Déclencher la recherche (passe par /api/search — pas de bug)
+    handleSearch(randomCity, randomCode);
   };
 
   const handleInputChange = (e) => {
