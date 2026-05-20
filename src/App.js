@@ -1813,37 +1813,6 @@ function App() {
         <div className="result-info distance-result">
           <h2>🗺️ Itinéraire</h2>
           
-          {/* Sélecteur d'itinéraires alternatifs */}
-          {routeAlternatives && routeAlternatives.length >= 1 && (
-            <div className="route-alternatives">
-              <h4 className="alt-title">{routeAlternatives.length > 1 ? 'Choisissez votre itinéraire :' : 'Itinéraire proposé :'}</h4>
-              <div className="alt-cards">
-                {routeAlternatives.map((alt, idx) => (
-                  <button
-                    key={idx}
-                    className={`alt-card ${selectedRouteIdx === idx ? 'alt-card-active' : ''}`}
-                    onClick={() => {
-                      setSelectedRouteIdx(idx);
-                      setDistance(alt.distance);
-                      setDuration(alt.duration);
-                      setRouteCoords(alt.route_coords.length > 0 ? alt.route_coords : null);
-                    }}
-                  >
-                    <span className="alt-number">#{idx + 1}</span>
-                    <span className="alt-detail">
-                      <strong>{alt.distance.toLocaleString()} km</strong>
-                      {alt.duration !== null && (
-                        <span className="alt-time">
-                          ⏱️ {Math.floor(alt.duration / 3600)}h{Math.round((alt.duration % 3600) / 60)}min
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <p className="distance-value">{distance.toLocaleString()} km</p>
           {duration !== null && (
             <p className="duration-value">
@@ -1903,6 +1872,48 @@ function App() {
               </a>
             </div>
           )}
+
+          {/* Coût carburant */}
+          <div className="fuel-cost-section">
+            <button className="btn-fuel-toggle" onClick={() => setShowFuelCalc(!showFuelCalc)}>
+              ⛽ {showFuelCalc ? 'Masquer' : 'Estimer'} le coût carburant
+            </button>
+            {showFuelCalc && (
+              <div className="fuel-calc">
+                <div className="fuel-row">
+                  <label>Consommation :</label>
+                  <input type="number" value={fuelConsumption} min="0" step="0.1"
+                    onChange={(e) => setFuelConsumption(parseFloat(e.target.value) || 0)}
+                    className="fuel-input" /> L/100km
+                </div>
+                <div className="fuel-row">
+                  <label>Carburant :</label>
+                  <select value={fuelType} onChange={(e) => {
+                    setFuelType(e.target.value);
+                    if (e.target.value === 'essence') setFuelPrice(1.85);
+                    else if (e.target.value === 'diesel') setFuelPrice(1.75);
+                    else if (e.target.value === 'electrique') setFuelPrice(0.25);
+                    else setFuelPrice(1.85);
+                  }} className="fuel-select">
+                    <option value="essence">⛽ Essence</option>
+                    <option value="diesel">🛢️ Diesel</option>
+                    <option value="electrique">⚡ Électrique</option>
+                    <option value="gpl">🔥 GPL</option>
+                  </select>
+                </div>
+                <div className="fuel-row">
+                  <label>Prix au litre :</label>
+                  <input type="number" value={fuelPrice} min="0" step="0.01"
+                    onChange={(e) => setFuelPrice(parseFloat(e.target.value) || 0)}
+                    className="fuel-input" /> €/L
+                </div>
+                <div className="fuel-result">
+                  <strong>💰 Coût estimé : {calculateFuelCost().toFixed(2)} €</strong>
+                  <small>({distance} km × {fuelConsumption}L/100km × {fuelPrice}€/L)</small>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* POIs (liens affiliés) */}
           {(cityA || cityB) && (

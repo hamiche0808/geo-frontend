@@ -2745,21 +2745,21 @@ body.dark-mode .chat-msg-model .chat-msg-bubble {
 /* ===== Boutons Google Maps & Waze ===== */
 .nav-buttons {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin: 12px 0;
   flex-wrap: wrap;
 }
 
 .btn-nav {
   flex: 1;
-  min-width: 160px;
+  min-width: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 13px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -2795,7 +2795,7 @@ body.dark-mode .chat-msg-model .chat-msg-bubble {
 }
 
 .btn-nav-icon {
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1;
 }
 
