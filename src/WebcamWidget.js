@@ -74,7 +74,7 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
   const handleLive = () => {
     setLive(true);
     setImgError(false);
-    // Auto‑rafraîchissement de l'image toutes les 3s → simule le direct
+    // Auto‑rafraîchissement de l'image toutes les 5s → simule le direct
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       const img = liveRef.current;
@@ -82,12 +82,18 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
         const separator = webcam.image_url.includes('?') ? '&' : '?';
         img.src = webcam.image_url + separator + 't=' + Date.now();
       }
-    }, 3000);
+    }, 5000);
   };
 
   const handleStop = () => {
     setLive(false);
+    setImgError(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
+  // Si l'image échoue en mode Live, on reste en mode Live mais on affiche l'erreur
+  const handleLiveImgError = () => {
+    setImgError(true);
   };
 
   return (
@@ -108,7 +114,11 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
           <>
             <div className="webcam-thumb-wrapper">
               {imgError ? (
-                <div className="webcam-error-icon">📷</div>
+                <div className="webcam-error-icon">
+                  <div className="webcam-error-msg">📷<br/>
+                    <small>{lang === 'fr' ? 'Image indisponible' : 'Image unavailable'}</small>
+                  </div>
+                </div>
               ) : (
                 <img
                   src={webcam.image_url}
@@ -116,6 +126,7 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
                   className="webcam-thumb"
                   onError={() => setImgError(true)}
                   loading="lazy"
+                  referrerPolicy="no-referrer"
                 />
               )}
               <button className="webcam-live-btn" onClick={handleLive}
@@ -127,13 +138,24 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
         ) : (
           <>
             <div className="webcam-live-wrapper">
-              <img
-                ref={liveRef}
-                src={webcam.image_url + (webcam.image_url.includes('?') ? '&' : '?') + 't=' + Date.now()}
-                alt={webcam.name + ' live'}
-                className="webcam-live"
-                onError={() => { handleStop(); setImgError(true); }}
-              />
+              <div className="webcam-live-img-container">
+                {imgError ? (
+                  <div className="webcam-error-icon">
+                    <div className="webcam-error-msg">📷<br/>
+                      <small>{lang === 'fr' ? 'Flux indisponible' : 'Stream unavailable'}</small>
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    ref={liveRef}
+                    src={webcam.image_url + (webcam.image_url.includes('?') ? '&' : '?') + 't=' + Date.now()}
+                    alt={webcam.name + ' live'}
+                    className="webcam-live"
+                    onError={handleLiveImgError}
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+              </div>
               <button className="webcam-stop-btn" onClick={handleStop}>
                 ⏹ {lang === 'fr' ? 'Arrêter' : 'Stop'}
               </button>

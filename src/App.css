@@ -1099,6 +1099,20 @@ body.dark-mode .btn-route-from-here {
   background: var(--badge-bg);
   border-radius: 6px;
 }
+.webcam-error-msg {
+  text-align: center;
+  line-height: 1.4;
+}
+.webcam-error-msg small {
+  font-size: 0.4em;
+  display: block;
+  color: var(--text-secondary);
+}
+.webcam-live-img-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .webcam-live-btn {
   position: absolute;
   bottom: 8px;
