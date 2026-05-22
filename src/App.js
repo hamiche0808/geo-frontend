@@ -415,26 +415,6 @@ const waypointIcon = L.divIcon({
   popupAnchor: [0, -10],
 });
 
-// Icône pour les POIs locaux (par catégorie)
-const poisIconCache = {};
-function getPoiIcon(category, emoji) {
-  const key = category || 'default';
-  if (poisIconCache[key]) return poisIconCache[key];
-  const colorMap = {
-    monument: '#8B4513', museum: '#6A0DAD', attraction: '#E67E22',
-    park: '#27AE60', beach: '#3498DB', restaurant: '#E74C3C', fountain: '#1ABC9C'
-  };
-  const bg = colorMap[category] || '#FF5733';
-  poisIconCache[key] = L.divIcon({
-    className: 'poi-marker',
-    html: `<div class="poi-marker-inner" style="background:${bg}">${emoji || '📍'}</div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -18],
-  });
-  return poisIconCache[key];
-}
-
 // ========== Composant d'auto-zoom sur les marqueurs ==========
 function FitBoundsOnChange({ markers, routeCoords }) {
   const map = useMap();
@@ -674,16 +654,6 @@ function App() {
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-
-  // POIs locaux (monuments, musées, etc.)
-  const [pois, setPois] = useState([]);
-  const [poisLoading, setPoisLoading] = useState(false);
-  const [showPoisOnMap, setShowPoisOnMap] = useState(true);
-
-  // Checklist voyage IA
-  const [checklist, setChecklist] = useState(null);
-  const [checklistLoading, setChecklistLoading] = useState(false);
-  const [showChecklist, setShowChecklist] = useState(false);
 
   // Détection hors-ligne
   useEffect(() => {
@@ -1074,20 +1044,6 @@ function App() {
     return () => clearInterval(id);
   }, [location?.country_code, location?.longitude]);
 
-  // ===== POIs locaux (monuments, musées, restaurants) =====
-  const fetchPois = async (lat, lon) => {
-    setPoisLoading(true);
-    try {
-      const data = await cachedGet(`${API}/api/pois`, { lat, lon, radius: 2000 });
-      setPois(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.warn('POIs error:', e.message);
-      setPois([]);
-    } finally {
-      setPoisLoading(false);
-    }
-  };
-
   // ===== Mode Recherche =====
   const handleSearch = async (query, countryOverride) => {
     const term = (query || searchInput).trim();
@@ -1096,9 +1052,6 @@ function App() {
     setError(null);
     setLoading(true);
     setLoadingMessage('🔍 Recherche...');
-    setPois([]);
-    setChecklist(null);
-    setShowChecklist(false);
     try {
       setLoadingMessage('📡 Connexion...');
       // Si le terme ne ressemble pas à un code postal, chercher d'abord via /api/search
@@ -1117,7 +1070,6 @@ function App() {
           trackServer(railFallbackActive ? 'render' : 'railway');
           setLoadingMessage('🌤️ Météo...');
           fetchWeather(data.latitude, data.longitude);
-          fetchPois(data.latitude, data.longitude);
           setLoadingMessage('🖼️ Ville...');
           setLoading(false);
           setLoadingMessage('');
@@ -1135,7 +1087,6 @@ function App() {
       // Charger la météo
       setLoadingMessage('🌤️ Météo...');
       fetchWeather(data.latitude, data.longitude);
-      fetchPois(data.latitude, data.longitude);
       setLoadingMessage('🖼️ Ville...');
     } catch (err) {
       const errMsg = err?.response?.status === 404 || (err?.response?.data?.detail || '').includes('non trouvé') ? 'Ville non trouvée.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
@@ -2141,83 +2092,6 @@ function App() {
 
           <p className="coords">Coordonnées : {location.latitude}, {location.longitude}</p>
 
-          {/* POIs locaux (monuments, musées, restaurants, etc.) */}
-          {pois.length > 0 && (
-            <div className="local-pois-section">
-              <h3>🏛️ {lang === 'fr' ? 'Points d\'intérêt à proximité' : 'Nearby points of interest'}</h3>
-              <div className="local-pois-list">
-                {pois.slice(0, 12).map((poi, idx) => (
-                  <div key={idx} className="local-poi-item" title={poi.name}>
-                    <span className="local-poi-emoji">{poi.emoji}</span>
-                    <span className="local-poi-name">{poi.name.length > 30 ? poi.name.slice(0, 30) + '…' : poi.name}</span>
-                    <span className="local-poi-dist">
-                      {poi.distance_m > 1000 ? (poi.distance_m / 1000).toFixed(1) + 'km' : poi.distance_m + 'm'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <small className="local-pois-note">
-                {lang === 'fr' ? 'Données OpenStreetMap' : 'OpenStreetMap data'} · 
-                <button className="local-pois-map-toggle" onClick={() => setShowPoisOnMap(!showPoisOnMap)}>
-                  {showPoisOnMap ? '🙈 ' + (lang === 'fr' ? 'Masquer sur la carte' : 'Hide on map') : '👁️ ' + (lang === 'fr' ? 'Afficher sur la carte' : 'Show on map')}
-                </button>
-              </small>
-            </div>
-          )}
-
-          {/* Checklist voyage IA */}
-          <div className="checklist-section">
-            {!showChecklist ? (
-              <button className="btn-checklist" onClick={async () => {
-                setShowChecklist(true);
-                setChecklistLoading(true);
-                try {
-                  const data = await cachedGet(`${API}/api/ai/checklist`, {
-                    city: location.city,
-                    country_code: location.country_code || 'FR',
-                    lang
-                  });
-                  setChecklist(data?.checklist || []);
-                } catch (e) {
-                  setChecklist([]);
-                } finally {
-                  setChecklistLoading(false);
-                }
-              }}>
-                🧳 {lang === 'fr' ? 'Checklist voyage IA' : 'AI Travel Checklist'}
-              </button>
-            ) : (
-              <div className="checklist-content">
-                <div className="checklist-header">
-                  <h4>🧳 {lang === 'fr' ? 'Checklist voyage' : 'Travel Checklist'} — {location.city}</h4>
-                  <button className="checklist-close" onClick={() => { setShowChecklist(false); setChecklist(null); }}>
-                    ✕
-                  </button>
-                </div>
-                {checklistLoading ? (
-                  <div className="checklist-loading">⏳ {lang === 'fr' ? 'Génération de la checklist...' : 'Generating checklist...'}</div>
-                ) : checklist && checklist.length > 0 ? (
-                  <div className="checklist-items">
-                    {checklist.map((cat, idx) => (
-                      <div key={idx} className="checklist-category">
-                        <h5>{cat.category}</h5>
-                        <ul>
-                          {cat.items.map((item, i) => (
-                            <li key={i}><label><input type="checkbox" /> {item}</label></li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="checklist-error">
-                    {lang === 'fr' ? 'Indisponible pour le moment' : 'Currently unavailable'}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* POIs (liens affiliés) */}
           <div className="poi-section">
             <h3>🔗 Hébergement & Transport</h3>
@@ -2309,14 +2183,6 @@ function App() {
           title={tr(fullScreenMap ? 'exitFullscreen' : 'fullscreen', lang)}>
           {fullScreenMap ? '⛶' : '⛶'}
         </button>
-        {/* Toggle POIs */}
-        {mode === 'search' && pois.length > 0 && (
-          <button className={`map-poi-toggle ${showPoisOnMap ? 'active' : ''}`}
-            onClick={() => setShowPoisOnMap(!showPoisOnMap)}
-            title={lang === 'fr' ? 'Afficher/Masquer les points d\'intérêt' : 'Show/Hide points of interest'}>
-            🏛️ {lang === 'fr' ? 'POIs' : 'POIs'} {poisLoading ? '⏳' : ''}
-          </button>
-        )}
       </div>
 
       {/* Carte */}
@@ -2363,20 +2229,6 @@ function App() {
                 </Popup>
               </Marker>
             )}
-
-            {/* POIs locaux (monuments, musées, restaurants, etc.) */}
-            {mode === 'search' && showPoisOnMap && pois.length > 0 && pois.map((poi, idx) => (
-              <Marker key={'poi-' + idx} position={[poi.lat, poi.lon]} icon={getPoiIcon(poi.category, poi.emoji)}>
-                <Popup>
-                  <b>{poi.emoji} {poi.name}</b><br />
-                  <span style={{fontSize:'12px', color:'#666'}}>
-                    {poi.category} · à {poi.distance_m > 1000 ? (poi.distance_m/1000).toFixed(1)+'km' : poi.distance_m+'m'}
-                  </span>
-                  {poi.address && <><br /><small>{poi.address}</small></>}
-                  {poi.website && <><br /><a href={poi.website} target="_blank" rel="noopener noreferrer">🔗 Site web</a></>}
-                </Popup>
-              </Marker>
-            ))}
 
             {/* Mode Distance : marqueurs */}
             {mode === 'distance' && aPos && (
