@@ -6,7 +6,6 @@ import 'leaflet/dist/leaflet.css';
 import './App.css';
 import WeatherWidget from './WeatherWidget';
 import ActivitiesWidget from './ActivitiesWidget';
-import WebcamWidget from './WebcamWidget';
 
 // ===== Axios personnalisé : User-Agent + cache session =====
 const API_CLIENT = axios.create({
@@ -2032,12 +2031,6 @@ function App() {
             <div className="population-badge"><span className="pop-icon">👤</span><span className="pop-label">Population :</span>{location.population > 0 ? <><span className="pop-value">{location.population.toLocaleString('fr-FR')}</span><span className="pop-unit">habitants</span></> : <span className="pop-value pop-unknown">Non spécifiée</span>}</div>
             {location.is_address && <span className="detail-badge address-badge">📍 Adresse précise</span>}
           </div>
-          <WebcamWidget
-            latitude={location?.latitude}
-            longitude={location?.longitude}
-            lang={lang}
-            apiBase={API}
-          />
           {weather && weather.current && !weather.error ? (
             <>
               <WeatherWidget weather={weather} cityName={location?.city} lang={lang} />
