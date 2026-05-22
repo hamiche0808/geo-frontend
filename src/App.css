@@ -1495,9 +1495,9 @@ body.dark-mode .btn-fuel-toggle:hover {
 .traffic-zones-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px 44px 12px 16px;
   background: linear-gradient(135deg, #c62828, #e65100);
   color: white;
   border: none;
@@ -1507,7 +1507,7 @@ body.dark-mode .btn-fuel-toggle:hover {
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 3px 12px rgba(198, 40, 40, 0.3);
-  text-align: left;
+  position: relative;
 }
 .traffic-zones-toggle:hover {
   transform: translateY(-1px);
@@ -1517,7 +1517,14 @@ body.dark-mode .traffic-zones-toggle {
   background: linear-gradient(135deg, #b71c1c, #bf360c);
   box-shadow: 0 3px 12px rgba(183, 28, 28, 0.3);
 }
+.traffic-toggle-text {
+  text-align: center;
+}
 .traffic-toggle-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 0.8em;
   opacity: 0.8;
 }

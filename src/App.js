@@ -2123,7 +2123,7 @@ function App() {
             <div className="traffic-zones-section">
               <button className="traffic-zones-toggle"
                 onClick={() => setTrafficZonesExpanded(!trafficZonesExpanded)}>
-                🚗 {lang === 'fr' ? 'Restrictions de circulation' : 'Traffic restrictions'}
+                <span className="traffic-toggle-text">🚗 {lang === 'fr' ? 'Restrictions de circulation' : 'Traffic restrictions'}</span>
                 <span className="traffic-toggle-arrow">{trafficZonesExpanded ? '▲' : '▼'}</span>
               </button>
               {trafficZonesExpanded && (
