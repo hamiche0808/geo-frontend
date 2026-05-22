@@ -1498,18 +1498,18 @@ body.dark-mode .btn-fuel-toggle:hover {
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 10px 36px 10px 12px;
+  padding: 8px 28px 8px 10px;
   background: linear-gradient(135deg, #c62828, #e65100);
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 0.95em;
+  font-size: 0.88em;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 3px 12px rgba(198, 40, 40, 0.3);
   position: relative;
-  gap: 8px;
+  gap: 6px;
 }
 .traffic-toggle-restricted:hover {
   transform: translateY(-1px);
@@ -1524,11 +1524,11 @@ body.dark-mode .traffic-toggle-restricted {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: rgba(255,255,255,0.25);
   border-radius: 50%;
-  font-size: 1.1em;
+  font-size: 1em;
   flex-shrink: 0;
 }
 .traffic-toggle-text {
@@ -1536,11 +1536,11 @@ body.dark-mode .traffic-toggle-restricted {
 }
 .traffic-toggle-arrow {
   position: absolute;
-  right: 16px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.8em;
-  opacity: 0.8;
+  font-size: 0.7em;
+  opacity: 0.7;
 }
 /* Bandeau vert (aucune restriction) */
 .traffic-zones-free {
@@ -1549,14 +1549,14 @@ body.dark-mode .traffic-toggle-restricted {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: linear-gradient(135deg, #2e7d32, #43a047);
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 0.9em;
+  font-size: 0.85em;
   font-weight: 600;
-  box-shadow: 0 3px 12px rgba(46, 125, 50, 0.3);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
 }
 body.dark-mode .traffic-zones-free {
   background: linear-gradient(135deg, #1b5e20, #2e7d32);
