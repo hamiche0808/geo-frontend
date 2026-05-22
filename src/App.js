@@ -1101,7 +1101,7 @@ function App() {
           setLoadingMessage('🖼️ Ville...');
           setLoading(false);
           setLoadingMessage('');
-          fetchTrafficZones(data.city, countryCode, data.postal_code);
+          fetchTrafficZones(data.city, data.country_code || countryCode, data.postal_code);
           return;
         }
       }
@@ -1117,7 +1117,7 @@ function App() {
       setLoadingMessage('🌤️ Météo...');
       fetchWeather(data.latitude, data.longitude);
       setLoadingMessage('🖼️ Ville...');
-      fetchTrafficZones(data.city, countryCode, data.postal_code);
+      fetchTrafficZones(data.city, data.country_code || countryCode, data.postal_code);
     } catch (err) {
       const errMsg = err?.response?.status === 404 || (err?.response?.data?.detail || '').includes('non trouvé') ? 'Ville non trouvée.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
       setError(errMsg);
