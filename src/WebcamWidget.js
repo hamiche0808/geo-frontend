@@ -6,6 +6,8 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
   const [webcam, setWebcam] = useState(null);
   const [live, setLive] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [noWebcam, setNoWebcam] = useState(false);
   const liveRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -14,14 +16,23 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
     setWebcam(null);
     setLive(false);
     setImgError(false);
+    setNoWebcam(false);
+    setLoading(true);
     const fetchWebcam = async () => {
       try {
         const resp = await axios.get(`${apiBase}/api/webcam`, {
           params: { lat: latitude, lon: longitude },
-          timeout: 12000
+          timeout: 15000
         });
-        setWebcam(resp.data);
-      } catch { /* aucun flux trouvé — on n'affiche rien */ }
+        if (resp.data && resp.data.image_url) {
+          setWebcam(resp.data);
+        } else {
+          setNoWebcam(true);
+        }
+      } catch {
+        setNoWebcam(true);
+      }
+      setLoading(false);
     };
     fetchWebcam();
   }, [latitude, longitude, apiBase]);
@@ -33,8 +44,32 @@ export default function WebcamWidget({ latitude, longitude, lang, apiBase }) {
     };
   }, []);
 
-  // Si pas de webcam trouvée → rien n'afficher (pas de casse)
-  if (!webcam || !webcam.image_url) return null;
+  // Pendant le chargement
+  if (loading) {
+    return (
+      <div className="webcam-widget webcam-loading">
+        <div className="webcam-header">
+          <span className="webcam-title">📹 {lang === 'fr' ? 'Recherche webcam...' : 'Searching webcam...'}</span>
+        </div>
+        <div className="webcam-preview">
+          <div className="webcam-thumb-wrapper">
+            <div className="webcam-loading-icon">⏳</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Aucune webcam trouvée → afficher un message discret
+  if (noWebcam || !webcam || !webcam.image_url) {
+    return (
+      <div className="webcam-widget webcam-none">
+        <div className="webcam-header">
+          <span className="webcam-title">📷 {lang === 'fr' ? 'Aucune webcam à proximité' : 'No webcam nearby'}</span>
+        </div>
+      </div>
+    );
+  }
 
   const handleLive = () => {
     setLive(true);
