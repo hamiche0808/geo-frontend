@@ -659,6 +659,7 @@ function App() {
   const [trafficZones, setTrafficZones] = useState([]);
   const [trafficZonesLoading, setTrafficZonesLoading] = useState(false);
   const [trafficZonesExpanded, setTrafficZonesExpanded] = useState(false);
+  const [trafficZonesChecked, setTrafficZonesChecked] = useState(false);
 
   // Détection hors-ligne
   useEffect(() => {
@@ -1065,6 +1066,7 @@ function App() {
       setTrafficZones([]);
     } finally {
       setTrafficZonesLoading(false);
+      setTrafficZonesChecked(true);
     }
   };
 
@@ -1077,6 +1079,7 @@ function App() {
     setLoading(true);
     setLoadingMessage('🔍 Recherche...');
     setTrafficZonesExpanded(false);
+    setTrafficZonesChecked(false);
     try {
       setLoadingMessage('📡 Connexion...');
       // Si le terme ne ressemble pas à un code postal, chercher d'abord via /api/search
@@ -1706,7 +1709,7 @@ function App() {
           <button className="btn-locate" onClick={locateMe} disabled={locating} title="Ma position">
             {locating ? '⏳' : '📍'}
           </button>
-          <select value={country} onChange={(e) => { setCountry(e.target.value); setTrafficZones([]); setTrafficZonesExpanded(false); }} className="country-select">
+          <select value={country} onChange={(e) => { setCountry(e.target.value); setTrafficZones([]); setTrafficZonesExpanded(false); setTrafficZonesChecked(false); }} className="country-select">
             {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
           </select>
 
@@ -2119,54 +2122,65 @@ function App() {
 
           <p className="coords">Coordonnées : {location.latitude}, {location.longitude}</p>
 
-          {/* Restrictions de circulation (Crit'Air, LEZ, ZTL, etc.) — plié par défaut */}
-          {trafficZones.length > 0 && (
+          {/* Restrictions de circulation (Crit'Air, LEZ, ZTL, etc.) */}
+          {trafficZonesChecked && (
             <div className="traffic-zones-section">
-              <button className="traffic-zones-toggle"
-                onClick={() => setTrafficZonesExpanded(!trafficZonesExpanded)}>
-                <span className="traffic-toggle-text">🚗 {lang === 'fr' ? 'Restrictions de circulation' : 'Traffic restrictions'}</span>
-                <span className="traffic-toggle-arrow">{trafficZonesExpanded ? '▲' : '▼'}</span>
-              </button>
-              {trafficZonesExpanded && (
-                <div className="traffic-zones-content">
-                  {trafficZones.map((zone, idx) => (
-                    <div key={idx} className="traffic-zone-card">
-                      <div className="traffic-zone-header">
-                        <span className="traffic-zone-badge">⚠️</span>
-                        <span className="traffic-zone-label">
-                          {lang === 'fr' ? zone.label_fr : zone.label_en}
-                        </span>
-                      </div>
-                      <p className="traffic-zone-desc">
-                        {lang === 'fr' ? zone.description_fr : zone.description_en}
-                      </p>
-                      <div className="traffic-zone-details">
-                        <span className="traffic-zone-info">
-                          🔖 <strong>{lang === 'fr' ? 'Vignette requise' : 'Required sticker'} :</strong> {zone.requires_vignette}
-                        </span>
-                        {zone.evolution && (
-                          <span className="traffic-zone-evolution">
-                            📅 <strong>{lang === 'fr' ? 'Évolution' : 'Changes'} :</strong> {zone.evolution}
-                          </span>
-                        )}
-                        <span className="traffic-zone-since">
-                          🗓️ <strong>{lang === 'fr' ? 'En vigueur depuis' : 'Active since'} :</strong> {zone.active_since}
-                        </span>
-                      </div>
-                      <div className="traffic-zone-links">
-                        {zone.vignette_url && (
-                          <a href={zone.vignette_url} target="_blank" rel="noopener noreferrer" className="traffic-link">
-                            🔗 {lang === 'fr' ? 'Obtenir la vignette' : 'Get the sticker'}
-                          </a>
-                        )}
-                        {zone.official_url && zone.vignette_url !== zone.official_url && (
-                          <a href={zone.official_url} target="_blank" rel="noopener noreferrer" className="traffic-link">
-                            📖 {lang === 'fr' ? 'Site officiel' : 'Official website'}
-                          </a>
-                        )}
-                      </div>
+              {trafficZones.length > 0 ? (
+                <>
+                  <button className="traffic-zones-toggle traffic-toggle-restricted"
+                    onClick={() => setTrafficZonesExpanded(!trafficZonesExpanded)}>
+                    <span className="traffic-toggle-icon-badge">🚗</span>
+                    <span className="traffic-toggle-text">
+                      {lang === 'fr' ? 'Restrictions de circulation' : 'Traffic restrictions'}
+                    </span>
+                    <span className="traffic-toggle-arrow">{trafficZonesExpanded ? '▲' : '▼'}</span>
+                  </button>
+                  {trafficZonesExpanded && (
+                    <div className="traffic-zones-content">
+                      {trafficZones.map((zone, idx) => (
+                        <div key={idx} className="traffic-zone-card">
+                          <div className="traffic-zone-header">
+                            <span className="traffic-zone-badge">⚠️</span>
+                            <span className="traffic-zone-label">
+                              {lang === 'fr' ? zone.label_fr : zone.label_en}
+                            </span>
+                          </div>
+                          <p className="traffic-zone-desc">
+                            {lang === 'fr' ? zone.description_fr : zone.description_en}
+                          </p>
+                          <div className="traffic-zone-details">
+                            <span className="traffic-zone-info">
+                              🔖 <strong>{lang === 'fr' ? 'Vignette requise' : 'Required sticker'} :</strong> {zone.requires_vignette}
+                            </span>
+                            {zone.evolution && (
+                              <span className="traffic-zone-evolution">
+                                📅 <strong>{lang === 'fr' ? 'Évolution' : 'Changes'} :</strong> {zone.evolution}
+                              </span>
+                            )}
+                            <span className="traffic-zone-since">
+                              🗓️ <strong>{lang === 'fr' ? 'En vigueur depuis' : 'Active since'} :</strong> {zone.active_since}
+                            </span>
+                          </div>
+                          <div className="traffic-zone-links">
+                            {zone.vignette_url && (
+                              <a href={zone.vignette_url} target="_blank" rel="noopener noreferrer" className="traffic-link">
+                                🔗 {lang === 'fr' ? 'Obtenir la vignette' : 'Get the sticker'}
+                              </a>
+                            )}
+                            {zone.official_url && zone.vignette_url !== zone.official_url && (
+                              <a href={zone.official_url} target="_blank" rel="noopener noreferrer" className="traffic-link">
+                                📖 {lang === 'fr' ? 'Site officiel' : 'Official website'}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                </>
+              ) : (
+                <div className="traffic-zones-free">
+                  ✅ {lang === 'fr' ? 'Aucune restriction de circulation connue' : 'No known traffic restrictions'}
                 </div>
               )}
             </div>

@@ -1492,7 +1492,8 @@ body.dark-mode .btn-fuel-toggle:hover {
   margin: 16px 0;
   animation: fadeIn 0.3s ease-out;
 }
-.traffic-zones-toggle {
+/* Bandeau rouge (restrictions actives) */
+.traffic-toggle-restricted {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1508,14 +1509,27 @@ body.dark-mode .btn-fuel-toggle:hover {
   transition: all 0.2s;
   box-shadow: 0 3px 12px rgba(198, 40, 40, 0.3);
   position: relative;
+  gap: 8px;
 }
-.traffic-zones-toggle:hover {
+.traffic-toggle-restricted:hover {
   transform: translateY(-1px);
   box-shadow: 0 5px 16px rgba(198, 40, 40, 0.4);
 }
-body.dark-mode .traffic-zones-toggle {
+body.dark-mode .traffic-toggle-restricted {
   background: linear-gradient(135deg, #b71c1c, #bf360c);
   box-shadow: 0 3px 12px rgba(183, 28, 28, 0.3);
+}
+/* Badge blanc pour l'icône voiture (visible sur fond rouge) */
+.traffic-toggle-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  font-size: 1.1em;
+  flex-shrink: 0;
 }
 .traffic-toggle-text {
   text-align: center;
@@ -1527,6 +1541,26 @@ body.dark-mode .traffic-zones-toggle {
   transform: translateY(-50%);
   font-size: 0.8em;
   opacity: 0.8;
+}
+/* Bandeau vert (aucune restriction) */
+.traffic-zones-free {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9em;
+  font-weight: 600;
+  box-shadow: 0 3px 12px rgba(46, 125, 50, 0.3);
+}
+body.dark-mode .traffic-zones-free {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  box-shadow: 0 3px 12px rgba(27, 94, 32, 0.3);
 }
 .traffic-zones-content {
   margin-top: 10px;
