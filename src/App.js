@@ -1076,6 +1076,7 @@ function App() {
     setError(null);
     setLoading(true);
     setLoadingMessage('🔍 Recherche...');
+    setTrafficZonesExpanded(false);
     try {
       setLoadingMessage('📡 Connexion...');
       // Si le terme ne ressemble pas à un code postal, chercher d'abord via /api/search
@@ -1705,7 +1706,7 @@ function App() {
           <button className="btn-locate" onClick={locateMe} disabled={locating} title="Ma position">
             {locating ? '⏳' : '📍'}
           </button>
-          <select value={country} onChange={(e) => setCountry(e.target.value)} className="country-select">
+          <select value={country} onChange={(e) => { setCountry(e.target.value); setTrafficZones([]); setTrafficZonesExpanded(false); }} className="country-select">
             {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
           </select>
 
