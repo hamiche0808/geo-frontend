@@ -1497,7 +1497,8 @@ body.dark-mode .btn-fuel-toggle:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
   padding: 8px 28px 8px 10px;
   background: linear-gradient(135deg, #c62828, #e65100);
   color: white;
@@ -1548,7 +1549,8 @@ body.dark-mode .traffic-toggle-restricted {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
   padding: 8px 10px;
   background: linear-gradient(135deg, #2e7d32, #43a047);
   color: white;
