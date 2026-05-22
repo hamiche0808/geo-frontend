@@ -1487,6 +1487,109 @@ body.dark-mode .btn-fuel-toggle:hover {
   opacity: 1;
 }
 
+/* ===== Restrictions de circulation (Crit'Air, LEZ, ZTL) ===== */
+.traffic-zones-section {
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 10px;
+  animation: fadeIn 0.3s ease-out;
+}
+body.dark-mode .traffic-zones-section {
+  background: #3d3200;
+  border-color: #665500;
+}
+.traffic-zones-section h3 {
+  font-size: 0.95em;
+  margin-bottom: 8px;
+  color: #e65100;
+}
+body.dark-mode .traffic-zones-section h3 {
+  color: #ffb74d;
+}
+.traffic-zone-card {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+}
+body.dark-mode .traffic-zone-card {
+  background: rgba(0,0,0,0.3);
+  border-left-color: #ffb74d;
+}
+.traffic-zone-card:last-child {
+  margin-bottom: 0;
+}
+.traffic-zone-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.traffic-zone-badge {
+  font-size: 1.2em;
+}
+.traffic-zone-label {
+  font-weight: 700;
+  font-size: 0.9em;
+  color: #bf360c;
+}
+body.dark-mode .traffic-zone-label {
+  color: #ffcc80;
+}
+.traffic-zone-desc {
+  font-size: 0.82em;
+  line-height: 1.4;
+  color: var(--text);
+  margin: 0 0 8px 0;
+}
+.traffic-zone-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.traffic-zone-info,
+.traffic-zone-evolution,
+.traffic-zone-since {
+  font-size: 0.78em;
+  color: var(--text-secondary);
+}
+.traffic-zone-links {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.traffic-link {
+  display: inline-block;
+  padding: 5px 12px;
+  background: #ff9800;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.traffic-link:hover {
+  background: #e65100;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+}
+body.dark-mode .traffic-link {
+  background: #e65100;
+}
+body.dark-mode .traffic-link:hover {
+  background: #bf360c;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ===== QR Code ===== */
 .btn-qr {
   padding: 8px 20px;

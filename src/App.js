@@ -655,6 +655,10 @@ function App() {
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
+  // Restrictions de circulation (Crit'Air, LEZ, ZTL, etc.)
+  const [trafficZones, setTrafficZones] = useState([]);
+  const [trafficZonesLoading, setTrafficZonesLoading] = useState(false);
+
   // Détection hors-ligne
   useEffect(() => {
     const goOffline = () => setIsOffline(true);
@@ -1044,6 +1048,25 @@ function App() {
     return () => clearInterval(id);
   }, [location?.country_code, location?.longitude]);
 
+  // ===== Restrictions de circulation (Crit'Air, LEZ, ZTL, etc.) =====
+  const fetchTrafficZones = async (cityName, countryCode, postalCode) => {
+    if (!cityName) return;
+    setTrafficZonesLoading(true);
+    try {
+      const data = await cachedGet(`${API}/api/traffic-zones`, {
+        city: cityName,
+        country_code: countryCode,
+        postal_code: postalCode || ''
+      });
+      setTrafficZones(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.warn('Traffic zones error:', e.message);
+      setTrafficZones([]);
+    } finally {
+      setTrafficZonesLoading(false);
+    }
+  };
+
   // ===== Mode Recherche =====
   const handleSearch = async (query, countryOverride) => {
     const term = (query || searchInput).trim();
@@ -1073,6 +1096,7 @@ function App() {
           setLoadingMessage('🖼️ Ville...');
           setLoading(false);
           setLoadingMessage('');
+          fetchTrafficZones(data.city, countryCode, data.postal_code);
           return;
         }
       }
@@ -1088,6 +1112,7 @@ function App() {
       setLoadingMessage('🌤️ Météo...');
       fetchWeather(data.latitude, data.longitude);
       setLoadingMessage('🖼️ Ville...');
+      fetchTrafficZones(data.city, countryCode, data.postal_code);
     } catch (err) {
       const errMsg = err?.response?.status === 404 || (err?.response?.data?.detail || '').includes('non trouvé') ? 'Ville non trouvée.' : `Erreur: ${err?.message || 'Réseau indisponible'}`;
       setError(errMsg);
@@ -2091,6 +2116,51 @@ function App() {
           )}
 
           <p className="coords">Coordonnées : {location.latitude}, {location.longitude}</p>
+
+          {/* Restrictions de circulation (Crit'Air, LEZ, ZTL, etc.) */}
+          {trafficZones.length > 0 && (
+            <div className="traffic-zones-section">
+              <h3>🚗 {lang === 'fr' ? 'Restrictions de circulation' : 'Traffic restrictions'}</h3>
+              {trafficZones.map((zone, idx) => (
+                <div key={idx} className="traffic-zone-card">
+                  <div className="traffic-zone-header">
+                    <span className="traffic-zone-badge">⚠️</span>
+                    <span className="traffic-zone-label">
+                      {lang === 'fr' ? zone.label_fr : zone.label_en}
+                    </span>
+                  </div>
+                  <p className="traffic-zone-desc">
+                    {lang === 'fr' ? zone.description_fr : zone.description_en}
+                  </p>
+                  <div className="traffic-zone-details">
+                    <span className="traffic-zone-info">
+                      🔖 <strong>{lang === 'fr' ? 'Vignette requise' : 'Required sticker'} :</strong> {zone.requires_vignette}
+                    </span>
+                    {zone.evolution && (
+                      <span className="traffic-zone-evolution">
+                        📅 <strong>{lang === 'fr' ? 'Évolution' : 'Changes'} :</strong> {zone.evolution}
+                      </span>
+                    )}
+                    <span className="traffic-zone-since">
+                      🗓️ <strong>{lang === 'fr' ? 'En vigueur depuis' : 'Active since'} :</strong> {zone.active_since}
+                    </span>
+                  </div>
+                  <div className="traffic-zone-links">
+                    {zone.vignette_url && (
+                      <a href={zone.vignette_url} target="_blank" rel="noopener noreferrer" className="traffic-link">
+                        🔗 {lang === 'fr' ? 'Obtenir la vignette' : 'Get the sticker'}
+                      </a>
+                    )}
+                    {zone.official_url && zone.vignette_url !== zone.official_url && (
+                      <a href={zone.official_url} target="_blank" rel="noopener noreferrer" className="traffic-link">
+                        📖 {lang === 'fr' ? 'Site officiel' : 'Official website'}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* POIs (liens affiliés) */}
           <div className="poi-section">
