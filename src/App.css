@@ -1489,35 +1489,44 @@ body.dark-mode .btn-fuel-toggle:hover {
 
 /* ===== Restrictions de circulation (Crit'Air, LEZ, ZTL) ===== */
 .traffic-zones-section {
-  margin: 12px 0;
-  padding: 10px 12px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  border-radius: 10px;
+  margin: 16px 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
   animation: fadeIn 0.3s ease-out;
-}
-body.dark-mode .traffic-zones-section {
-  background: #3d3200;
-  border-color: #665500;
+  overflow: hidden;
 }
 .traffic-zones-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px 0;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #e65100, #ff8f00);
+  color: white;
   font-size: 0.95em;
-  margin-bottom: 8px;
-  color: #e65100;
+  font-weight: 700;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(230, 81, 0, 0.3);
 }
 body.dark-mode .traffic-zones-section h3 {
-  color: #ffb74d;
+  background: linear-gradient(135deg, #bf360c, #e65100);
+  box-shadow: 0 3px 12px rgba(191, 54, 12, 0.3);
 }
 .traffic-zone-card {
   margin-bottom: 10px;
-  padding: 10px;
-  background: rgba(255,255,255,0.7);
-  border-radius: 8px;
-  border-left: 4px solid #ff9800;
+  padding: 12px 14px;
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+  border-radius: 10px;
+  border-left: 5px solid #ff6f00;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 body.dark-mode .traffic-zone-card {
-  background: rgba(0,0,0,0.3);
-  border-left-color: #ffb74d;
+  background: #2d1f00;
+  border-color: #664400;
+  border-left-color: #ff8f00;
 }
 .traffic-zone-card:last-child {
   margin-bottom: 0;
@@ -1526,63 +1535,83 @@ body.dark-mode .traffic-zone-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .traffic-zone-badge {
-  font-size: 1.2em;
+  font-size: 1.4em;
 }
 .traffic-zone-label {
   font-weight: 700;
-  font-size: 0.9em;
+  font-size: 0.95em;
   color: #bf360c;
 }
 body.dark-mode .traffic-zone-label {
   color: #ffcc80;
 }
 .traffic-zone-desc {
-  font-size: 0.82em;
-  line-height: 1.4;
+  font-size: 0.85em;
+  line-height: 1.5;
   color: var(--text);
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 6px;
+}
+body.dark-mode .traffic-zone-desc {
+  background: rgba(0,0,0,0.2);
 }
 .traffic-zone-details {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  font-size: 0.8em;
 }
 .traffic-zone-info,
 .traffic-zone-evolution,
 .traffic-zone-since {
-  font-size: 0.78em;
-  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text);
+  padding: 3px 0;
+}
+.traffic-zone-info strong,
+.traffic-zone-evolution strong,
+.traffic-zone-since strong {
+  color: #e65100;
+}
+body.dark-mode .traffic-zone-info strong,
+body.dark-mode .traffic-zone-evolution strong,
+body.dark-mode .traffic-zone-since strong {
+  color: #ffb74d;
 }
 .traffic-zone-links {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 .traffic-link {
-  display: inline-block;
-  padding: 5px 12px;
-  background: #ff9800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  background: linear-gradient(135deg, #e65100, #ff8f00);
   color: white;
-  border-radius: 6px;
-  font-size: 0.8em;
+  border-radius: 8px;
+  font-size: 0.82em;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(230, 81, 0, 0.25);
 }
 .traffic-link:hover {
-  background: #e65100;
+  background: linear-gradient(135deg, #bf360c, #e65100);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.4);
 }
 body.dark-mode .traffic-link {
-  background: #e65100;
-}
-body.dark-mode .traffic-link:hover {
-  background: #bf360c;
+  background: linear-gradient(135deg, #bf360c, #e65100);
 }
 
 @keyframes fadeIn {
