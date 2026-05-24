@@ -554,7 +554,7 @@ body.dark-mode .currency-badge {
   margin: 10px 0;
 }
 .currency-converter-toggle {
-  background: linear-gradient(135deg, var(--primary, #667eea), var(--accent, #ff6b35));
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
   border-radius: 24px;
@@ -571,9 +571,6 @@ body.dark-mode .currency-badge {
 }
 .currency-converter-toggle:active {
   transform: translateY(0);
-}
-body.dark-mode .currency-converter-toggle {
-  background: linear-gradient(135deg, var(--accent, #ff6b35), var(--primary, #667eea));
 }
 .currency-converter {
   background: #f9f9f9;
