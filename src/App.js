@@ -364,6 +364,17 @@ const FUEL_PRICES = {
   ZA: { g: 1.10, d: 1.02 }, EG: { g: 0.45, d: 0.35 }, SN: { g: 1.25, d: 1.15 }, CI: { g: 1.20, d: 1.10 },
   KE: { g: 1.22, d: 1.12 }, CO: { g: 0.75, d: 0.65 }, CL: { g: 1.20, d: 1.08 }, PE: { g: 1.15, d: 1.05 },
 };
+// ===== Prix paquet de cigarettes (Marlboro, €) =====
+const CIGARETTE_PRICES = {
+  FR: 11, BE: 8, DE: 8, IT: 6, ES: 5.5, PT: 5.5, NL: 9, AT: 6, IE: 14, GB: 13,
+  GR: 5, FI: 9, SE: 7, NO: 13, DK: 8, PL: 4.5, CH: 8, CZ: 5, HU: 4.5, RO: 4.5,
+  BG: 3.5, HR: 4.5, SK: 4.5, SI: 4.5, LT: 4, LV: 4, EE: 4.5, IS: 12, MT: 5.5, LU: 6,
+  US: 10, CA: 12, MX: 4, BR: 3.5, AR: 3, JP: 5, CN: 3, IN: 3.5, KR: 4.5, TR: 3,
+  TH: 3.5, DZ: 2.5, MA: 3, TN: 2.5, AU: 22, NZ: 20, RU: 2.5,
+  RS: 3.5, UA: 2.5, AL: 3, BA: 3.5, ME: 3.5, SG: 12, HK: 8, MY: 3.5, ID: 2, PH: 2.5,
+  VN: 1.5, IL: 9, ZA: 3.5, EG: 2, SN: 2.5, CI: 2.5, KE: 2.5, CO: 2.5, CL: 4.5, PE: 3,
+};
+const COST_KEYS_ORDER = ['coffee', 'meal', 'beer', 'transport', 'rent', 'taxi', 'cigarettes'];
 const COST_LABELS = {
   meal: { fr: 'Repas (restaurant pas cher)', en: 'Meal (inexpensive)' },
   beer: { fr: 'Bière (0,5L)', en: 'Domestic beer (0.5L)' },
@@ -371,6 +382,7 @@ const COST_LABELS = {
   transport: { fr: 'Ticket transport', en: 'Local transport' },
   taxi: { fr: 'Diesel (1L)', en: 'Diesel (1L)' },
   rent: { fr: 'Loyer 1ch. centre-ville/mois', en: 'Rent 1BR city center/month' },
+  cigarettes: { fr: 'Cigarettes (Marlboro)', en: 'Cigarettes (Marlboro)' },
 };
 // ===== Composant d'affichage d'une prise (photo réelle) =====
 function PlugIcon({ type }) {
@@ -2578,10 +2590,16 @@ function App() {
                     </span>
                   </div>
                   <div className="cost-items">
-                    {Object.entries(COST_DATA[location.country_code]).map(([key, val]) => {
-                      if (key === 'coffee') val = FUEL_PRICES[location.country_code]?.g ?? val;
-                      if (key === 'taxi') val = FUEL_PRICES[location.country_code]?.d ?? val;
-                      const frVal = key === 'coffee' ? FUEL_PRICES.FR.g : key === 'taxi' ? FUEL_PRICES.FR.d : (COST_DATA.FR[key] || 1);
+                    {COST_KEYS_ORDER.map(key => {
+                      const val = key === 'coffee' ? FUEL_PRICES[location.country_code]?.g
+                               : key === 'taxi' ? FUEL_PRICES[location.country_code]?.d
+                               : key === 'cigarettes' ? CIGARETTE_PRICES[location.country_code]
+                               : COST_DATA[location.country_code][key];
+                      if (val === undefined || val === null) return null;
+                      const frVal = key === 'coffee' ? FUEL_PRICES.FR.g
+                                  : key === 'taxi' ? FUEL_PRICES.FR.d
+                                  : key === 'cigarettes' ? CIGARETTE_PRICES.FR
+                                  : (COST_DATA.FR[key] || 1);
                       const ratio = val / frVal;
                       const diff = ratio > 1.1 ? 'plus-cher' : ratio < 0.9 ? 'moins-cher' : 'egal';
                       return (
@@ -2596,7 +2614,7 @@ function App() {
                     })}
                   </div>
                   <p className="cost-source">
-                    {lang === 'fr' ? 'Sources : Numbeo (prix moyens indicatifs), GlobalPetrolPrices (carburant)' : 'Sources: Numbeo (average indicative prices), GlobalPetrolPrices (fuel)'}
+                    {lang === 'fr' ? 'Sources : Numbeo, GlobalPetrolPrices, TobaccoPrices' : 'Sources: Numbeo, GlobalPetrolPrices, TobaccoPrices'}
                   </p>
                 </div>
               )}
