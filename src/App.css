@@ -2954,6 +2954,50 @@ body.dark-mode .chat-msg-model .chat-msg-bubble {
   cursor: not-allowed;
 }
 
+/* Suggestions cliquables dans le chat */
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.chat-suggestion-btn {
+  background: var(--primary, #667eea);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
+  line-height: 1.3;
+}
+.chat-suggestion-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.chat-suggestion-btn:active {
+  transform: scale(0.95);
+}
+body.dark-mode .chat-suggestion-btn {
+  background: var(--accent, #ff6b35);
+}
+
+/* Markdown dans les bulles */
+.chat-msg-bubble strong {
+  font-weight: 700;
+}
+.chat-msg-bubble ul {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.chat-msg-bubble li {
+  margin: 2px 0;
+}
+
 /* ===== Admin Modal ===== */
 .modal-overlay {
   position: fixed;

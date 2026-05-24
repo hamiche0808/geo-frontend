@@ -430,6 +430,27 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Rendu markdown basique (gras, listes, sauts de ligne)
+function renderMarkdown(text) {
+  if (!text) return '';
+  let html = text
+    // Échapper le HTML
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    // Gras **text**
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Listes non ordonnées
+    .replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>')
+    // Listes ordonnées
+    .replace(/^\s*\d+\.\s+(.+)$/gm, '<li>$1</li>')
+    // Regrouper les <li> consécutifs dans <ul>
+    .replace(/((?:<li>.*?<\/li>\n?)+)/g, '<ul>$1</ul>')
+    // Sauts de ligne
+    .replace(/\n/g, '<br>')
+    // Nettoyer les <br> après </ul>
+    .replace(/<\/ul><br>/g, '</ul>');
+  return html;
+}
+
 // Icône violette pour les waypoints
 const waypointIcon = L.divIcon({
   className: 'waypoint-marker',
@@ -947,14 +968,37 @@ function App() {
     setChatInput('');
     setChatLoading(true);
     try {
+      // Construire le contexte enrichi
+      const chatContext = {
+        population: location.population || null,
+        local_time: localTimeStr || null,
+        weather: weather?.current ? {
+          temperature: weather.current.temperature,
+          conditions: lang === 'fr' ? weather.current.condition_fr : weather.current.condition_en
+        } : null,
+        currency: location.country_code && CURRENCY_MAP[location.country_code]
+          ? (CURRENCY_MAP[location.country_code] === 'EUR' ? 'Euro (€)' : `${CURRENCY_MAP[location.country_code]}`)
+          : null,
+      };
       const resp = await apiPost(`${API}/api/ai/chat`, {
         city: location.city,
         country_code: location.country_code,
         lang: lang,
         messages: updatedMessages,
+        context: chatContext,
       });
-      const reply = resp.data.response || resp.data.guide || '...';
-      setChatMessages(prev => [...prev, { role: 'model', text: reply }]);
+      const replyText = resp.data.response || resp.data.guide || '...';
+      const suggestions = resp.data.suggestions || [];
+      setChatMessages(prev => [...prev, { role: 'model', text: replyText, suggestions }]);
+      // Sauvegarder dans localStorage
+      try {
+        const saved = JSON.parse(localStorage.getItem('geoloc_chat') || '{}');
+        saved[location.city + '_' + location.country_code] = [...updatedMessages, { role: 'model', text: replyText, suggestions }];
+        // Limiter à 5 entrées
+        const keys = Object.keys(saved);
+        if (keys.length > 5) delete saved[keys[0]];
+        localStorage.setItem('geoloc_chat', JSON.stringify(saved));
+      } catch { /* ignore */ }
     } catch {
       const errMsg = lang === 'fr'
         ? '❌ Erreur lors de la génération de la réponse. Réessayez.'
@@ -967,6 +1011,16 @@ function App() {
   // Démarrer le chat automatiquement avec une première question
   const startChat = () => {
     setChatStarted(true);
+    // Restaurer une conversation précédente pour cette ville
+    try {
+      const saved = JSON.parse(localStorage.getItem('geoloc_chat') || '{}');
+      const key = location.city + '_' + location.country_code;
+      if (saved[key] && saved[key].length > 0) {
+        setChatMessages(saved[key]);
+        return;
+      }
+    } catch { /* ignore */ }
+    // Sinon, démarrer une nouvelle conversation
     const firstQuestion = lang === 'fr'
       ? `Quels sont les meilleurs endroits à visiter à ${location.city} et quelle spécialité locale goûter ?`
       : `What are the best places to visit in ${location.city} and what local specialty should I try?`;
@@ -2166,7 +2220,16 @@ function App() {
                 {chatMessages.map((msg, idx) => (
                   <div key={idx} className={`chat-msg ${msg.role === 'user' ? 'chat-msg-user' : 'chat-msg-model'}`}>
                     <div className="chat-msg-avatar">{msg.role === 'user' ? '👤' : '🤖'}</div>
-                    <div className="chat-msg-bubble">{msg.text}</div>
+                    <div className="chat-msg-bubble" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }} />
+                    {msg.role === 'model' && msg.suggestions && msg.suggestions.length > 0 && (
+                      <div className="chat-suggestions">
+                        {msg.suggestions.map((s, si) => (
+                          <button key={si} className="chat-suggestion-btn" onClick={() => sendChatMessage(s.replace(/^[^\w]+/, ''))}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(s) }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {chatLoading && (
