@@ -233,6 +233,7 @@ const PLUG_DATA = {
   RU: { types: ['C', 'F'], voltage: '220V', frequency: '50Hz' },
 };
 // ===== SVG Illustrations des prises électriques =====
+const EUROPEAN_PLUG_TYPES = ['C', 'E', 'F']; // Types de référence européens
 const PLUG_SVGS = {
   A: (
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
@@ -2461,6 +2462,19 @@ function App() {
                   <span className="plug-frequency">{PLUG_DATA[location.country_code].frequency}</span>
                 </div>
               </div>
+              {(() => {
+                const destTypes = PLUG_DATA[location.country_code].types;
+                const needsAdapter = !destTypes.some(t => EUROPEAN_PLUG_TYPES.includes(t));
+                return (
+                  <div className={"plug-adapter " + (needsAdapter ? 'adapter-needed' : 'adapter-ok')}>
+                    {needsAdapter ? (
+                      <>{lang === 'fr' ? '⚠️ Adaptateur nécessaire' : '⚠️ Adapter required'}</>
+                    ) : (
+                      <>{lang === 'fr' ? '✅ Compatible Europe (C/E/F)' : '✅ Compatible Europe (C/E/F)'}</>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

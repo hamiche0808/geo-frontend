@@ -706,6 +706,34 @@ body.dark-mode .plug-info {
 .plug-sep {
   color: #ccc;
 }
+.plug-adapter {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: center;
+}
+.plug-adapter.adapter-needed {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+.plug-adapter.adapter-ok {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+}
+body.dark-mode .plug-adapter.adapter-needed {
+  background: #3d3200;
+  color: #ffd970;
+  border-color: #856404;
+}
+body.dark-mode .plug-adapter.adapter-ok {
+  background: #0a2e1a;
+  color: #75d787;
+  border-color: #155724;
+}
 
 .details {
   display: flex;
