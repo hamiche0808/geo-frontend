@@ -166,6 +166,208 @@ const CURRENCY_NAMES = {
   SEK: 'Couronne suédoise', NOK: 'Couronne norvégienne', DKK: 'Couronne danoise', PLN: 'Zloty polonais',
 };
 
+// ===== Données des prises électriques =====
+const PLUG_TYPES_LABELS = {
+  A: 'USA / Japon',
+  B: 'USA (avec terre)',
+  C: 'Europlug',
+  D: 'Inde',
+  E: 'Française (avec terre)',
+  F: 'Schuko (allemande)',
+  G: 'Royaume-Uni',
+  H: 'Israël',
+  I: 'Australie / Chine',
+  J: 'Suisse',
+  K: 'Danemark',
+  L: 'Italie',
+  M: 'Afrique du Sud',
+  N: 'Brésil',
+};
+const PLUG_DATA = {
+  FR: { types: ['E', 'F'], voltage: '230V', frequency: '50Hz' },
+  BE: { types: ['E', 'F'], voltage: '230V', frequency: '50Hz' },
+  DE: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  IT: { types: ['F', 'L'], voltage: '230V', frequency: '50Hz' },
+  ES: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  PT: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  NL: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  AT: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  IE: { types: ['G'], voltage: '230V', frequency: '50Hz' },
+  GB: { types: ['G'], voltage: '230V', frequency: '50Hz' },
+  GR: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  FI: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  SE: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  NO: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  DK: { types: ['K', 'F'], voltage: '230V', frequency: '50Hz' },
+  PL: { types: ['E', 'F'], voltage: '230V', frequency: '50Hz' },
+  CH: { types: ['J'], voltage: '230V', frequency: '50Hz' },
+  CZ: { types: ['E', 'F'], voltage: '230V', frequency: '50Hz' },
+  HU: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  RO: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  BG: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  HR: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  SK: { types: ['E', 'F'], voltage: '230V', frequency: '50Hz' },
+  SI: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  LT: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  LV: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  EE: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  IS: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  MT: { types: ['G'], voltage: '230V', frequency: '50Hz' },
+  LU: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  US: { types: ['A', 'B'], voltage: '120V', frequency: '60Hz' },
+  CA: { types: ['A', 'B'], voltage: '120V', frequency: '60Hz' },
+  MX: { types: ['A', 'B'], voltage: '127V', frequency: '60Hz' },
+  BR: { types: ['N', 'C'], voltage: '127V / 220V', frequency: '60Hz' },
+  AR: { types: ['C', 'I'], voltage: '220V', frequency: '50Hz' },
+  JP: { types: ['A', 'B'], voltage: '100V', frequency: '50/60Hz' },
+  CN: { types: ['A', 'C', 'I'], voltage: '220V', frequency: '50Hz' },
+  IN: { types: ['C', 'D', 'M'], voltage: '230V', frequency: '50Hz' },
+  KR: { types: ['C', 'F'], voltage: '220V', frequency: '60Hz' },
+  TR: { types: ['F'], voltage: '230V', frequency: '50Hz' },
+  TH: { types: ['A', 'B', 'C'], voltage: '220V', frequency: '50Hz' },
+  DZ: { types: ['C', 'F'], voltage: '230V', frequency: '50Hz' },
+  MA: { types: ['C', 'E'], voltage: '220V', frequency: '50Hz' },
+  TN: { types: ['C', 'E'], voltage: '230V', frequency: '50Hz' },
+  AU: { types: ['I'], voltage: '230V', frequency: '50Hz' },
+  NZ: { types: ['I'], voltage: '230V', frequency: '50Hz' },
+  RU: { types: ['C', 'F'], voltage: '220V', frequency: '50Hz' },
+};
+// ===== SVG Illustrations des prises électriques =====
+const PLUG_SVGS = {
+  A: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <rect x="12" y="8" width="4" height="12" rx="1" fill="#e63946"/>
+      <rect x="20" y="8" width="4" height="12" rx="1" fill="#e63946"/>
+      <text x="18" y="31" textAnchor="middle" fontSize="7" fill="#888">A</text>
+    </svg>
+  ),
+  B: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <rect x="12" y="8" width="4" height="10" rx="1" fill="#e63946"/>
+      <rect x="20" y="8" width="4" height="10" rx="1" fill="#e63946"/>
+      <circle cx="18" cy="25" r="3.5" fill="#666" opacity="0.5"/>
+      <text x="18" y="31" textAnchor="middle" fontSize="7" fill="#888">B</text>
+    </svg>
+  ),
+  C: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="12" cy="15" r="3.5" fill="#e63946"/>
+      <circle cx="24" cy="15" r="3.5" fill="#e63946"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">C</text>
+    </svg>
+  ),
+  D: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="18" cy="11" r="4" fill="#e63946"/>
+      <circle cx="11" cy="23" r="4" fill="#e63946"/>
+      <circle cx="25" cy="23" r="4" fill="#e63946"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">D</text>
+    </svg>
+  ),
+  E: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="12" cy="14" r="3.5" fill="#e63946"/>
+      <circle cx="24" cy="14" r="3.5" fill="#e63946"/>
+      <rect x="16.5" y="20" width="3" height="8" rx="1.5" fill="#666" opacity="0.6"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">E</text>
+    </svg>
+  ),
+  F: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="12" cy="14" r="3.5" fill="#e63946"/>
+      <circle cx="24" cy="14" r="3.5" fill="#e63946"/>
+      <rect x="5" y="10" width="2" height="8" rx="1" fill="#666" opacity="0.4"/>
+      <rect x="29" y="10" width="2" height="8" rx="1" fill="#666" opacity="0.4"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">F</text>
+    </svg>
+  ),
+  G: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <rect x="11" y="8" width="3" height="10" rx="0.8" fill="#e63946"/>
+      <rect x="18" y="8" width="3" height="10" rx="0.8" fill="#e63946"/>
+      <rect x="22" y="18" width="3" height="8" rx="0.8" fill="#e63946"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">G</text>
+    </svg>
+  ),
+  H: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="18" cy="10" r="3.5" fill="#e63946"/>
+      <circle cx="11" cy="22" r="3.5" fill="#e63946"/>
+      <circle cx="25" cy="22" r="3.5" fill="#e63946"/>
+      <text x="18" y="34" textAnchor="middle" fontSize="7" fill="#888">H</text>
+    </svg>
+  ),
+  I: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <rect x="15" y="7" width="6" height="3" rx="0.8" fill="#e63946" transform="rotate(-30 18 8)"/>
+      <rect x="15" y="16" width="6" height="3" rx="0.8" fill="#e63946" transform="rotate(30 18 17)"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">I</text>
+    </svg>
+  ),
+  J: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="18" cy="9" r="3" fill="#e63946"/>
+      <circle cx="10" cy="20" r="3" fill="#e63946"/>
+      <circle cx="26" cy="20" r="3" fill="#e63946"/>
+      <text x="18" y="34" textAnchor="middle" fontSize="7" fill="#888">J</text>
+    </svg>
+  ),
+  K: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="12" cy="14" r="3.5" fill="#e63946"/>
+      <circle cx="24" cy="14" r="3.5" fill="#e63946"/>
+      <circle cx="18" cy="24" r="2.5" fill="#666" opacity="0.5"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">K</text>
+    </svg>
+  ),
+  L: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="18" cy="9" r="3" fill="#e63946"/>
+      <circle cx="12" cy="20" r="3" fill="#e63946"/>
+      <circle cx="24" cy="20" r="3" fill="#e63946"/>
+      <text x="18" y="34" textAnchor="middle" fontSize="7" fill="#888">L</text>
+    </svg>
+  ),
+  M: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="18" cy="10" r="4.5" fill="#e63946"/>
+      <circle cx="10" cy="23" r="4.5" fill="#e63946"/>
+      <circle cx="26" cy="23" r="4.5" fill="#e63946"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">M</text>
+    </svg>
+  ),
+  N: (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
+      <circle cx="18" cy="10" r="3.5" fill="#e63946"/>
+      <circle cx="11" cy="22" r="3.5" fill="#e63946"/>
+      <circle cx="25" cy="22" r="3.5" fill="#e63946"/>
+      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">N</text>
+    </svg>
+  ),
+};
+// ===== Composant d'affichage d'une prise =====
+function PlugIcon({ type }) {
+  return (
+    <div className="plug-icon" title={PLUG_TYPES_LABELS[type] || type}>
+      {PLUG_SVGS[type] || <span className="plug-unknown">{type}</span>}
+    </div>
+  );
+}
+
 // ===== Locales pour la prononciation (Synthèse vocale) =====
 const COUNTRY_LOCALE_MAP = {
   FR: 'fr-FR', BE: 'fr-BE', DE: 'de-DE', IT: 'it-IT', ES: 'es-ES', PT: 'pt-PT',
@@ -2237,6 +2439,28 @@ function App() {
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 🔌 Prises électriques */}
+          {location?.country_code && PLUG_DATA[location.country_code] && (
+            <div className="plug-section">
+              <div className="plug-header">
+                <span className="plug-header-icon">🔌</span>
+                <span>{lang === 'fr' ? 'Prises électriques' : 'Power plugs'}</span>
+              </div>
+              <div className="plug-body">
+                <div className="plug-icons-row">
+                  {PLUG_DATA[location.country_code].types.map(t => (
+                    <PlugIcon key={t} type={t} />
+                  ))}
+                </div>
+                <div className="plug-info">
+                  <span className="plug-voltage">{PLUG_DATA[location.country_code].voltage}</span>
+                  <span className="plug-sep">·</span>
+                  <span className="plug-frequency">{PLUG_DATA[location.country_code].frequency}</span>
+                </div>
+              </div>
             </div>
           )}
 
