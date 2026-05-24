@@ -559,8 +559,8 @@ function buildLocationFromData(data, defaultCountry) {
     postal_code: data.postal_code || '',
     country: data.country || '',
     country_code: data.country_code || defaultCountry || 'FR',
-    latitude: data.latitude,
-    longitude: data.longitude,
+    latitude: data.latitude ? parseFloat(data.latitude) : (data.lat ? parseFloat(data.lat) : undefined),
+    longitude: data.longitude ? parseFloat(data.longitude) : (data.lon ? parseFloat(data.lon) : undefined),
     department: data.department || '',
     region: data.region || '',
     population: data.population || 0,
@@ -1569,6 +1569,17 @@ function App() {
 
     // Mode avion : pas d'API OSRM, on utilise la distance orthodromique
     if (profile === 'flying') {
+      // Vérifier que les coordonnées sont valides
+      if (!cityA?.latitude || !cityA?.longitude || !cityB?.latitude || !cityB?.longitude) {
+        console.warn('✈️ Coordonnées manquantes pour le calcul du vol');
+        return;
+      }
+      if (!totalAirKm || totalAirKm < 10 || totalAirKm > 20000) {
+        console.warn('✈️ Distance de vol invalide :', totalAirKm, 'km — vérifiez les coordonnées');
+        console.log(' cityA:', cityA.city, cityA.latitude, cityA.longitude);
+        console.log(' cityB:', cityB.city, cityB.latitude, cityB.longitude);
+        return;
+      }
       setDistance(Math.round(totalAirKm));
       const speedKmh = PROFILE_SPEEDS.flying || 800;
       // Temps de vol : (distance / vitesse) + 30 min de décollage/atterrissage
