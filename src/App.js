@@ -232,213 +232,38 @@ const PLUG_DATA = {
   NZ: { types: ['I'], voltage: '230V', frequency: '50Hz' },
   RU: { types: ['C', 'F'], voltage: '220V', frequency: '50Hz' },
 };
-// ===== SVG Illustrations des prises électriques =====
+// ===== Photos réelles des prises électriques (Wikimedia Commons) =====
 const EUROPEAN_PLUG_TYPES = ['C', 'E', 'F']; // Types de référence européens
-const PLUG_SVGS = {
-  A: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyA" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinA" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowA"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyA)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowA)"/>
-      <rect x="14" y="10" width="4" height="14" rx="1.2" fill="url(#pinA)"/>
-      <rect x="26" y="10" width="4" height="14" rx="1.2" fill="url(#pinA)"/>
-      <text x="22" y="35" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">A</text>
-    </svg>
-  ),
-  B: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyB" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <radialGradient id="groundB" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#999"/><stop offset="100%" stopColor="#555"/></radialGradient>
-        <filter id="shadowB"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyB)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowB)"/>
-      <rect x="14" y="10" width="4" height="12" rx="1.2" fill="url(#pinB)"/>
-      <rect x="26" y="10" width="4" height="12" rx="1.2" fill="url(#pinB)"/>
-      <circle cx="22" cy="28" r="4" fill="url(#groundB)"/>
-      <text x="22" y="35" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">B</text>
-    </svg>
-  ),
-  C: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyC" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinC" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowC"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyC)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowC)"/>
-      <circle cx="15" cy="18" r="4" fill="url(#pinC)"/>
-      <circle cx="29" cy="18" r="4" fill="url(#pinC)"/>
-      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">C</text>
-    </svg>
-  ),
-  D: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyD" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinD" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowD"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyD)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowD)"/>
-      <circle cx="22" cy="12" r="4.5" fill="url(#pinD)"/>
-      <circle cx="13" cy="26" r="4.5" fill="url(#pinD)"/>
-      <circle cx="31" cy="26" r="4.5" fill="url(#pinD)"/>
-      <text x="22" y="37" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">D</text>
-    </svg>
-  ),
-  E: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyE" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinE" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <linearGradient id="femE" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#888"/><stop offset="100%" stopColor="#444"/></linearGradient>
-        <filter id="shadowE"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyE)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowE)"/>
-      <circle cx="14" cy="16" r="4" fill="url(#pinE)"/>
-      <circle cx="30" cy="16" r="4" fill="url(#pinE)"/>
-      <rect x="19.5" y="22" width="5" height="10" rx="2.5" fill="url(#femE)"/>
-      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">E</text>
-    </svg>
-  ),
-  F: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyF" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinF" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <linearGradient id="clipF" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#aaa"/><stop offset="100%" stopColor="#666"/></linearGradient>
-        <filter id="shadowF"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyF)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowF)"/>
-      <circle cx="14" cy="16" r="4" fill="url(#pinF)"/>
-      <circle cx="30" cy="16" r="4" fill="url(#pinF)"/>
-      <rect x="7" y="12" width="2.5" height="9" rx="1.2" fill="url(#clipF)"/>
-      <rect x="34.5" y="12" width="2.5" height="9" rx="1.2" fill="url(#clipF)"/>
-      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">F</text>
-    </svg>
-  ),
-  G: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyG" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowG"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyG)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowG)"/>
-      <rect x="13" y="9" width="3.5" height="12" rx="1" fill="url(#pinG)"/>
-      <rect x="20.5" y="9" width="3.5" height="12" rx="1" fill="url(#pinG)"/>
-      <rect x="27" y="21" width="3.5" height="10" rx="1" fill="url(#pinG)"/>
-      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">G</text>
-    </svg>
-  ),
-  H: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyH" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinH" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowH"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyH)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowH)"/>
-      <circle cx="22" cy="11" r="4" fill="url(#pinH)"/>
-      <circle cx="13" cy="25" r="4" fill="url(#pinH)"/>
-      <circle cx="31" cy="25" r="4" fill="url(#pinH)"/>
-      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">H</text>
-    </svg>
-  ),
-  I: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyI" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowI"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyI)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowI)"/>
-      <path d="M21 9 l-8 5 l0 10 l8 -5 Z" fill="url(#pinI)"/>
-      <path d="M21 25 l-8 -5 l0 10 l8 5 Z" fill="url(#pinI)"/>
-      <text x="22" y="37" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">I</text>
-    </svg>
-  ),
-  J: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyJ" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinJ" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowJ"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyJ)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowJ)"/>
-      <circle cx="22" cy="10" r="3.5" fill="url(#pinJ)"/>
-      <circle cx="13" cy="22" r="3.5" fill="url(#pinJ)"/>
-      <circle cx="31" cy="22" r="3.5" fill="url(#pinJ)"/>
-      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">J</text>
-    </svg>
-  ),
-  K: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyK" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinK" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <radialGradient id="groundK" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#999"/><stop offset="100%" stopColor="#555"/></radialGradient>
-        <filter id="shadowK"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyK)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowK)"/>
-      <circle cx="14" cy="16" r="4" fill="url(#pinK)"/>
-      <circle cx="30" cy="16" r="4" fill="url(#pinK)"/>
-      <circle cx="22" cy="27" r="3" fill="url(#groundK)"/>
-      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">K</text>
-    </svg>
-  ),
-  L: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyL" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinL" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowL"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyL)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowL)"/>
-      <circle cx="22" cy="10" r="3.5" fill="url(#pinL)"/>
-      <circle cx="14" cy="22" r="3.5" fill="url(#pinL)"/>
-      <circle cx="30" cy="22" r="3.5" fill="url(#pinL)"/>
-      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">L</text>
-    </svg>
-  ),
-  M: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyM" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinM" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowM"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyM)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowM)"/>
-      <circle cx="22" cy="11" r="5" fill="url(#pinM)"/>
-      <circle cx="12" cy="26" r="5" fill="url(#pinM)"/>
-      <circle cx="32" cy="26" r="5" fill="url(#pinM)"/>
-      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">M</text>
-    </svg>
-  ),
-  N: (
-    <svg width="44" height="44" viewBox="0 0 44 44">
-      <defs>
-        <radialGradient id="bodyN" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
-        <linearGradient id="pinN" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
-        <filter id="shadowN"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
-      </defs>
-      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyN)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowN)"/>
-      <circle cx="22" cy="11" r="4" fill="url(#pinN)"/>
-      <circle cx="13" cy="25" r="4" fill="url(#pinN)"/>
-      <circle cx="31" cy="25" r="4" fill="url(#pinN)"/>
-      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">N</text>
-    </svg>
-  ),
+const PLUG_PHOTOS = {
+  A: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/NEMA_1-15_plug%2C_American_Standard.jpg/100px-NEMA_1-15_plug%2C_American_Standard.jpg',
+  B: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/NEMA_5-15_plug%2C_American_Standard.jpg/100px-NEMA_5-15_plug%2C_American_Standard.jpg',
+  C: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Euro-Flachstecker_2.jpg/100px-Euro-Flachstecker_2.jpg',
+  D: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Indian_plug.jpg/100px-Indian_plug.jpg',
+  E: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Type_E_plug.jpg/100px-Type_E_plug.jpg',
+  F: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Schuko_plug.jpg/100px-Schuko_plug.jpg',
+  G: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/UK_13A_plug.jpg/100px-UK_13A_plug.jpg',
+  H: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/SI_32_plug.jpg/100px-SI_32_plug.jpg',
+  I: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Australian_plug.jpg/100px-Australian_plug.jpg',
+  J: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Type_J_plug.jpg/100px-Type_J_plug.jpg',
+  K: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Danish_plug.jpg/100px-Danish_plug.jpg',
+  L: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Italian_plug.jpg/100px-Italian_plug.jpg',
+  M: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/South_African_plug.jpg/100px-South_African_plug.jpg',
+  N: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Brazilian_plug.jpg/100px-Brazilian_plug.jpg',
 };
-// ===== Composant d'affichage d'une prise =====
+// ===== Composant d'affichage d'une prise (photo réelle) =====
 function PlugIcon({ type }) {
+  const [imgError, setImgError] = React.useState(false);
+  const photoUrl = PLUG_PHOTOS[type];
   return (
     <div className="plug-icon" title={PLUG_TYPES_LABELS[type] || type}>
-      {PLUG_SVGS[type] || <span className="plug-unknown">{type}</span>}
+      {photoUrl && !imgError ? (
+        <img src={photoUrl} alt={type}
+          className="plug-photo"
+          onError={() => setImgError(true)}
+          loading="lazy" />
+      ) : (
+        <span className="plug-unknown">{type}</span>
+      )}
     </div>
   );
 }
