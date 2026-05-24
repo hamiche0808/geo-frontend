@@ -1397,7 +1397,7 @@ function App() {
   });
 
   // Vitesses moyennes pour estimer la durée selon le profil
-  const PROFILE_SPEEDS = { driving: 50, cycling: 15, walking: 5 };
+  const PROFILE_SPEEDS = { driving: 50, cycling: 15, walking: 5, flying: 800 };
 
   // ===== Export PDF =====
   const [exporting, setExporting] = useState(false);
@@ -1862,6 +1862,7 @@ function App() {
                 <option value="driving">🚗 Voiture</option>
                 <option value="cycling">🚲 Vélo</option>
                 <option value="walking">🚶 Piéton</option>
+                <option value="flying">✈️ Avion</option>
               </select>
             </div>
 
@@ -1925,8 +1926,8 @@ function App() {
           <p className="coords">
             {routeCoords ? 'Route calculée' : 'Vol d\'oiseau'}
             <span className="profile-badge">
-              {modeProfile === 'driving' ? '🚗' : modeProfile === 'cycling' ? '🚲' : '🚶'}
-              {' '}{modeProfile === 'driving' ? 'Voiture' : modeProfile === 'cycling' ? 'Vélo' : 'Piéton'}
+              {modeProfile === 'driving' ? '🚗' : modeProfile === 'cycling' ? '🚲' : modeProfile === 'walking' ? '🚶' : '✈️'}
+              {' '}{modeProfile === 'driving' ? 'Voiture' : modeProfile === 'cycling' ? 'Vélo' : modeProfile === 'walking' ? 'Piéton' : 'Avion'}
             </span>
           </p>
 
