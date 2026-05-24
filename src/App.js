@@ -897,6 +897,7 @@ function App() {
   // Taux de change (devises)
   const [exchangeRates, setExchangeRates] = useState(null);
   const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
+  const [showPlugs, setShowPlugs] = useState(false);
   const [convertEuro, setConvertEuro] = useState(100);
   const [convertLocal, setConvertLocal] = useState(100);
 
@@ -2407,13 +2408,23 @@ function App() {
             </div>
           )}
 
-          {/* Convertisseur de devises */}
-          {location?.country_code && CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
-            <div className="currency-converter-section">
-              <button className="currency-converter-toggle" onClick={() => setShowCurrencyConverter(!showCurrencyConverter)}>
-                🧮 {showCurrencyConverter ? (lang === 'fr' ? 'Masquer' : 'Hide') : (lang === 'fr' ? 'Convertisseur de devises' : 'Currency converter')}
-              </button>
-              {showCurrencyConverter && (
+          {/* Outils : Convertisseur + Prises */}
+          {(location?.country_code && ((CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates) || PLUG_DATA[location.country_code])) && (
+            <>
+              <div className="tools-row">
+                {CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
+                  <button className={"tool-toggle" + (showCurrencyConverter ? ' tool-active' : '')} onClick={() => setShowCurrencyConverter(!showCurrencyConverter)}>
+                    🧮 {showCurrencyConverter ? (lang === 'fr' ? 'Devises' : 'Currency') : (lang === 'fr' ? 'Devises' : 'Currency')}
+                  </button>
+                )}
+                {PLUG_DATA[location.country_code] && (
+                  <button className={"tool-toggle" + (showPlugs ? ' tool-active' : '')} onClick={() => setShowPlugs(!showPlugs)}>
+                    🔌 {showPlugs ? (lang === 'fr' ? 'Prises' : 'Plugs') : (lang === 'fr' ? 'Prises' : 'Plugs')}
+                  </button>
+                )}
+              </div>
+
+              {showCurrencyConverter && CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
                 <div className="currency-converter">
                   <div className="currency-converter-row">
                     <label>€ Euro</label>
@@ -2440,42 +2451,37 @@ function App() {
                   </p>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* 🔌 Prises électriques */}
-          {location?.country_code && PLUG_DATA[location.country_code] && (
-            <div className="plug-section">
-              <div className="plug-header">
-                <span className="plug-header-icon">🔌</span>
-                <span>{lang === 'fr' ? 'Prises électriques' : 'Power plugs'}</span>
-              </div>
-              <div className="plug-body">
-                <div className="plug-icons-row">
-                  {PLUG_DATA[location.country_code].types.map(t => (
-                    <PlugIcon key={t} type={t} />
-                  ))}
-                </div>
-                <div className="plug-info">
-                  <span className="plug-voltage">{PLUG_DATA[location.country_code].voltage}</span>
-                  <span className="plug-sep">·</span>
-                  <span className="plug-frequency">{PLUG_DATA[location.country_code].frequency}</span>
-                </div>
-              </div>
-              {(() => {
-                const destTypes = PLUG_DATA[location.country_code].types;
-                const needsAdapter = !destTypes.some(t => EUROPEAN_PLUG_TYPES.includes(t));
-                return (
-                  <div className={"plug-adapter " + (needsAdapter ? 'adapter-needed' : 'adapter-ok')}>
-                    {needsAdapter ? (
-                      <>{lang === 'fr' ? '⚠️ Adaptateur nécessaire' : '⚠️ Adapter required'}</>
-                    ) : (
-                      <>{lang === 'fr' ? '✅ Compatible Europe (C/E/F)' : '✅ Compatible Europe (C/E/F)'}</>
-                    )}
+              {showPlugs && PLUG_DATA[location.country_code] && (
+                <div className="plug-section">
+                  <div className="plug-body">
+                    <div className="plug-icons-row">
+                      {PLUG_DATA[location.country_code].types.map(t => (
+                        <PlugIcon key={t} type={t} />
+                      ))}
+                    </div>
+                    <div className="plug-info">
+                      <span className="plug-voltage">{PLUG_DATA[location.country_code].voltage}</span>
+                      <span className="plug-sep">·</span>
+                      <span className="plug-frequency">{PLUG_DATA[location.country_code].frequency}</span>
+                    </div>
                   </div>
-                );
-              })()}
-            </div>
+                  {(() => {
+                    const destTypes = PLUG_DATA[location.country_code].types;
+                    const needsAdapter = !destTypes.some(t => EUROPEAN_PLUG_TYPES.includes(t));
+                    return (
+                      <div className={"plug-adapter " + (needsAdapter ? 'adapter-needed' : 'adapter-ok')}>
+                        {needsAdapter ? (
+                          <>{lang === 'fr' ? '⚠️ Adaptateur nécessaire' : '⚠️ Adapter required'}</>
+                        ) : (
+                          <>{lang === 'fr' ? '✅ Compatible Europe (C/E/F)' : '✅ Compatible Europe (C/E/F)'}</>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </>
           )}
 
           {/* Chat Guide Touristiqu IA conversationnel */}
