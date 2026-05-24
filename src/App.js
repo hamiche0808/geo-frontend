@@ -609,6 +609,7 @@ function App() {
   const [routeCoords, setRouteCoords] = useState(null); // tracé routier
   const [routeAlternatives, setRouteAlternatives] = useState(null); // toutes les routes alternatives
   const [selectedRouteIdx, setSelectedRouteIdx] = useState(0); // index de la route sélectionnée
+  const [routeCalcTrigger, setRouteCalcTrigger] = useState(0); // compteur pour forcer le recalcul
 
   // Multi-étapes (waypoints)
   const [waypoints, setWaypoints] = useState([]); // array de city objects
@@ -1630,7 +1631,7 @@ function App() {
         const speedKmh = PROFILE_SPEEDS[profile] || 50;
         setDuration(Math.round((totalAirKm / speedKmh) * 3600));
       });
-  }, [cityA, cityB, waypoints, modeProfile]);
+  }, [cityA, cityB, waypoints, modeProfile, routeCalcTrigger]);
 
   // Calcul du coût carburant
   const calculateFuelCost = () => {
@@ -1863,6 +1864,11 @@ function App() {
                 <option value="walking">🚶 Piéton</option>
               </select>
             </div>
+
+            {/* Bouton manuel pour lancer le calcul */}
+            <button className="btn-go" onClick={() => setRouteCalcTrigger(c => c + 1)} disabled={!cityA || !cityB}>
+              {lang === 'fr' ? '🚀 Partir' : '🚀 Go'}
+            </button>
           </>
         )}
 

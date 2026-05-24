@@ -1099,6 +1099,34 @@ body.dark-mode .btn-fav:hover { background: #3a3a5a; }
   color: white;
 }
 
+/* Bouton Partir / Go manuel */
+.btn-go {
+  display: block;
+  margin: 14px auto 0;
+  padding: 12px 40px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary, #667eea), var(--accent, #ff6b35));
+  color: #fff;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-go:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.btn-go:active {
+  transform: scale(0.97);
+}
+.btn-go:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Badge profil dans le résultat distance */
 .profile-badge {
   display: inline-block;
