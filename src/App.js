@@ -2208,7 +2208,7 @@ function App() {
           {location?.country_code && CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
             <div className="currency-converter-section">
               <button className="currency-converter-toggle" onClick={() => setShowCurrencyConverter(!showCurrencyConverter)}>
-                💱 {showCurrencyConverter ? (lang === 'fr' ? 'Masquer' : 'Hide') : (lang === 'fr' ? 'Convertisseur de devises' : 'Currency converter')}
+                💰 {showCurrencyConverter ? (lang === 'fr' ? 'Masquer' : 'Hide') : (lang === 'fr' ? 'Convertisseur de devises' : 'Currency converter')}
               </button>
               {showCurrencyConverter && (
                 <div className="currency-converter">
