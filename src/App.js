@@ -236,127 +236,201 @@ const PLUG_DATA = {
 const EUROPEAN_PLUG_TYPES = ['C', 'E', 'F']; // Types de référence européens
 const PLUG_SVGS = {
   A: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <rect x="12" y="8" width="4" height="12" rx="1" fill="#e63946"/>
-      <rect x="20" y="8" width="4" height="12" rx="1" fill="#e63946"/>
-      <text x="18" y="31" textAnchor="middle" fontSize="7" fill="#888">A</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyA" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinA" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowA"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyA)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowA)"/>
+      <rect x="14" y="10" width="4" height="14" rx="1.2" fill="url(#pinA)"/>
+      <rect x="26" y="10" width="4" height="14" rx="1.2" fill="url(#pinA)"/>
+      <text x="22" y="35" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">A</text>
     </svg>
   ),
   B: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <rect x="12" y="8" width="4" height="10" rx="1" fill="#e63946"/>
-      <rect x="20" y="8" width="4" height="10" rx="1" fill="#e63946"/>
-      <circle cx="18" cy="25" r="3.5" fill="#666" opacity="0.5"/>
-      <text x="18" y="31" textAnchor="middle" fontSize="7" fill="#888">B</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyB" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <radialGradient id="groundB" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#999"/><stop offset="100%" stopColor="#555"/></radialGradient>
+        <filter id="shadowB"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyB)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowB)"/>
+      <rect x="14" y="10" width="4" height="12" rx="1.2" fill="url(#pinB)"/>
+      <rect x="26" y="10" width="4" height="12" rx="1.2" fill="url(#pinB)"/>
+      <circle cx="22" cy="28" r="4" fill="url(#groundB)"/>
+      <text x="22" y="35" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">B</text>
     </svg>
   ),
   C: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="12" cy="15" r="3.5" fill="#e63946"/>
-      <circle cx="24" cy="15" r="3.5" fill="#e63946"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">C</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyC" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinC" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowC"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyC)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowC)"/>
+      <circle cx="15" cy="18" r="4" fill="url(#pinC)"/>
+      <circle cx="29" cy="18" r="4" fill="url(#pinC)"/>
+      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">C</text>
     </svg>
   ),
   D: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="18" cy="11" r="4" fill="#e63946"/>
-      <circle cx="11" cy="23" r="4" fill="#e63946"/>
-      <circle cx="25" cy="23" r="4" fill="#e63946"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">D</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyD" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinD" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowD"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyD)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowD)"/>
+      <circle cx="22" cy="12" r="4.5" fill="url(#pinD)"/>
+      <circle cx="13" cy="26" r="4.5" fill="url(#pinD)"/>
+      <circle cx="31" cy="26" r="4.5" fill="url(#pinD)"/>
+      <text x="22" y="37" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">D</text>
     </svg>
   ),
   E: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="12" cy="14" r="3.5" fill="#e63946"/>
-      <circle cx="24" cy="14" r="3.5" fill="#e63946"/>
-      <rect x="16.5" y="20" width="3" height="8" rx="1.5" fill="#666" opacity="0.6"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">E</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyE" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinE" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <linearGradient id="femE" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#888"/><stop offset="100%" stopColor="#444"/></linearGradient>
+        <filter id="shadowE"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyE)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowE)"/>
+      <circle cx="14" cy="16" r="4" fill="url(#pinE)"/>
+      <circle cx="30" cy="16" r="4" fill="url(#pinE)"/>
+      <rect x="19.5" y="22" width="5" height="10" rx="2.5" fill="url(#femE)"/>
+      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">E</text>
     </svg>
   ),
   F: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="12" cy="14" r="3.5" fill="#e63946"/>
-      <circle cx="24" cy="14" r="3.5" fill="#e63946"/>
-      <rect x="5" y="10" width="2" height="8" rx="1" fill="#666" opacity="0.4"/>
-      <rect x="29" y="10" width="2" height="8" rx="1" fill="#666" opacity="0.4"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">F</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyF" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinF" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <linearGradient id="clipF" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#aaa"/><stop offset="100%" stopColor="#666"/></linearGradient>
+        <filter id="shadowF"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyF)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowF)"/>
+      <circle cx="14" cy="16" r="4" fill="url(#pinF)"/>
+      <circle cx="30" cy="16" r="4" fill="url(#pinF)"/>
+      <rect x="7" y="12" width="2.5" height="9" rx="1.2" fill="url(#clipF)"/>
+      <rect x="34.5" y="12" width="2.5" height="9" rx="1.2" fill="url(#clipF)"/>
+      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">F</text>
     </svg>
   ),
   G: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <rect x="11" y="8" width="3" height="10" rx="0.8" fill="#e63946"/>
-      <rect x="18" y="8" width="3" height="10" rx="0.8" fill="#e63946"/>
-      <rect x="22" y="18" width="3" height="8" rx="0.8" fill="#e63946"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">G</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyG" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowG"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyG)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowG)"/>
+      <rect x="13" y="9" width="3.5" height="12" rx="1" fill="url(#pinG)"/>
+      <rect x="20.5" y="9" width="3.5" height="12" rx="1" fill="url(#pinG)"/>
+      <rect x="27" y="21" width="3.5" height="10" rx="1" fill="url(#pinG)"/>
+      <text x="22" y="36" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">G</text>
     </svg>
   ),
   H: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="18" cy="10" r="3.5" fill="#e63946"/>
-      <circle cx="11" cy="22" r="3.5" fill="#e63946"/>
-      <circle cx="25" cy="22" r="3.5" fill="#e63946"/>
-      <text x="18" y="34" textAnchor="middle" fontSize="7" fill="#888">H</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyH" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinH" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowH"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyH)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowH)"/>
+      <circle cx="22" cy="11" r="4" fill="url(#pinH)"/>
+      <circle cx="13" cy="25" r="4" fill="url(#pinH)"/>
+      <circle cx="31" cy="25" r="4" fill="url(#pinH)"/>
+      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">H</text>
     </svg>
   ),
   I: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <rect x="15" y="7" width="6" height="3" rx="0.8" fill="#e63946" transform="rotate(-30 18 8)"/>
-      <rect x="15" y="16" width="6" height="3" rx="0.8" fill="#e63946" transform="rotate(30 18 17)"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">I</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyI" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinI" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowI"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyI)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowI)"/>
+      <path d="M21 9 l-8 5 l0 10 l8 -5 Z" fill="url(#pinI)"/>
+      <path d="M21 25 l-8 -5 l0 10 l8 5 Z" fill="url(#pinI)"/>
+      <text x="22" y="37" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">I</text>
     </svg>
   ),
   J: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="18" cy="9" r="3" fill="#e63946"/>
-      <circle cx="10" cy="20" r="3" fill="#e63946"/>
-      <circle cx="26" cy="20" r="3" fill="#e63946"/>
-      <text x="18" y="34" textAnchor="middle" fontSize="7" fill="#888">J</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyJ" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinJ" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowJ"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyJ)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowJ)"/>
+      <circle cx="22" cy="10" r="3.5" fill="url(#pinJ)"/>
+      <circle cx="13" cy="22" r="3.5" fill="url(#pinJ)"/>
+      <circle cx="31" cy="22" r="3.5" fill="url(#pinJ)"/>
+      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">J</text>
     </svg>
   ),
   K: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="12" cy="14" r="3.5" fill="#e63946"/>
-      <circle cx="24" cy="14" r="3.5" fill="#e63946"/>
-      <circle cx="18" cy="24" r="2.5" fill="#666" opacity="0.5"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">K</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyK" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinK" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <radialGradient id="groundK" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#999"/><stop offset="100%" stopColor="#555"/></radialGradient>
+        <filter id="shadowK"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyK)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowK)"/>
+      <circle cx="14" cy="16" r="4" fill="url(#pinK)"/>
+      <circle cx="30" cy="16" r="4" fill="url(#pinK)"/>
+      <circle cx="22" cy="27" r="3" fill="url(#groundK)"/>
+      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">K</text>
     </svg>
   ),
   L: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="18" cy="9" r="3" fill="#e63946"/>
-      <circle cx="12" cy="20" r="3" fill="#e63946"/>
-      <circle cx="24" cy="20" r="3" fill="#e63946"/>
-      <text x="18" y="34" textAnchor="middle" fontSize="7" fill="#888">L</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyL" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinL" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowL"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyL)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowL)"/>
+      <circle cx="22" cy="10" r="3.5" fill="url(#pinL)"/>
+      <circle cx="14" cy="22" r="3.5" fill="url(#pinL)"/>
+      <circle cx="30" cy="22" r="3.5" fill="url(#pinL)"/>
+      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">L</text>
     </svg>
   ),
   M: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="18" cy="10" r="4.5" fill="#e63946"/>
-      <circle cx="10" cy="23" r="4.5" fill="#e63946"/>
-      <circle cx="26" cy="23" r="4.5" fill="#e63946"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">M</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyM" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinM" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowM"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyM)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowM)"/>
+      <circle cx="22" cy="11" r="5" fill="url(#pinM)"/>
+      <circle cx="12" cy="26" r="5" fill="url(#pinM)"/>
+      <circle cx="32" cy="26" r="5" fill="url(#pinM)"/>
+      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">M</text>
     </svg>
   ),
   N: (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect x="2" y="2" width="32" height="32" rx="4" fill="#f0f0f0" stroke="#bbb" strokeWidth="1"/>
-      <circle cx="18" cy="10" r="3.5" fill="#e63946"/>
-      <circle cx="11" cy="22" r="3.5" fill="#e63946"/>
-      <circle cx="25" cy="22" r="3.5" fill="#e63946"/>
-      <text x="18" y="33" textAnchor="middle" fontSize="7" fill="#888">N</text>
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <defs>
+        <radialGradient id="bodyN" cx="40%" cy="35%" r="70%"><stop offset="0%" stopColor="#fafafa"/><stop offset="100%" stopColor="#d4d4d4"/></radialGradient>
+        <linearGradient id="pinN" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ffd700"/><stop offset="50%" stopColor="#daa520"/><stop offset="100%" stopColor="#b8860b"/></linearGradient>
+        <filter id="shadowN"><feDropShadow dx="0" dy="1" stdDeviation="1.5" floodOpacity="0.25"/></filter>
+      </defs>
+      <rect x="4" y="4" width="36" height="36" rx="6" fill="url(#bodyN)" stroke="#b0b0b0" strokeWidth="0.8" filter="url(#shadowN)"/>
+      <circle cx="22" cy="11" r="4" fill="url(#pinN)"/>
+      <circle cx="13" cy="25" r="4" fill="url(#pinN)"/>
+      <circle cx="31" cy="25" r="4" fill="url(#pinN)"/>
+      <text x="22" y="38" textAnchor="middle" fontSize="8" fontWeight="700" fill="#888" fontFamily="sans-serif">N</text>
     </svg>
   ),
 };
