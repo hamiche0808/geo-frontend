@@ -250,6 +250,64 @@ const PLUG_PHOTOS = {
   M: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/BS_546_Plugs_-_15A_5A_2A.png/120px-BS_546_Plugs_-_15A_5A_2A.png',
   N: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/NBR_14136_plugs_and_outlet.jpg/120px-NBR_14136_plugs_and_outlet.jpg',
 };
+// ===== Coût de la vie par pays (prix moyens en €, sources: Numbeo) =====
+const COST_DATA = {
+  FR: { meal: 15, beer: 6, coffee: 3, transport: 1.9, taxi: 1.5, rent: 700 },
+  BE: { meal: 16, beer: 4.5, coffee: 3.2, transport: 2.5, taxi: 1.8, rent: 750 },
+  DE: { meal: 12, beer: 4, coffee: 3.2, transport: 2.8, taxi: 2, rent: 800 },
+  IT: { meal: 15, beer: 5, coffee: 1.5, transport: 1.5, taxi: 1.6, rent: 650 },
+  ES: { meal: 13, beer: 3.5, coffee: 2, transport: 1.5, taxi: 1.3, rent: 600 },
+  PT: { meal: 10, beer: 2.5, coffee: 1.8, transport: 1.7, taxi: 0.9, rent: 550 },
+  NL: { meal: 18, beer: 5, coffee: 3.5, transport: 3.2, taxi: 2.5, rent: 1200 },
+  AT: { meal: 15, beer: 4, coffee: 3.5, transport: 2.4, taxi: 1.8, rent: 850 },
+  IE: { meal: 18, beer: 5.5, coffee: 3.8, transport: 2.5, taxi: 2, rent: 1400 },
+  GB: { meal: 18, beer: 5, coffee: 3.5, transport: 2.8, taxi: 1.5, rent: 1300 },
+  GR: { meal: 12, beer: 4, coffee: 3, transport: 1.2, taxi: 0.9, rent: 400 },
+  FI: { meal: 14, beer: 7, coffee: 4, transport: 2.8, taxi: 2.2, rent: 900 },
+  SE: { meal: 12, beer: 6, coffee: 3.8, transport: 3.5, taxi: 2, rent: 850 },
+  NO: { meal: 22, beer: 9, coffee: 4.5, transport: 4, taxi: 2.5, rent: 1100 },
+  DK: { meal: 18, beer: 6, coffee: 5, transport: 3, taxi: 2.5, rent: 1000 },
+  PL: { meal: 8, beer: 3, coffee: 2.5, transport: 1, taxi: 0.6, rent: 500 },
+  CH: { meal: 25, beer: 8, coffee: 5, transport: 3.5, taxi: 3, rent: 1500 },
+  CZ: { meal: 8, beer: 1.8, coffee: 2.2, transport: 1.2, taxi: 0.8, rent: 550 },
+  HU: { meal: 9, beer: 2.5, coffee: 2, transport: 1.2, taxi: 0.9, rent: 450 },
+  RO: { meal: 7, beer: 2.5, coffee: 2.5, transport: 0.7, taxi: 0.6, rent: 400 },
+  BG: { meal: 7, beer: 2, coffee: 1.8, transport: 0.8, taxi: 0.5, rent: 350 },
+  HR: { meal: 10, beer: 3, coffee: 2.2, transport: 1.5, taxi: 1, rent: 500 },
+  SK: { meal: 8, beer: 2.5, coffee: 2.2, transport: 1, taxi: 0.8, rent: 550 },
+  SI: { meal: 10, beer: 3, coffee: 2, transport: 1.5, taxi: 0.8, rent: 550 },
+  LT: { meal: 8, beer: 3, coffee: 2.5, transport: 1, taxi: 0.7, rent: 400 },
+  LV: { meal: 8, beer: 3, coffee: 2.5, transport: 1.2, taxi: 0.7, rent: 400 },
+  EE: { meal: 10, beer: 4, coffee: 3, transport: 1.5, taxi: 0.8, rent: 500 },
+  IS: { meal: 22, beer: 10, coffee: 5.5, transport: 3.5, taxi: 3, rent: 1300 },
+  MT: { meal: 15, beer: 3.5, coffee: 2.5, transport: 1.5, taxi: 1.5, rent: 700 },
+  LU: { meal: 18, beer: 6, coffee: 3.5, transport: 2.5, taxi: 2.5, rent: 1500 },
+  US: { meal: 18, beer: 5, coffee: 4.5, transport: 2.5, taxi: 1.5, rent: 1500 },
+  CA: { meal: 18, beer: 5.5, coffee: 3.8, transport: 2.8, taxi: 1.8, rent: 1200 },
+  MX: { meal: 8, beer: 2.5, coffee: 2.5, transport: 0.5, taxi: 0.8, rent: 400 },
+  BR: { meal: 7, beer: 2.5, coffee: 2, transport: 0.7, taxi: 0.6, rent: 350 },
+  AR: { meal: 8, beer: 2, coffee: 2.5, transport: 0.5, taxi: 0.5, rent: 300 },
+  JP: { meal: 9, beer: 4.5, coffee: 3.5, transport: 1.8, taxi: 3, rent: 900 },
+  CN: { meal: 5, beer: 2, coffee: 3, transport: 0.5, taxi: 0.5, rent: 500 },
+  IN: { meal: 4, beer: 3, coffee: 2.5, transport: 0.3, taxi: 0.3, rent: 200 },
+  KR: { meal: 10, beer: 4, coffee: 4, transport: 1.3, taxi: 1.2, rent: 800 },
+  TR: { meal: 8, beer: 3, coffee: 2.5, transport: 0.5, taxi: 0.6, rent: 350 },
+  TH: { meal: 4, beer: 2, coffee: 2.5, transport: 0.5, taxi: 0.5, rent: 350 },
+  DZ: { meal: 5, beer: 0, coffee: 1.5, transport: 0.3, taxi: 0.4, rent: 200 },
+  MA: { meal: 5, beer: 3, coffee: 1.5, transport: 0.5, taxi: 0.5, rent: 250 },
+  TN: { meal: 5, beer: 2.5, coffee: 1.2, transport: 0.3, taxi: 0.4, rent: 200 },
+  AU: { meal: 18, beer: 6, coffee: 4, transport: 3.5, taxi: 2, rent: 1300 },
+  NZ: { meal: 16, beer: 6, coffee: 4, transport: 3, taxi: 2, rent: 1100 },
+  RU: { meal: 8, beer: 2.5, coffee: 2, transport: 0.5, taxi: 0.5, rent: 400 },
+};
+const COST_LABELS = {
+  meal: { fr: 'Repas (restaurant pas cher)', en: 'Meal (inexpensive)' },
+  beer: { fr: 'Bière (0,5L)', en: 'Domestic beer (0.5L)' },
+  coffee: { fr: 'Cappuccino', en: 'Cappuccino' },
+  transport: { fr: 'Ticket transport', en: 'Local transport' },
+  taxi: { fr: 'Taxi (1km)', en: 'Taxi (1km)' },
+  rent: { fr: 'Loyer 1ch. centre-ville/mois', en: 'Rent 1BR city center/month' },
+};
 // ===== Composant d'affichage d'une prise (photo réelle) =====
 function PlugIcon({ type }) {
   const [imgError, setImgError] = React.useState(false);
@@ -797,6 +855,7 @@ function App() {
   const [exchangeRates, setExchangeRates] = useState(null);
   const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
   const [showPlugs, setShowPlugs] = useState(false);
+  const [showCost, setShowCost] = useState(false);
   const [convertEuro, setConvertEuro] = useState(100);
   const [convertLocal, setConvertLocal] = useState(100);
 
@@ -2307,8 +2366,8 @@ function App() {
             </div>
           )}
 
-          {/* Outils : Convertisseur + Prises */}
-          {(location?.country_code && ((CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates) || PLUG_DATA[location.country_code])) && (
+          {/* Outils : Devises + Prises + Coût de la vie */}
+          {(location?.country_code && ((CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates) || PLUG_DATA[location.country_code] || COST_DATA[location.country_code])) && (
             <>
               <div className="tools-row">
                 {CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
@@ -2319,6 +2378,11 @@ function App() {
                 {PLUG_DATA[location.country_code] && (
                   <button className={"tool-toggle" + (showPlugs ? ' tool-active' : '')} onClick={() => setShowPlugs(!showPlugs)}>
                     🔌 {showPlugs ? (lang === 'fr' ? 'Prises' : 'Plugs') : (lang === 'fr' ? 'Prises' : 'Plugs')}
+                  </button>
+                )}
+                {COST_DATA[location.country_code] && (
+                  <button className={"tool-toggle" + (showCost ? ' tool-active' : '')} onClick={() => setShowCost(!showCost)}>
+                    💰 {showCost ? (lang === 'fr' ? 'Coût' : 'Cost') : (lang === 'fr' ? 'Coût' : 'Cost')}
                   </button>
                 )}
               </div>
@@ -2393,6 +2457,37 @@ function App() {
                       </>
                     );
                   })()}
+                </div>
+              )}
+
+              {showCost && COST_DATA[location.country_code] && (
+                <div className="cost-section">
+                  <div className="cost-header">
+                    <span className="cost-header-icon">💰</span>
+                    <span>{lang === 'fr' ? 'Coût de la vie' : 'Cost of living'}</span>
+                    <span className="cost-compare-hint">
+                      {lang === 'fr' ? '(vs France)' : '(vs France)'}
+                    </span>
+                  </div>
+                  <div className="cost-items">
+                    {Object.entries(COST_DATA[location.country_code]).map(([key, val]) => {
+                      const frVal = COST_DATA.FR[key] || 1;
+                      const ratio = val / frVal;
+                      const diff = ratio > 1.1 ? 'plus-cher' : ratio < 0.9 ? 'moins-cher' : 'egal';
+                      return (
+                        <div key={key} className="cost-row">
+                          <span className="cost-label">{COST_LABELS[key]?.[lang] || key}</span>
+                          <span className="cost-value">{val} €</span>
+                          <span className={"cost-diff cost-diff-" + diff}>
+                            {diff === 'plus-cher' ? `+${Math.round((ratio - 1) * 100)}%` : diff === 'moins-cher' ? `-${Math.round((1 - ratio) * 100)}%` : '≈'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="cost-source">
+                    {lang === 'fr' ? 'Sources : Numbeo (prix moyens indicatifs)' : 'Sources: Numbeo (average indicative prices)'}
+                  </p>
                 </div>
               )}
             </>

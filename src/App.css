@@ -773,6 +773,107 @@ body.dark-mode .plug-adapter-link:hover {
   color: #c084fc;
 }
 
+/* ===== Coût de la vie ===== */
+.cost-section {
+  margin: 6px 0 14px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+}
+body.dark-mode .cost-section {
+  background: #2a2a2a;
+  border-color: #444;
+}
+.cost-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+}
+.cost-header-icon {
+  font-size: 1.1em;
+}
+.cost-compare-hint {
+  font-size: 0.75em;
+  color: #999;
+  font-weight: 400;
+}
+.cost-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cost-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.85em;
+  border-bottom: 1px solid #eee;
+}
+body.dark-mode .cost-row {
+  border-bottom-color: #3a3a3a;
+}
+.cost-row:last-child {
+  border-bottom: none;
+}
+.cost-label {
+  flex: 1;
+  color: #555;
+}
+body.dark-mode .cost-label {
+  color: #bbb;
+}
+.cost-value {
+  font-weight: 700;
+  color: #333;
+  margin: 0 10px;
+  white-space: nowrap;
+}
+body.dark-mode .cost-value {
+  color: #ddd;
+}
+.cost-diff {
+  font-size: 0.8em;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.cost-diff-plus-cher {
+  background: #ffeaea;
+  color: #c0392b;
+}
+.cost-diff-moins-cher {
+  background: #eaffea;
+  color: #27ae60;
+}
+.cost-diff-egal {
+  background: #f0f0f0;
+  color: #888;
+}
+body.dark-mode .cost-diff-plus-cher {
+  background: #3d1a1a;
+  color: #ff6b6b;
+}
+body.dark-mode .cost-diff-moins-cher {
+  background: #1a3d1a;
+  color: #6bff6b;
+}
+body.dark-mode .cost-diff-egal {
+  background: #333;
+  color: #999;
+}
+.cost-source {
+  margin: 8px 0 0;
+  font-size: 0.7em;
+  color: #aaa;
+  text-align: center;
+}
+
 .details {
   display: flex;
   gap: 8px;
