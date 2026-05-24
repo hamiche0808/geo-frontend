@@ -564,7 +564,6 @@ body.dark-mode .currency-badge {
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  width: 100%;
 }
 .currency-converter-toggle:hover {
   transform: translateY(-2px);
