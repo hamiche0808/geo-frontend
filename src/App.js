@@ -2369,13 +2369,28 @@ function App() {
                     const destTypes = PLUG_DATA[location.country_code].types;
                     const needsAdapter = !destTypes.some(t => EUROPEAN_PLUG_TYPES.includes(t));
                     return (
-                      <div className={"plug-adapter " + (needsAdapter ? 'adapter-needed' : 'adapter-ok')}>
-                        {needsAdapter ? (
-                          <>{lang === 'fr' ? '⚠️ Adaptateur nécessaire' : '⚠️ Adapter required'}</>
-                        ) : (
-                          <>{lang === 'fr' ? '✅ Compatible Europe (C/E/F)' : '✅ Compatible Europe (C/E/F)'}</>
-                        )}
-                      </div>
+                      <>
+                        <div className={"plug-adapter " + (needsAdapter ? 'adapter-needed' : 'adapter-ok')}>
+                          {needsAdapter ? (
+                            <>{lang === 'fr' ? '⚠️ Adaptateur nécessaire' : '⚠️ Adapter required'}</>
+                          ) : (
+                            <>{lang === 'fr' ? '✅ Compatible Europe (C/E/F)' : '✅ Compatible Europe (C/E/F)'}</>
+                          )}
+                        </div>
+                        <div className="plug-adapter-links">
+                          <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Multi_plug.jpg/80px-Multi_plug.jpg"
+                            alt={lang === 'fr' ? 'Adaptateur universel' : 'Universal adapter'}
+                            className="plug-adapter-photo"
+                            loading="lazy"
+                          />
+                          <a href="https://www.worldstandards.eu/electricity/plugs-and-sockets/"
+                            target="_blank" rel="noopener noreferrer"
+                            className="plug-adapter-link">
+                            📖 {lang === 'fr' ? 'Guide des prises dans le monde' : 'World plug guide'}
+                          </a>
+                        </div>
+                      </>
                     );
                   })()}
                 </div>

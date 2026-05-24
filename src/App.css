@@ -738,6 +738,40 @@ body.dark-mode .plug-adapter.adapter-ok {
   color: #75d787;
   border-color: #155724;
 }
+.plug-adapter-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.plug-adapter-photo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+}
+body.dark-mode .plug-adapter-photo {
+  border-color: #555;
+}
+.plug-adapter-link {
+  font-size: 0.82em;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.plug-adapter-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+body.dark-mode .plug-adapter-link {
+  color: #a0b4ff;
+}
+body.dark-mode .plug-adapter-link:hover {
+  color: #c084fc;
+}
 
 .details {
   display: flex;
