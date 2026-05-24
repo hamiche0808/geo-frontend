@@ -604,6 +604,7 @@ function App() {
   const [countryA, setCountryA] = useState('FR');
   const [countryB, setCountryB] = useState('FR');
   const [distance, setDistance] = useState(null);
+  const [airDistance, setAirDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [routeCoords, setRouteCoords] = useState(null); // tracé routier
   const [routeAlternatives, setRouteAlternatives] = useState(null); // toutes les routes alternatives
@@ -1537,6 +1538,7 @@ function App() {
   useEffect(() => {
     if (!cityA || !cityB) {
       setDistance(null);
+      setAirDistance(null);
       setDuration(null);
       setRouteCoords(null);
       setRouteAlternatives(null);
@@ -1557,7 +1559,7 @@ function App() {
       }
       totalAirKm += haversineKm(validWp[validWp.length - 1].latitude, validWp[validWp.length - 1].longitude, cityB.latitude, cityB.longitude);
     }
-    setDistance(Math.round(totalAirKm));
+    setAirDistance(Math.round(totalAirKm));
     setRouteCoords(null);
     setRouteAlternatives(null);
     setSelectedRouteIdx(0);
@@ -1624,6 +1626,7 @@ function App() {
       })
       .catch(() => {
         // Fallback : la distance à vol d'oiseau reste affichée
+        setDistance(Math.round(totalAirKm));
         const speedKmh = PROFILE_SPEEDS[profile] || 50;
         setDuration(Math.round((totalAirKm / speedKmh) * 3600));
       });
@@ -1882,7 +1885,12 @@ function App() {
         <div className="result-info distance-result">
           <h2>🗺️ Itinéraire</h2>
           
-          <p className="distance-value">{distance.toLocaleString()} km</p>
+          <p className="distance-value">
+            🚗 {distance.toLocaleString()} km
+            {airDistance && airDistance !== distance && (
+              <span className="air-distance"> • 🕊️ {airDistance.toLocaleString()} km <small>({lang === 'fr' ? "vol d'oiseau" : 'as the crow flies'})</small></span>
+            )}
+          </p>
           {duration !== null && (
             <p className="duration-value">
               ⏱️ {Math.floor(duration / 3600)}h{Math.round((duration % 3600) / 60)}min
