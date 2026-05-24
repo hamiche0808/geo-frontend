@@ -1566,6 +1566,17 @@ function App() {
     setSelectedRouteIdx(0);
 
     const profile = modeProfile;
+
+    // Mode avion : pas d'API OSRM, on utilise la distance orthodromique
+    if (profile === 'flying') {
+      setDistance(Math.round(totalAirKm));
+      const speedKmh = PROFILE_SPEEDS.flying || 800;
+      // Temps de vol : (distance / vitesse) + 30 min de décollage/atterrissage
+      const flightTimeSec = Math.round((totalAirKm / speedKmh) * 3600 + 1800);
+      setDuration(flightTimeSec);
+      return;
+    }
+
     let url = `${API}/api/directions?origin_lat=${cityA.latitude}&origin_lon=${cityA.longitude}&dest_lat=${cityB.latitude}&dest_lon=${cityB.longitude}&profile=${profile}&alternatives=3`;
     if (waypointsParam) {
       url += `&waypoints=${encodeURIComponent(waypointsParam)}`;
@@ -1893,14 +1904,19 @@ function App() {
           <h2>🗺️ Itinéraire</h2>
           
           <p className="distance-value">
-            🚗 {distance.toLocaleString()} km
-            {airDistance && airDistance !== distance && (
-              <span className="air-distance"> • 🕊️ {airDistance.toLocaleString()} km <small>({lang === 'fr' ? "vol d'oiseau" : 'as the crow flies'})</small></span>
-            )}
+            {modeProfile === 'flying' ? '✈️' : '🚗'} {distance.toLocaleString()} km
+            {modeProfile === 'flying'
+              ? <span className="air-distance"> <small>({lang === 'fr' ? 'distance de vol' : 'flight distance'})</small></span>
+              : airDistance && airDistance !== distance && (
+                <span className="air-distance"> • 🕊️ {airDistance.toLocaleString()} km <small>({lang === 'fr' ? "vol d'oiseau" : 'as the crow flies'})</small></span>
+              )}
           </p>
           {duration !== null && (
             <p className="duration-value">
-              ⏱️ {Math.floor(duration / 3600)}h{Math.round((duration % 3600) / 60)}min
+              {modeProfile === 'flying' ? '✈️' : '⏱️'} {Math.floor(duration / 3600)}h{Math.round((duration % 3600) / 60)}min
+              {modeProfile === 'flying' && (
+                <span className="wp-badge"> {lang === 'fr' ? 'temps de vol' : 'flight time'}</span>
+              )}
               {routeAlternatives && routeAlternatives.length > 1 && (
                 <span className="wp-badge"> 🛣️ {routeAlternatives.length} propositions</span>
               )}
@@ -1924,15 +1940,17 @@ function App() {
             </span>
           </div>
           <p className="coords">
-            {routeCoords ? 'Route calculée' : 'Vol d\'oiseau'}
+            {modeProfile === 'flying'
+              ? (lang === 'fr' ? 'Vol direct' : 'Direct flight')
+              : routeCoords ? (lang === 'fr' ? 'Route calculée' : 'Calculated route') : (lang === 'fr' ? "Vol d'oiseau" : 'As the crow flies')}
             <span className="profile-badge">
               {modeProfile === 'driving' ? '🚗' : modeProfile === 'cycling' ? '🚲' : modeProfile === 'walking' ? '🚶' : '✈️'}
               {' '}{modeProfile === 'driving' ? 'Voiture' : modeProfile === 'cycling' ? 'Vélo' : modeProfile === 'walking' ? 'Piéton' : 'Avion'}
             </span>
           </p>
 
-          {/* Boutons Google Maps & Waze */}
-          {cityA && cityB && (
+          {/* Boutons Google Maps & Waze (pas en mode avion) */}
+          {cityA && cityB && modeProfile !== 'flying' && (
             <div className="nav-buttons">
               <a
                 href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(cityA?.city || `${cityA?.latitude},${cityA?.longitude}`)}&destination=${encodeURIComponent(cityB?.city || `${cityB?.latitude},${cityB?.longitude}`)}`}
