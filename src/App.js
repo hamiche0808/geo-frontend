@@ -693,6 +693,9 @@ function App() {
 
   // Taux de change (devises)
   const [exchangeRates, setExchangeRates] = useState(null);
+  const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
+  const [convertEuro, setConvertEuro] = useState(100);
+  const [convertLocal, setConvertLocal] = useState(100);
 
   // Guide touristique IA conversationnel
   const [chatMessages, setChatMessages] = useState([]);
@@ -2198,6 +2201,42 @@ function App() {
           ) : location && !loading && (
             <div className="weather-fallback">
               🌤️ {lang === 'fr' ? 'Météo temporairement indisponible' : 'Weather temporarily unavailable'}
+            </div>
+          )}
+
+          {/* Convertisseur de devises */}
+          {location?.country_code && CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
+            <div className="currency-converter-section">
+              <button className="currency-converter-toggle" onClick={() => setShowCurrencyConverter(!showCurrencyConverter)}>
+                💱 {showCurrencyConverter ? (lang === 'fr' ? 'Masquer' : 'Hide') : (lang === 'fr' ? 'Convertisseur de devises' : 'Currency converter')}
+              </button>
+              {showCurrencyConverter && (
+                <div className="currency-converter">
+                  <div className="currency-converter-row">
+                    <label>€ Euro</label>
+                    <input type="number" value={convertEuro} min="0" step="0.01"
+                      onChange={e => setConvertEuro(parseFloat(e.target.value) || 0)}
+                      className="currency-input" />
+                    <span className="currency-arrow">→</span>
+                    <span className="currency-result">
+                      {(convertEuro * exchangeRates[CURRENCY_MAP[location.country_code]]).toFixed(2)} {CURRENCY_MAP[location.country_code]}
+                    </span>
+                  </div>
+                  <div className="currency-converter-row">
+                    <label>{CURRENCY_MAP[location.country_code]}</label>
+                    <input type="number" value={convertLocal} min="0" step="0.01"
+                      onChange={e => setConvertLocal(parseFloat(e.target.value) || 0)}
+                      className="currency-input" />
+                    <span className="currency-arrow">→</span>
+                    <span className="currency-result">
+                      {(convertLocal / exchangeRates[CURRENCY_MAP[location.country_code]]).toFixed(2)} €
+                    </span>
+                  </div>
+                  <p className="currency-rate-info">
+                    1 € = {exchangeRates[CURRENCY_MAP[location.country_code]].toFixed(4)} {CURRENCY_MAP[location.country_code]}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
