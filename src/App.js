@@ -235,20 +235,20 @@ const PLUG_DATA = {
 // ===== Photos réelles des prises électriques (Wikimedia Commons) =====
 const EUROPEAN_PLUG_TYPES = ['C', 'E', 'F']; // Types de référence européens
 const PLUG_PHOTOS = {
-  A: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/NEMA_1-15_plug%2C_American_Standard.jpg/100px-NEMA_1-15_plug%2C_American_Standard.jpg',
-  B: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/NEMA_5-15_plug%2C_American_Standard.jpg/100px-NEMA_5-15_plug%2C_American_Standard.jpg',
-  C: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Euro-Flachstecker_2.jpg/100px-Euro-Flachstecker_2.jpg',
-  D: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Indian_plug.jpg/100px-Indian_plug.jpg',
-  E: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Type_E_plug.jpg/100px-Type_E_plug.jpg',
-  F: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Schuko_plug.jpg/100px-Schuko_plug.jpg',
-  G: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/UK_13A_plug.jpg/100px-UK_13A_plug.jpg',
-  H: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/SI_32_plug.jpg/100px-SI_32_plug.jpg',
-  I: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Australian_plug.jpg/100px-Australian_plug.jpg',
-  J: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Type_J_plug.jpg/100px-Type_J_plug.jpg',
-  K: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Danish_plug.jpg/100px-Danish_plug.jpg',
-  L: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Italian_plug.jpg/100px-Italian_plug.jpg',
-  M: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/South_African_plug.jpg/100px-South_African_plug.jpg',
-  N: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Brazilian_plug.jpg/100px-Brazilian_plug.jpg',
+  A: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/NEMA-1_plug_polarized.agr.jpg/120px-NEMA-1_plug_polarized.agr.jpg',
+  B: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Domestic_AC_Type_B_USA.jpg/120px-Domestic_AC_Type_B_USA.jpg',
+  C: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Euro-Flachstecker_2.jpg/120px-Euro-Flachstecker_2.jpg',
+  D: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/BS_546_Plugs_-_15A_5A_2A.png/120px-BS_546_Plugs_-_15A_5A_2A.png',
+  E: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/E_plug_and_socket.jpg/120px-E_plug_and_socket.jpg',
+  F: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Schuko_plug_and_socket_annotated.png/120px-Schuko_plug_and_socket_annotated.png',
+  G: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/BS1363_Plug_04.jpg/120px-BS1363_Plug_04.jpg',
+  H: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Israeli-type-H-plugs-and-socket.jpg/120px-Israeli-type-H-plugs-and-socket.jpg',
+  I: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/I_plug.jpg/120px-I_plug.jpg',
+  J: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/J_plug_-_1.jpg/120px-J_plug_-_1.jpg',
+  K: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/K_plug_typical.jpg/120px-K_plug_typical.jpg',
+  L: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Ita_plug_16A_10A.jpg/120px-Ita_plug_16A_10A.jpg',
+  M: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/BS_546_Plugs_-_15A_5A_2A.png/120px-BS_546_Plugs_-_15A_5A_2A.png',
+  N: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/NBR_14136_plugs_and_outlet.jpg/120px-NBR_14136_plugs_and_outlet.jpg',
 };
 // ===== Composant d'affichage d'une prise (photo réelle) =====
 function PlugIcon({ type }) {
