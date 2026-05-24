@@ -344,12 +344,32 @@ const COST_DATA = {
   CL: { meal: 10, beer: 3, coffee: 3, transport: 1.2, taxi: 1, rent: 450 },
   PE: { meal: 5, beer: 2.5, coffee: 2.5, transport: 0.5, taxi: 0.5, rent: 300 },
 };
+// ===== Prix carburant par pays (€/L, sources : GlobalPetrolPrices) =====
+const FUEL_PRICES = {
+  FR: { g: 1.85, d: 1.72 }, BE: { g: 1.72, d: 1.68 }, DE: { g: 1.80, d: 1.67 }, IT: { g: 1.82, d: 1.75 },
+  ES: { g: 1.65, d: 1.58 }, PT: { g: 1.72, d: 1.61 }, NL: { g: 1.95, d: 1.78 }, AT: { g: 1.63, d: 1.54 },
+  IE: { g: 1.72, d: 1.63 }, GB: { g: 1.62, d: 1.68 }, GR: { g: 1.85, d: 1.72 }, FI: { g: 1.78, d: 1.66 },
+  SE: { g: 1.75, d: 1.67 }, NO: { g: 2.05, d: 1.90 }, DK: { g: 1.80, d: 1.65 }, PL: { g: 1.45, d: 1.42 },
+  CH: { g: 1.70, d: 1.72 }, CZ: { g: 1.42, d: 1.40 }, HU: { g: 1.50, d: 1.48 }, RO: { g: 1.38, d: 1.35 },
+  BG: { g: 1.32, d: 1.28 }, HR: { g: 1.48, d: 1.42 }, SK: { g: 1.50, d: 1.45 }, SI: { g: 1.48, d: 1.40 },
+  LT: { g: 1.45, d: 1.38 }, LV: { g: 1.50, d: 1.42 }, EE: { g: 1.55, d: 1.48 }, IS: { g: 1.90, d: 1.80 },
+  MT: { g: 1.32, d: 1.28 }, LU: { g: 1.55, d: 1.48 }, US: { g: 0.92, d: 0.98 }, CA: { g: 1.05, d: 1.10 },
+  MX: { g: 0.85, d: 0.88 }, BR: { g: 0.95, d: 0.82 }, AR: { g: 0.60, d: 0.55 }, JP: { g: 1.28, d: 1.20 },
+  CN: { g: 0.92, d: 0.85 }, IN: { g: 1.10, d: 0.95 }, KR: { g: 1.45, d: 1.35 }, TR: { g: 1.10, d: 1.05 },
+  TH: { g: 1.05, d: 0.95 }, DZ: { g: 0.35, d: 0.28 }, MA: { g: 1.22, d: 0.95 }, TN: { g: 0.85, d: 0.75 },
+  AU: { g: 1.28, d: 1.32 }, NZ: { g: 1.48, d: 1.25 }, RU: { g: 0.62, d: 0.58 },
+  RS: { g: 1.48, d: 1.42 }, UA: { g: 1.30, d: 1.25 }, AL: { g: 1.55, d: 1.45 }, BA: { g: 1.38, d: 1.32 },
+  ME: { g: 1.40, d: 1.35 }, SG: { g: 1.85, d: 1.72 }, HK: { g: 2.05, d: 1.90 }, MY: { g: 0.62, d: 0.55 },
+  ID: { g: 0.65, d: 0.58 }, PH: { g: 1.05, d: 0.92 }, VN: { g: 0.95, d: 0.82 }, IL: { g: 1.75, d: 1.55 },
+  ZA: { g: 1.10, d: 1.02 }, EG: { g: 0.45, d: 0.35 }, SN: { g: 1.25, d: 1.15 }, CI: { g: 1.20, d: 1.10 },
+  KE: { g: 1.22, d: 1.12 }, CO: { g: 0.75, d: 0.65 }, CL: { g: 1.20, d: 1.08 }, PE: { g: 1.15, d: 1.05 },
+};
 const COST_LABELS = {
   meal: { fr: 'Repas (restaurant pas cher)', en: 'Meal (inexpensive)' },
   beer: { fr: 'Bière (0,5L)', en: 'Domestic beer (0.5L)' },
-  coffee: { fr: 'Cappuccino', en: 'Cappuccino' },
+  coffee: { fr: 'Essence (1L)', en: 'Gasoline (1L)' },
   transport: { fr: 'Ticket transport', en: 'Local transport' },
-  taxi: { fr: 'Taxi (1km)', en: 'Taxi (1km)' },
+  taxi: { fr: 'Diesel (1L)', en: 'Diesel (1L)' },
   rent: { fr: 'Loyer 1ch. centre-ville/mois', en: 'Rent 1BR city center/month' },
 };
 // ===== Composant d'affichage d'une prise (photo réelle) =====
@@ -2559,7 +2579,9 @@ function App() {
                   </div>
                   <div className="cost-items">
                     {Object.entries(COST_DATA[location.country_code]).map(([key, val]) => {
-                      const frVal = COST_DATA.FR[key] || 1;
+                      if (key === 'coffee') val = FUEL_PRICES[location.country_code]?.g ?? val;
+                      if (key === 'taxi') val = FUEL_PRICES[location.country_code]?.d ?? val;
+                      const frVal = key === 'coffee' ? FUEL_PRICES.FR.g : key === 'taxi' ? FUEL_PRICES.FR.d : (COST_DATA.FR[key] || 1);
                       const ratio = val / frVal;
                       const diff = ratio > 1.1 ? 'plus-cher' : ratio < 0.9 ? 'moins-cher' : 'egal';
                       return (
@@ -2574,7 +2596,7 @@ function App() {
                     })}
                   </div>
                   <p className="cost-source">
-                    {lang === 'fr' ? 'Sources : Numbeo (prix moyens indicatifs)' : 'Sources: Numbeo (average indicative prices)'}
+                    {lang === 'fr' ? 'Sources : Numbeo (prix moyens indicatifs), GlobalPetrolPrices (carburant)' : 'Sources: Numbeo (average indicative prices), GlobalPetrolPrices (fuel)'}
                   </p>
                 </div>
               )}
