@@ -2684,6 +2684,37 @@ body.dark-mode .loading-modal {
   flex: 1;
 }
 
+/* Bouton prononciation */
+.speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary, #667eea);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-left: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+.speak-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.speak-btn:active {
+  transform: scale(0.95);
+}
+body.dark-mode .speak-btn {
+  background: var(--accent, #ff6b35);
+}
+
 .local-time {
   display: inline-block;
   margin-top: 6px;

@@ -166,6 +166,30 @@ const CURRENCY_NAMES = {
   SEK: 'Couronne suédoise', NOK: 'Couronne norvégienne', DKK: 'Couronne danoise', PLN: 'Zloty polonais',
 };
 
+// ===== Locales pour la prononciation (Synthèse vocale) =====
+const COUNTRY_LOCALE_MAP = {
+  FR: 'fr-FR', BE: 'fr-BE', DE: 'de-DE', IT: 'it-IT', ES: 'es-ES', PT: 'pt-PT',
+  NL: 'nl-NL', AT: 'de-AT', GB: 'en-GB', US: 'en-US', CA: 'en-CA', CH: 'fr-CH',
+  JP: 'ja-JP', CN: 'zh-CN', RU: 'ru-RU', PL: 'pl-PL', SE: 'sv-SE', NO: 'nb-NO',
+  DK: 'da-DK', FI: 'fi-FI', GR: 'el-GR', IE: 'en-IE', AU: 'en-AU', NZ: 'en-NZ',
+  MA: 'ar-MA', DZ: 'ar-DZ', TN: 'ar-TN', BR: 'pt-BR', MX: 'es-MX', AR: 'es-AR',
+  IN: 'hi-IN', KR: 'ko-KR', TR: 'tr-TR', TH: 'th-TH', CZ: 'cs-CZ', HU: 'hu-HU',
+  RO: 'ro-RO', BG: 'bg-BG', HR: 'hr-HR', SK: 'sk-SK', SI: 'sl-SI', LT: 'lt-LT',
+  LV: 'lv-LV', EE: 'et-EE', IS: 'is-IS', MT: 'mt-MT', LU: 'lb-LU',
+};
+
+// ===== Prononciation du nom de la ville (Web Speech API) =====
+function speakCityName(text, countryCode) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  const locale = COUNTRY_LOCALE_MAP[countryCode] || 'en-US';
+  utterance.lang = locale;
+  utterance.rate = 0.85;
+  utterance.pitch = 1.0;
+  window.speechSynthesis.speak(utterance);
+}
+
 // ===== Traductions FR / EN =====
 const TR = {
   fr: {
@@ -2020,7 +2044,10 @@ function App() {
             <div className="city-info">
               {location.display_name ? (
                 <>
-                  <h2>{location.display_name.split(',')[0]}</h2>
+                  <h2>
+                    {location.display_name.split(',')[0]}
+                    <button className="speak-btn" onClick={() => speakCityName(location.display_name.split(',')[0], location.country_code)} title={lang === 'fr' ? 'Écouter la prononciation' : 'Listen to pronunciation'}>🔊</button>
+                  </h2>
                   <p className="address-full">{location.display_name}</p>
                   <p className="country-name">
                 {location.country}
@@ -2036,7 +2063,10 @@ function App() {
                 </>
               ) : (
                 <>
-                  <h2>{location.city} {location.postal_code ? <span className="postal-code">({location.postal_code})</span> : ''}</h2>
+                  <h2>
+                    {location.city} {location.postal_code ? <span className="postal-code">({location.postal_code})</span> : ''}
+                    <button className="speak-btn" onClick={() => speakCityName(location.city, location.country_code)} title={lang === 'fr' ? 'Écouter la prononciation' : 'Listen to pronunciation'}>🔊</button>
+                  </h2>
                   <p className="country-name">
                 {location.country}
                 {location.country_code && CURRENCY_MAP[location.country_code] && exchangeRates && (
