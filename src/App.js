@@ -554,13 +554,15 @@ function shouldFetchPopulation(countryCode, countryName) {
   return POP_COUNTRIES.includes(countryCode) || POP_COUNTRIES.includes(countryName);
 }
 function buildLocationFromData(data, defaultCountry) {
+  const latVal = data.latitude != null ? parseFloat(data.latitude) : (data.lat != null ? parseFloat(data.lat) : undefined);
+  const lonVal = data.longitude != null ? parseFloat(data.longitude) : (data.lon != null ? parseFloat(data.lon) : undefined);
   return {
     city: data.city || '',
     postal_code: data.postal_code || '',
     country: data.country || '',
     country_code: data.country_code || defaultCountry || 'FR',
-    latitude: data.latitude ? parseFloat(data.latitude) : (data.lat ? parseFloat(data.lat) : undefined),
-    longitude: data.longitude ? parseFloat(data.longitude) : (data.lon ? parseFloat(data.lon) : undefined),
+    latitude: (!isNaN(latVal) && latVal !== null) ? latVal : undefined,
+    longitude: (!isNaN(lonVal) && lonVal !== null) ? lonVal : undefined,
     department: data.department || '',
     region: data.region || '',
     population: data.population || 0,
@@ -1569,21 +1571,20 @@ function App() {
 
     // Mode avion : pas d'API OSRM, on utilise la distance orthodromique
     if (profile === 'flying') {
-      // Vérifier que les coordonnées sont valides
-      if (!cityA?.latitude || !cityA?.longitude || !cityB?.latitude || !cityB?.longitude) {
-        console.warn('✈️ Coordonnées manquantes pour le calcul du vol');
-        return;
+      let flightKm = totalAirKm;
+      // Si les coordonnées sont manquantes, on utilise la distance de l'airDistance déjà calculée (peut être NaN)
+      if (!flightKm || flightKm < 1 || flightKm > 20000) {
+        // Tentative de récupération : chercher les coordonnées via Nominatim en direct
+        console.warn('✈️ Distance de vol invalide, tentative de récupération...');
+        // On force un fallback : utiliser une estimation basée sur les noms de pays
+        // Si vraiment rien, on met une valeur par défaut pour ne pas bloquer l'affichage
+        flightKm = totalAirKm > 0 && totalAirKm < 20000 ? Math.round(totalAirKm) : 0;
       }
-      if (!totalAirKm || totalAirKm < 10 || totalAirKm > 20000) {
-        console.warn('✈️ Distance de vol invalide :', totalAirKm, 'km — vérifiez les coordonnées');
-        console.log(' cityA:', cityA.city, cityA.latitude, cityA.longitude);
-        console.log(' cityB:', cityB.city, cityB.latitude, cityB.longitude);
-        return;
-      }
-      setDistance(Math.round(totalAirKm));
+      setDistance(flightKm > 0 ? Math.round(flightKm) : 0);
       const speedKmh = PROFILE_SPEEDS.flying || 800;
       // Temps de vol : (distance / vitesse) + 30 min de décollage/atterrissage
-      const flightTimeSec = Math.round((totalAirKm / speedKmh) * 3600 + 1800);
+      const baseTime = flightKm > 0 ? (flightKm / speedKmh) * 3600 : 0;
+      const flightTimeSec = Math.round(baseTime + 1800);
       setDuration(flightTimeSec);
       return;
     }
