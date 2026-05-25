@@ -1015,6 +1015,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [customPrimary, setCustomPrimary] = useState(() => localStorage.getItem('geoloc_primary_color') || '');
   const [customAccent, setCustomAccent] = useState(() => localStorage.getItem('geoloc_accent_color') || '');
+  const [selectedPattern, setSelectedPattern] = useState(() => localStorage.getItem('geoloc_pattern') || 'none');
   // Admin secret
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPin, setAdminPin] = useState('');
@@ -1173,6 +1174,15 @@ function App() {
       document.documentElement.style.removeProperty('--accent');
     }
   }, [customAccent]);
+
+  // Persistance du motif de fond
+  useEffect(() => {
+    if (selectedPattern && selectedPattern !== 'none') {
+      localStorage.setItem('geoloc_pattern', selectedPattern);
+    } else {
+      localStorage.removeItem('geoloc_pattern');
+    }
+  }, [selectedPattern]);
 
   // Reset du chat IA quand on change de ville ou pays
   useEffect(() => {
@@ -2236,7 +2246,7 @@ function App() {
 
   // ===== Rendu =====
   return (
-    <div className="App">
+    <div className={"App" + (selectedPattern && selectedPattern !== 'none' ? ' pattern-' + selectedPattern : '')}>
       <header>
         <div className="app-brand">
           <div className="app-logo">
@@ -3382,8 +3392,34 @@ function App() {
               </button>
             </div>
 
+            <label style={{display:'block', margin:'15px 0 5px'}}>
+              {lang === 'fr' ? 'Motif de fond' : 'Background pattern'}
+            </label>
+            <div className="pattern-grid">
+              {[
+                { id: 'none',     labelFr: 'Minimaliste', labelEn: 'Minimal',     icon: '▫️' },
+                { id: 'topo',     labelFr: 'Topographie', labelEn: 'Topography',   icon: '🏔️' },
+                { id: 'coords',   labelFr: 'Coordonnées', labelEn: 'Coordinates',  icon: '🌐' },
+                { id: 'adventure', labelFr: 'Aventure',    labelEn: 'Adventure',    icon: '🧭' },
+              ].map(p => (
+                <button
+                  key={p.id}
+                  className={"pattern-tile" + (selectedPattern === p.id ? ' pattern-tile-active' : '')}
+                  onClick={() => setSelectedPattern(p.id)}
+                  style={{
+                    '--pattern-primary': customPrimary || '#1976D2',
+                    '--pattern-accent': customAccent || '#4CAF50',
+                  }}
+                >
+                  <div className={"pattern-preview pattern-preview-" + p.id} />
+                  <span className="pattern-tile-icon">{p.icon}</span>
+                  <span className="pattern-tile-label">{lang === 'fr' ? p.labelFr : p.labelEn}</span>
+                </button>
+              ))}
+            </div>
+
             <p style={{marginTop:'20px', opacity:0.6, fontSize:'12px'}}>
-              {lang === 'fr' ? 'Les couleurs sont sauvegardées automatiquement.' : 'Colors are saved automatically.'}
+              {lang === 'fr' ? 'Les couleurs et le motif sont sauvegardés automatiquement.' : 'Colors and pattern are saved automatically.'}
             </p>
 
             {/* 🔒 Admin secret — accessible uniquement à mon créateur */}
