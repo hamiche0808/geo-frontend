@@ -2246,7 +2246,11 @@ function App() {
 
   // ===== Rendu =====
   return (
-    <div className={"App" + (selectedPattern && selectedPattern !== 'none' ? ' pattern-' + selectedPattern : '')}>
+    <div className={"App" + (selectedPattern && selectedPattern !== 'none' ? ' pattern-' + selectedPattern : '')}
+      style={{
+        '--pattern-primary': customPrimary || '#1976D2',
+        '--pattern-accent': customAccent || '#4CAF50',
+      }}>
       <header>
         <div className="app-brand">
           <div className="app-logo">
@@ -3306,7 +3310,7 @@ function App() {
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-links">
-          <span className="footer-brand">🌍 GeoLoc v5.3</span>
+          <span className="footer-brand">🌍 GeoLoc v5.4</span>
           <button className="footer-link" onClick={() => setLegalPage('terms')}>📜 CGU</button>
           <button className="footer-link" onClick={() => setLegalPage('privacy')}>🔒 Confidentialité</button>
           <button className="footer-link" onClick={() => setShowContact(true)}>✉️ Contact</button>
@@ -3397,10 +3401,14 @@ function App() {
             </label>
             <div className="pattern-grid">
               {[
-                { id: 'none',     labelFr: 'Minimaliste', labelEn: 'Minimal',     icon: '▫️' },
-                { id: 'topo',     labelFr: 'Topographie', labelEn: 'Topography',   icon: '🏔️' },
-                { id: 'coords',   labelFr: 'Coordonnées', labelEn: 'Coordinates',  icon: '🌐' },
-                { id: 'adventure', labelFr: 'Aventure',    labelEn: 'Adventure',    icon: '🧭' },
+                { id: 'none',     labelFr: 'Minimaliste',  labelEn: 'Minimal',      icon: '▫️' },
+                { id: 'topo',     labelFr: 'Topographie',  labelEn: 'Topography',   icon: '🏔️' },
+                { id: 'coords',   labelFr: 'Coordonnées',  labelEn: 'Coordinates',  icon: '🌐' },
+                { id: 'adventure',labelFr: 'Aventure',     labelEn: 'Adventure',    icon: '🧭' },
+                { id: 'map',      labelFr: 'Carte',        labelEn: 'Map',          icon: '🗺️' },
+                { id: 'clouds',   labelFr: 'Nuages',       labelEn: 'Clouds',       icon: '☁️' },
+                { id: 'waves',    labelFr: 'Vagues',       labelEn: 'Waves',        icon: '🌊' },
+                { id: 'compass',  labelFr: 'Rose des vents',labelEn: 'Compass Rose', icon: '🧭' },
               ].map(p => (
                 <button
                   key={p.id}

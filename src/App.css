@@ -3840,28 +3840,61 @@ body.dark-mode .pattern-tile {
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  background-color: var(--pattern-primary, #1976D2);
   background-blend-mode: overlay;
-  transition: background-color 0.3s;
+  transition: background 0.3s;
   border: 1px solid rgba(255,255,255,0.15);
 }
 .pattern-preview-none {
-  /* Fond uni, pas de motif supplémentaire */
+  background: var(--pattern-primary, #1976D2);
 }
 .pattern-preview-topo {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M10 30 Q 20 10 30 25 T 50 30' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='1'/%3E%3Cpath d='M0 45 Q 15 30 30 40 T 60 35' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='0.8'/%3E%3Cpath d='M5 15 Q 20 25 35 10 T 55 20' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='0.6'/%3E%3Ccircle cx='28' cy='22' r='2' fill='rgba(255,255,255,0.25)'/%3E%3C/svg%3E");
-  background-size: 48px 48px;
-  background-blend-mode: soft-light;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M10 30 Q 20 10 30 25 T 50 30' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='1'/%3E%3Cpath d='M0 45 Q 15 30 30 40 T 60 35' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.8'/%3E%3Cpath d='M5 15 Q 20 25 35 10 T 55 20' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='0.6'/%3E%3Ccircle cx='28' cy='22' r='2' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 48px, auto;
+  background-blend-mode: overlay;
 }
 .pattern-preview-coords {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cline x1='0' y1='16' x2='48' y2='16' stroke='rgba(255,255,255,0.12)' stroke-width='0.5'/%3E%3Cline x1='0' y1='32' x2='48' y2='32' stroke='rgba(255,255,255,0.12)' stroke-width='0.5'/%3E%3Cline x1='16' y1='0' x2='16' y2='48' stroke='rgba(255,255,255,0.12)' stroke-width='0.5'/%3E%3Cline x1='32' y1='0' x2='32' y2='48' stroke='rgba(255,255,255,0.12)' stroke-width='0.5'/%3E%3Ccircle cx='24' cy='24' r='2' fill='rgba(255,255,255,0.3)'/%3E%3Ctext x='2' y='14' font-size='5' fill='rgba(255,255,255,0.2)'%3E48%C2%B0N%3C/text%3E%3Ctext x='34' y='46' font-size='5' fill='rgba(255,255,255,0.2)'%3E2%C2%B0E%3C/text%3E%3C/svg%3E");
-  background-size: 48px 48px;
-  background-blend-mode: soft-light;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cline x1='0' y1='16' x2='48' y2='16' stroke='rgba(255,255,255,0.15)' stroke-width='0.5'/%3E%3Cline x1='0' y1='32' x2='48' y2='32' stroke='rgba(255,255,255,0.15)' stroke-width='0.5'/%3E%3Cline x1='16' y1='0' x2='16' y2='48' stroke='rgba(255,255,255,0.15)' stroke-width='0.5'/%3E%3Cline x1='32' y1='0' x2='32' y2='48' stroke='rgba(255,255,255,0.15)' stroke-width='0.5'/%3E%3Ccircle cx='24' cy='24' r='2' fill='rgba(255,255,255,0.35)'/%3E%3Ctext x='2' y='14' font-size='5' fill='rgba(255,255,255,0.25)'%3E48%C2%B0N%3C/text%3E%3Ctext x='34' y='46' font-size='5' fill='rgba(255,255,255,0.25)'%3E2%C2%B0E%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 48px, auto;
+  background-blend-mode: overlay;
 }
 .pattern-preview-adventure {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.6'/%3E%3Cpath d='M12 9 L12 15 M9 12 L15 12' stroke='rgba(255,255,255,0.2)' stroke-width='0.6'/%3E%3Ccircle cx='36' cy='36' r='4' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='0.5'/%3E%3Cpath d='M36 32 L36 40 M32 36 L40 36' stroke='rgba(255,255,255,0.15)' stroke-width='0.5'/%3E%3Cpath d='M8 38 L14 30 L20 38' fill='none' stroke='rgba(255,255,255,0.18)' stroke-width='0.6'/%3E%3Ccircle cx='14' cy='30' r='1.5' fill='rgba(255,255,255,0.25)'/%3E%3Ctext x='28' y='14' font-size='8' fill='rgba(255,255,255,0.2)'%3E%E2%9C%93%3C/text%3E%3C/svg%3E");
-  background-size: 48px 48px;
-  background-blend-mode: soft-light;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='12' cy='12' r='3' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='0.6'/%3E%3Cpath d='M12 9 L12 15 M9 12 L15 12' stroke='rgba(255,255,255,0.25)' stroke-width='0.6'/%3E%3Ccircle cx='36' cy='36' r='4' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Cpath d='M36 32 L36 40 M32 36 L40 36' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Cpath d='M8 38 L14 30 L20 38' fill='none' stroke='rgba(255,255,255,0.22)' stroke-width='0.6'/%3E%3Ccircle cx='14' cy='30' r='1.5' fill='rgba(255,255,255,0.3)'/%3E%3Ctext x='28' y='14' font-size='8' fill='rgba(255,255,255,0.25)'%3E%E2%9C%93%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 48px, auto;
+  background-blend-mode: overlay;
+}
+.pattern-preview-map {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cline x1='0' y1='12' x2='48' y2='12' stroke='rgba(255,255,255,0.12)' stroke-width='0.4'/%3E%3Cline x1='0' y1='24' x2='48' y2='24' stroke='rgba(255,255,255,0.12)' stroke-width='0.4'/%3E%3Cline x1='0' y1='36' x2='48' y2='36' stroke='rgba(255,255,255,0.12)' stroke-width='0.4'/%3E%3Cline x1='12' y1='0' x2='12' y2='48' stroke='rgba(255,255,255,0.12)' stroke-width='0.4'/%3E%3Cline x1='24' y1='0' x2='24' y2='48' stroke='rgba(255,255,255,0.12)' stroke-width='0.4'/%3E%3Cline x1='36' y1='0' x2='36' y2='48' stroke='rgba(255,255,255,0.12)' stroke-width='0.4'/%3E%3Cpath d='M0 6 Q 12 2 24 8 T 48 4' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.6'/%3E%3Cpath d='M6 48 Q 18 38 30 44 T 48 40' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.6'/%3E%3Ccircle cx='24' cy='24' r='2' fill='rgba(255,255,255,0.35)'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 48px, auto;
+  background-blend-mode: overlay;
+}
+.pattern-preview-clouds {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='16' cy='20' r='6' fill='rgba(255,255,255,0.15)'/%3E%3Ccircle cx='26' cy='18' r='7' fill='rgba(255,255,255,0.13)'/%3E%3Ccircle cx='20' cy='24' r='5' fill='rgba(255,255,255,0.12)'/%3E%3Ccircle cx='34' cy='22' r='5' fill='rgba(255,255,255,0.1)'/%3E%3Ccircle cx='10' cy='36' r='4' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='38' cy='38' r='3.5' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 48px, auto;
+  background-blend-mode: overlay;
+}
+.pattern-preview-waves {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'%3E%3Cpath d='M0 12 Q 6 4 12 10 T 24 8 T 36 12 T 48 8' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.8'/%3E%3Cpath d='M0 18 Q 8 12 16 16 T 32 14 T 48 18' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='0.5'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 24px, auto;
+  background-blend-mode: overlay;
+}
+.pattern-preview-compass {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpolygon points='24,4 28,20 24,24 20,20' fill='rgba(255,255,255,0.2)'/%3E%3Cpolygon points='24,44 20,28 24,24 28,28' fill='rgba(255,255,255,0.12)'/%3E%3Cpolygon points='4,24 20,20 24,24 20,28' fill='rgba(255,255,255,0.12)'/%3E%3Cpolygon points='44,24 28,28 24,24 28,20' fill='rgba(255,255,255,0.2)'/%3E%3Ccircle cx='24' cy='24' r='2' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2), var(--pattern-accent, #4CAF50));
+  background-size: 48px 48px, auto;
+  background-blend-mode: overlay;
 }
 
 /* Icône + label sous la prévisualisation */
@@ -3880,64 +3913,130 @@ body.dark-mode .pattern-tile {
 /* ===== Application globale des motifs via la classe sur .App ===== */
 /* Minimaliste = pas de motif (défaut) */
 
-/* Topographie : courbes de niveau */
-.App.pattern-topo::before {
+/* Base commune : dégradé primaire → accent en fond, motif SVG par-dessus */
+.App.pattern-topo::before,
+.App.pattern-coords::before,
+.App.pattern-adventure::before,
+.App.pattern-map::before,
+.App.pattern-clouds::before,
+.App.pattern-waves::before,
+.App.pattern-compass::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='%23999' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='%23999' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='%23999' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='%23999' opacity='0.2'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
+}
+
+.App.pattern-topo,
+.App.pattern-coords,
+.App.pattern-adventure,
+.App.pattern-map,
+.App.pattern-clouds,
+.App.pattern-waves,
+.App.pattern-compass {
+  position: relative;
+}
+
+/* Topographie : courbes de niveau + dégradé */
+.App.pattern-topo::before {
+  opacity: 0.35;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='%23999' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='%23999' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='%23999' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='%23999' opacity='0.2'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
 }
 body.dark-mode .App.pattern-topo::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='%23666' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='%23666' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='%23666' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='%23666' opacity='0.2'/%3E%3C/svg%3E");
-}
-.App.pattern-topo {
-  position: relative;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='%23666' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='%23666' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='%23666' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='%23666' opacity='0.2'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
 }
 
-/* Coordonnées : grille latitude/longitude */
+/* Coordonnées : grille + dégradé */
 .App.pattern-coords::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.4;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23999'/%3E%3Ctext x='2' y='22' font-size='5' fill='%23999' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='%23999' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E");
-  background-size: 100px 100px;
+  opacity: 0.3;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23999'/%3E%3Ctext x='2' y='22' font-size='5' fill='%23999' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='%23999' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
 }
 body.dark-mode .App.pattern-coords::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23666'/%3E%3Ctext x='2' y='22' font-size='5' fill='%23666' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='%23666' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E");
-}
-.App.pattern-coords {
-  position: relative;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23666'/%3E%3Ctext x='2' y='22' font-size='5' fill='%23666' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='%23666' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
 }
 
-/* Aventure : icônes de voyage */
+/* Aventure : icônes + dégradé */
 .App.pattern-adventure::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='%23999' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='%23999' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='%23999' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='%23999' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='%23999' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E");
-  background-size: 80px 80px;
+  opacity: 0.35;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='%23999' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='%23999' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='%23999' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='%23999' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='%23999' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
 }
 body.dark-mode .App.pattern-adventure::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='%23666' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='%23666' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='%23666' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='%23666' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='%23666' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E");
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='%23666' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='%23666' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='%23666' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='%23666' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='%23666' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
 }
-.App.pattern-adventure {
-  position: relative;
+
+/* Carte : grille + routes */
+.App.pattern-map::before {
+  opacity: 0.35;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='20' x2='100' y2='20' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='0' y1='40' x2='100' y2='40' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='0' y1='60' x2='100' y2='60' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='0' y1='80' x2='100' y2='80' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='20' y1='0' x2='20' y2='100' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='40' y1='0' x2='40' y2='100' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='60' y1='0' x2='60' y2='100' stroke='%23999' stroke-width='0.4'/%3E%3Cline x1='80' y1='0' x2='80' y2='100' stroke='%23999' stroke-width='0.4'/%3E%3Cpath d='M0 10 Q 20 4 40 12 T 80 6 T 100 14' fill='none' stroke='%23999' stroke-width='0.7'/%3E%3Cpath d='M0 90 Q 30 82 50 88 T 100 84' fill='none' stroke='%23999' stroke-width='0.7'/%3E%3Cpath d='M10 100 Q 16 80 22 90 T 34 78 T 46 86' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='20' cy='40' r='1.5' fill='%23999' opacity='0.4'/%3E%3Ccircle cx='60' cy='20' r='1' fill='%23999' opacity='0.3'/%3E%3Ccircle cx='80' cy='80' r='1.5' fill='%23999' opacity='0.4'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
+}
+body.dark-mode .App.pattern-map::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='20' x2='100' y2='20' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='0' y1='40' x2='100' y2='40' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='0' y1='60' x2='100' y2='60' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='0' y1='80' x2='100' y2='80' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='20' y1='0' x2='20' y2='100' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='40' y1='0' x2='40' y2='100' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='60' y1='0' x2='60' y2='100' stroke='%23666' stroke-width='0.4'/%3E%3Cline x1='80' y1='0' x2='80' y2='100' stroke='%23666' stroke-width='0.4'/%3E%3Cpath d='M0 10 Q 20 4 40 12 T 80 6 T 100 14' fill='none' stroke='%23666' stroke-width='0.7'/%3E%3Cpath d='M0 90 Q 30 82 50 88 T 100 84' fill='none' stroke='%23666' stroke-width='0.7'/%3E%3Cpath d='M10 100 Q 16 80 22 90 T 34 78 T 46 86' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='20' cy='40' r='1.5' fill='%23666' opacity='0.4'/%3E%3Ccircle cx='60' cy='20' r='1' fill='%23666' opacity='0.3'/%3E%3Ccircle cx='80' cy='80' r='1.5' fill='%23666' opacity='0.4'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
+}
+
+/* Nuages : formes nuageuses */
+.App.pattern-clouds::before {
+  opacity: 0.3;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80' viewBox='0 0 120 80'%3E%3Ccircle cx='30' cy='30' r='12' fill='%23999' opacity='0.12'/%3E%3Ccircle cx='48' cy='26' r='14' fill='%23999' opacity='0.1'/%3E%3Ccircle cx='38' cy='36' r='10' fill='%23999' opacity='0.08'/%3E%3Ccircle cx='60' cy='32' r='10' fill='%23999' opacity='0.07'/%3E%3Ccircle cx='80' cy='28' r='8' fill='%23999' opacity='0.06'/%3E%3Ccircle cx='20' cy='55' r='7' fill='%23999' opacity='0.05'/%3E%3Ccircle cx='70' cy='60' r='9' fill='%23999' opacity='0.06'/%3E%3Ccircle cx='100' cy='45' r='11' fill='%23999' opacity='0.07'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
+}
+body.dark-mode .App.pattern-clouds::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80' viewBox='0 0 120 80'%3E%3Ccircle cx='30' cy='30' r='12' fill='%23666' opacity='0.12'/%3E%3Ccircle cx='48' cy='26' r='14' fill='%23666' opacity='0.1'/%3E%3Ccircle cx='38' cy='36' r='10' fill='%23666' opacity='0.08'/%3E%3Ccircle cx='60' cy='32' r='10' fill='%23666' opacity='0.07'/%3E%3Ccircle cx='80' cy='28' r='8' fill='%23666' opacity='0.06'/%3E%3Ccircle cx='20' cy='55' r='7' fill='%23666' opacity='0.05'/%3E%3Ccircle cx='70' cy='60' r='9' fill='%23666' opacity='0.06'/%3E%3Ccircle cx='100' cy='45' r='11' fill='%23666' opacity='0.07'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
+}
+
+/* Vagues : lignes ondulées */
+.App.pattern-waves::before {
+  opacity: 0.3;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cpath d='M0 15 Q 10 4 20 12 T 40 8 T 60 14 T 80 10' fill='none' stroke='%23999' stroke-width='0.8'/%3E%3Cpath d='M0 28 Q 12 18 24 26 T 48 20 T 72 28 T 80 24' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Cpath d='M0 36 Q 15 30 30 34 T 60 32 T 80 36' fill='none' stroke='%23999' stroke-width='0.3'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
+}
+body.dark-mode .App.pattern-waves::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cpath d='M0 15 Q 10 4 20 12 T 40 8 T 60 14 T 80 10' fill='none' stroke='%23666' stroke-width='0.8'/%3E%3Cpath d='M0 28 Q 12 18 24 26 T 48 20 T 72 28 T 80 24' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Cpath d='M0 36 Q 15 30 30 34 T 60 32 T 80 36' fill='none' stroke='%23666' stroke-width='0.3'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
+}
+
+/* Rose des vents : étoiles à 4 branches */
+.App.pattern-compass::before {
+  opacity: 0.3;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpolygon points='40,8 45,32 40,40 35,32' fill='%23999' opacity='0.15'/%3E%3Cpolygon points='40,72 35,48 40,40 45,48' fill='%23999' opacity='0.08'/%3E%3Cpolygon points='8,40 32,35 40,40 32,45' fill='%23999' opacity='0.08'/%3E%3Cpolygon points='72,40 48,45 40,40 48,35' fill='%23999' opacity='0.15'/%3E%3Ccircle cx='40' cy='40' r='3' fill='%23999' opacity='0.2'/%3E%3Ctext x='25' y='30' font-size='6' fill='%23999' opacity='0.2'%3EN%3C/text%3E%3Ctext x='52' y='52' font-size='5' fill='%23999' opacity='0.15'%3ES%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1976D2) 0%, var(--pattern-accent, #4CAF50) 100%);
+}
+body.dark-mode .App.pattern-compass::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpolygon points='40,8 45,32 40,40 35,32' fill='%23666' opacity='0.15'/%3E%3Cpolygon points='40,72 35,48 40,40 45,48' fill='%23666' opacity='0.08'/%3E%3Cpolygon points='8,40 32,35 40,40 32,45' fill='%23666' opacity='0.08'/%3E%3Cpolygon points='72,40 48,45 40,40 48,35' fill='%23666' opacity='0.15'/%3E%3Ccircle cx='40' cy='40' r='3' fill='%23666' opacity='0.2'/%3E%3Ctext x='25' y='30' font-size='6' fill='%23666' opacity='0.2'%3EN%3C/text%3E%3Ctext x='52' y='52' font-size='5' fill='%23666' opacity='0.15'%3ES%3C/text%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, var(--pattern-primary, #1a3a5c) 0%, var(--pattern-accent, #2a5a3a) 100%);
 }
 
 /* Assurer que le contenu de l'app reste au-dessus du motif */
 .App.pattern-topo > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
 .App.pattern-coords > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
-.App.pattern-adventure > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay) {
+.App.pattern-adventure > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
+.App.pattern-map > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
+.App.pattern-clouds > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
+.App.pattern-waves > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
+.App.pattern-compass > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay) {
   position: relative;
   z-index: 1;
 }
@@ -3945,6 +4044,10 @@ body.dark-mode .App.pattern-adventure::before {
 /* Cachet "motif actif" subtil sur chaque tuile dans l'aperçu */
 .pattern-preview-topo,
 .pattern-preview-coords,
-.pattern-preview-adventure {
+.pattern-preview-adventure,
+.pattern-preview-map,
+.pattern-preview-clouds,
+.pattern-preview-waves,
+.pattern-preview-compass {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
 }
