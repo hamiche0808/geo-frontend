@@ -1034,6 +1034,8 @@ function App() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [chatStarted, setChatStarted] = useState(false);
+  const [chatListening, setChatListening] = useState(false);
+  const chatRecognitionRef = useRef(null);
 
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
@@ -1170,7 +1172,23 @@ function App() {
     setChatStarted(false);
     setChatMessages([]);
     setChatInput('');
+    // Arrêter la reconnaissance vocale en cours
+    if (chatRecognitionRef.current) {
+      try { chatRecognitionRef.current.stop(); } catch { /* ignore */ }
+      chatRecognitionRef.current = null;
+    }
+    setChatListening(false);
   }, [location]);
+
+  // Nettoyage de la reconnaissance vocale au démontage
+  useEffect(() => {
+    return () => {
+      if (chatRecognitionRef.current) {
+        try { chatRecognitionRef.current.stop(); } catch { /* ignore */ }
+        chatRecognitionRef.current = null;
+      }
+    };
+  }, []);
 
   // Lecture des paramètres d'URL pour le partage + white-label
   useEffect(() => {
@@ -1341,6 +1359,59 @@ function App() {
       setChatMessages(prev => [...prev, { role: 'model', text: errMsg }]);
     }
     setChatLoading(false);
+  };
+
+  // ===== Reconnaissance vocale pour le chat IA =====
+  const handleVoiceChat = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setNotification(lang === 'fr' ? '🎤 Reconnaissance vocale non supportée sur ce navigateur.' : '🎤 Speech recognition not supported on this browser.');
+      setTimeout(() => setNotification(''), 3000);
+      return;
+    }
+    if (chatListening) {
+      // Arrêter l'écoute
+      if (chatRecognitionRef.current) {
+        chatRecognitionRef.current.stop();
+        chatRecognitionRef.current = null;
+      }
+      setChatListening(false);
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = lang === 'fr' ? 'fr-FR' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setChatInput(transcript);
+      sendChatMessage(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+      setChatListening(false);
+      if (event.error === 'not-allowed') {
+        setNotification(lang === 'fr' ? '🎤 Accès au micro refusé.' : '🎤 Microphone access denied.');
+        setTimeout(() => setNotification(''), 3000);
+      }
+    };
+
+    recognition.onend = () => {
+      setChatListening(false);
+      chatRecognitionRef.current = null;
+    };
+
+    chatRecognitionRef.current = recognition;
+    setChatListening(true);
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error('Speech recognition start failed', e);
+      setChatListening(false);
+    }
   };
 
   // Démarrer le chat automatiquement avec une première question
@@ -2721,6 +2792,14 @@ function App() {
                   placeholder={lang === 'fr' ? 'Posez une question...' : 'Ask a question...'}
                   disabled={chatLoading}
                 />
+                <button
+                  className={`chat-mic-btn${chatListening ? ' listening' : ''}`}
+                  onClick={handleVoiceChat}
+                  disabled={chatLoading}
+                  title={lang === 'fr' ? 'Dicter votre question' : 'Dictate your question'}
+                >
+                  {chatListening ? '🔴' : '🎤'}
+                </button>
                 <button className="chat-send-btn" onClick={() => sendChatMessage(chatInput)} disabled={chatLoading || !chatInput.trim()}>
                   {chatLoading ? '⏳' : '➤'}
                 </button>

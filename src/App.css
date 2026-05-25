@@ -3279,6 +3279,39 @@ body.dark-mode .chat-msg-model .chat-msg-bubble {
   cursor: not-allowed;
 }
 
+.chat-mic-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: white;
+  font-size: 1.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.3s;
+  flex-shrink: 0;
+}
+.chat-mic-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+.chat-mic-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.chat-mic-btn.listening {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  animation: mic-pulse 1s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(245, 87, 108, 0.5);
+}
+@keyframes mic-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(245, 87, 108, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(245, 87, 108, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 87, 108, 0); }
+}
+
 /* Suggestions cliquables dans le chat */
 .chat-suggestions {
   display: flex;
