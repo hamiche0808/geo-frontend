@@ -1026,6 +1026,10 @@ function App() {
   const [showCurrencyConverter, setShowCurrencyConverter] = useState(false);
   const [showPlugs, setShowPlugs] = useState(false);
   const [showCost, setShowCost] = useState(false);
+  const [showBudget, setShowBudget] = useState(false);
+  const [budgetDays, setBudgetDays] = useState(3);
+  const [budgetPeople, setBudgetPeople] = useState(1);
+  const [budgetStyle, setBudgetStyle] = useState('mid');
   const [convertEuro, setConvertEuro] = useState(100);
   const [convertLocal, setConvertLocal] = useState(100);
 
@@ -1310,6 +1314,44 @@ function App() {
         });
       }
     } catch { /* La qualité de l'air est optionnelle */ }
+  };
+
+  // ===== Calculateur de budget voyage =====
+  const calcBudget = () => {
+    const cd = COST_DATA[location.country_code];
+    if (!cd) return null;
+    const fp = FUEL_PRICES[location.country_code];
+    // Coûts quotidiens par personne
+    const mealCost = cd.meal * 2; // repas midi + soir
+    const breakfastCost = cd.coffee != null ? cd.coffee * 1.5 : 3; // petit-déjeuner approximatif
+    const dailyFood = (mealCost + breakfastCost) * budgetDays * budgetPeople;
+    // Transport local (tickets)
+    const transportCost = (cd.transport || 2) * 2 * budgetDays * budgetPeople; // aller-retour
+    // Carburant si disponible
+    const fuelCostPerDay = fp ? (fp.g * 10) * budgetDays * 2 : 0; // ~10L/jour pour tourisme
+    // Logement (basé sur rent/30 * facteur style)
+    const styleMultiplier = budgetStyle === 'low' ? 0.5 : budgetStyle === 'mid' ? 1 : budgetStyle === 'high' ? 2 : 1.5;
+    const dailyRent = (cd.rent || 500) / 30 * styleMultiplier;
+    const accommodationCost = dailyRent * budgetDays;
+    // Activités / divers (~15% du total)
+    const subtotal = dailyFood + transportCost + fuelCostPerDay + accommodationCost;
+    const miscCost = subtotal * 0.15;
+
+    const total = subtotal + miscCost;
+    const perPersonPerDay = total / budgetDays / budgetPeople;
+
+    return {
+      dailyFood: Math.round(dailyFood),
+      transportCost: Math.round(transportCost),
+      fuelCost: Math.round(fuelCostPerDay),
+      accommodationCost: Math.round(accommodationCost),
+      miscCost: Math.round(miscCost),
+      total: Math.round(total),
+      perPersonPerDay: Math.round(perPersonPerDay),
+      dailyRent: Math.round(dailyRent),
+      mealCost: Math.round(mealCost),
+      breakfastCost: Math.round(breakfastCost),
+    };
   };
 
   // ===== Chat conversationnel IA via backend Gemini =====
@@ -2626,6 +2668,11 @@ function App() {
                     💰 {showCost ? (lang === 'fr' ? 'Coût' : 'Cost') : (lang === 'fr' ? 'Coût' : 'Cost')}
                   </button>
                 )}
+                {COST_DATA[location.country_code] && (
+                  <button className={"tool-toggle" + (showBudget ? ' tool-active' : '')} onClick={() => setShowBudget(!showBudget)}>
+                    📊 {showBudget ? (lang === 'fr' ? 'Budget' : 'Budget') : (lang === 'fr' ? 'Budget' : 'Budget')}
+                  </button>
+                )}
               </div>
 
               {showCurrencyConverter && CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
@@ -2740,6 +2787,87 @@ function App() {
                 </div>
               )}
             </>
+          )}
+
+          {/* Calculateur de budget voyage */}
+          {showBudget && location?.country_code && COST_DATA[location.country_code] && (
+            <div className="budget-section">
+              <div className="budget-header">
+                <span>📊 {lang === 'fr' ? 'Budget voyage estimé' : 'Trip budget estimate'}</span>
+              </div>
+              <div className="budget-inputs">
+                <label className="budget-label">
+                  {lang === 'fr' ? 'Jours' : 'Days'}:
+                  <input type="number" min="1" max="90" value={budgetDays}
+                    onChange={e => setBudgetDays(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="budget-input" />
+                </label>
+                <label className="budget-label">
+                  {lang === 'fr' ? 'Personnes' : 'People'}:
+                  <input type="number" min="1" max="20" value={budgetPeople}
+                    onChange={e => setBudgetPeople(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="budget-input" />
+                </label>
+                <label className="budget-label">
+                  {lang === 'fr' ? 'Confort' : 'Comfort'}:
+                  <select value={budgetStyle} onChange={e => setBudgetStyle(e.target.value)} className="budget-select">
+                    <option value="low">{lang === 'fr' ? 'Économique' : 'Budget'}</option>
+                    <option value="mid">{lang === 'fr' ? 'Standard' : 'Mid-range'}</option>
+                    <option value="high">{lang === 'fr' ? 'Confort' : 'Comfort'}</option>
+                    <option value="luxury">{lang === 'fr' ? 'Luxe' : 'Luxury'}</option>
+                  </select>
+                </label>
+              </div>
+              {(() => {
+                const b = calcBudget();
+                if (!b) return <p className="budget-error">{lang === 'fr' ? 'Données insuffisantes' : 'Insufficient data'}</p>;
+                const totalPerPerson = Math.round(b.total / budgetPeople);
+                return (
+                  <div className="budget-results">
+                    <div className="budget-total">
+                      <span className="budget-total-amount">{b.total} €</span>
+                      <span className="budget-total-label">{lang === 'fr' ? 'Budget total estimé' : 'Total estimated budget'}</span>
+                    </div>
+                    <div className="budget-per-person">
+                      <span>{lang === 'fr' ? 'Soit' : 'That is'} <strong>{totalPerPerson} €</strong> {lang === 'fr' ? 'par personne' : 'per person'}</span>
+                      <span>— <strong>{b.perPersonPerDay} €</strong> {lang === 'fr' ? 'par jour/pers.' : 'per day/pers.'}</span>
+                    </div>
+                    <div className="budget-details">
+                      <div className="budget-detail-item">
+                        <span className="budget-detail-icon">🍽️</span>
+                        <span className="budget-detail-label">{lang === 'fr' ? 'Repas' : 'Meals'}</span>
+                        <span className="budget-detail-value">{b.dailyFood} €</span>
+                      </div>
+                      <div className="budget-detail-item">
+                        <span className="budget-detail-icon">🏨</span>
+                        <span className="budget-detail-label">{lang === 'fr' ? 'Logement' : 'Accommodation'}</span>
+                        <span className="budget-detail-value">{b.accommodationCost} €</span>
+                      </div>
+                      <div className="budget-detail-item">
+                        <span className="budget-detail-icon">🚌</span>
+                        <span className="budget-detail-label">{lang === 'fr' ? 'Transport local' : 'Local transport'}</span>
+                        <span className="budget-detail-value">{b.transportCost} €</span>
+                      </div>
+                      {b.fuelCost > 0 && (
+                        <div className="budget-detail-item">
+                          <span className="budget-detail-icon">⛽</span>
+                          <span className="budget-detail-label">{lang === 'fr' ? 'Carburant' : 'Fuel'}</span>
+                          <span className="budget-detail-value">{b.fuelCost} €</span>
+                        </div>
+                      )}
+                      <div className="budget-detail-item">
+                        <span className="budget-detail-icon">🎫</span>
+                        <span className="budget-detail-label">{lang === 'fr' ? 'Divers / Activités' : 'Misc / Activities'}</span>
+                        <span className="budget-detail-value">{b.miscCost} €</span>
+                      </div>
+                    </div>
+                    <p className="budget-note">
+                      {lang === 'fr' ? '💡 Estimation basée sur les prix locaux moyens. Hors vol et assurance.' : '💡 Estimate based on average local prices. Excluding flights and insurance.'}
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
           )}
 
           {/* Chat Guide Touristiqu IA conversationnel */}

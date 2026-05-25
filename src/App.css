@@ -874,6 +874,147 @@ body.dark-mode .cost-diff-egal {
   text-align: center;
 }
 
+/* Calculateur de budget voyage */
+.budget-section {
+  margin: 6px 0 14px;
+  background: #f0f4ff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid #d0d8f0;
+}
+body.dark-mode .budget-section {
+  background: #1a1a2e;
+  border-color: #3a3a5e;
+}
+.budget-header {
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.budget-inputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.budget-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8em;
+  color: #555;
+}
+body.dark-mode .budget-label {
+  color: #bbb;
+}
+.budget-input {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9em;
+  text-align: center;
+}
+body.dark-mode .budget-input {
+  background: #333;
+  color: #eee;
+  border-color: #555;
+}
+.budget-select {
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.85em;
+  background: white;
+}
+body.dark-mode .budget-select {
+  background: #333;
+  color: #eee;
+  border-color: #555;
+}
+.budget-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.budget-total {
+  text-align: center;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 10px;
+}
+.budget-total-amount {
+  display: block;
+  font-size: 1.6em;
+  font-weight: 800;
+}
+.budget-total-label {
+  display: block;
+  font-size: 0.75em;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+.budget-per-person {
+  text-align: center;
+  font-size: 0.85em;
+  color: #666;
+}
+body.dark-mode .budget-per-person {
+  color: #aaa;
+}
+.budget-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.budget-detail-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #e8ecf8;
+  font-size: 0.85em;
+}
+body.dark-mode .budget-detail-item {
+  border-bottom-color: #2a2a4e;
+}
+.budget-detail-item:last-child {
+  border-bottom: none;
+}
+.budget-detail-icon {
+  width: 24px;
+  text-align: center;
+  font-size: 1em;
+}
+.budget-detail-label {
+  flex: 1;
+  color: #555;
+  margin-left: 6px;
+}
+body.dark-mode .budget-detail-label {
+  color: #bbb;
+}
+.budget-detail-value {
+  font-weight: 700;
+  color: #333;
+}
+body.dark-mode .budget-detail-value {
+  color: #ddd;
+}
+.budget-note {
+  font-size: 0.7em;
+  color: #999;
+  text-align: center;
+  margin: 4px 0 0;
+}
+.budget-error {
+  text-align: center;
+  color: #999;
+  font-size: 0.85em;
+}
+
 .details {
   display: flex;
   gap: 8px;
