@@ -1030,6 +1030,9 @@ function App() {
   const [budgetDays, setBudgetDays] = useState(3);
   const [budgetPeople, setBudgetPeople] = useState(1);
   const [budgetStyle, setBudgetStyle] = useState('mid');
+  const [showClimate, setShowClimate] = useState(false);
+  const [climateData, setClimateData] = useState(null);
+  const [climateLoading, setClimateLoading] = useState(false);
   const [convertEuro, setConvertEuro] = useState(100);
   const [convertLocal, setConvertLocal] = useState(100);
 
@@ -1314,6 +1317,19 @@ function App() {
         });
       }
     } catch { /* La qualité de l'air est optionnelle */ }
+  };
+
+  // ===== Climat mensuel (Open-Meteo Climate API) =====
+  const fetchClimate = async (lat, lon) => {
+    if (!lat || !lon) return;
+    setClimateLoading(true);
+    try {
+      const resp = await apiPost(`${API}/api/climate?lat=${lat}&lon=${lon}`);
+      if (resp.data && resp.data.months) {
+        setClimateData(resp.data);
+      }
+    } catch { /* climat optionnel */ }
+    setClimateLoading(false);
   };
 
   // ===== Calculateur de budget voyage =====
@@ -1628,6 +1644,7 @@ function App() {
           trackServer(railFallbackActive ? 'render' : 'railway');
           setLoadingMessage('🌤️ Météo...');
           fetchWeather(data.latitude, data.longitude);
+          fetchClimate(data.latitude, data.longitude);
           setLoadingMessage('🖼️ Ville...');
           setLoading(false);
           setLoadingMessage('');
@@ -1646,6 +1663,7 @@ function App() {
       // Charger la météo
       setLoadingMessage('🌤️ Météo...');
       fetchWeather(data.latitude, data.longitude);
+      fetchClimate(data.latitude, data.longitude);
       setLoadingMessage('🖼️ Ville...');
       fetchTrafficZones(data.city, data.country_code || countryCode, data.postal_code);
     } catch (err) {
@@ -1728,6 +1746,7 @@ function App() {
       setLocation(data);
       saveToHistory(data);
       fetchWeather(data.latitude, data.longitude);
+      fetchClimate(data.latitude, data.longitude);
       setLoadingMessage('🖼️ Ville...');
     } catch (err) {
       setError(`Erreur: ${err?.message || 'Réseau indisponible'}`);
@@ -2673,6 +2692,11 @@ function App() {
                     📊 {showBudget ? (lang === 'fr' ? 'Budget' : 'Budget') : (lang === 'fr' ? 'Budget' : 'Budget')}
                   </button>
                 )}
+                {climateData && (
+                  <button className={"tool-toggle" + (showClimate ? ' tool-active' : '')} onClick={() => setShowClimate(!showClimate)}>
+                    🌤️ {showClimate ? (lang === 'fr' ? 'Climat' : 'Climate') : (lang === 'fr' ? 'Climat' : 'Climate')}
+                  </button>
+                )}
               </div>
 
               {showCurrencyConverter && CURRENCY_MAP[location.country_code] && CURRENCY_MAP[location.country_code] !== 'EUR' && exchangeRates && (
@@ -2867,6 +2891,91 @@ function App() {
                   </div>
                 );
               })()}
+            </div>
+          )}
+
+          {/* Climat mensuel (meilleure période) */}
+          {showClimate && climateData && climateData.months && (
+            <div className="climate-section">
+              <div className="climate-header">
+                <span>🌤️ {lang === 'fr' ? 'Climat mensuel' : 'Monthly climate'}</span>
+                <span className="climate-source">1991-2020</span>
+              </div>
+              {climateLoading && (
+                <div className="climate-loading">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
+              )}
+              {!climateLoading && (
+                <>
+                  <div className="climate-chart">
+                    {climateData.months.map((m, idx) => {
+                      const temp = m.temp_mean;
+                      const precip = m.precipitation_sum;
+                      const isBest = climateData.summary && climateData.summary.best_month === m.month;
+                      const isWorst = climateData.summary && climateData.summary.worst_month === m.month;
+                      const isDriest = climateData.summary && climateData.summary.driest_month === m.month;
+                      const isWettest = climateData.summary && climateData.summary.wettest_month === m.month;
+                      // Barre de température relative (de -10°C à 40°C)
+                      const tempPct = temp != null ? Math.max(0, Math.min(100, ((temp + 10) / 50) * 100)) : 0;
+                      // Barre de précipitation relative (0 à 200mm)
+                      const precipPct = precip != null ? Math.min(100, (precip / 200) * 100) : 0;
+                      // Emoji saison
+                      let seasonEmoji = '🌸';
+                      if (m.month >= 3 && m.month <= 5) seasonEmoji = '🌸';
+                      else if (m.month >= 6 && m.month <= 8) seasonEmoji = '☀️';
+                      else if (m.month >= 9 && m.month <= 11) seasonEmoji = '🍂';
+                      else seasonEmoji = '❄️';
+                      return (
+                        <div key={idx} className={"climate-month" + (isBest ? ' climate-best' : '') + (isWorst ? ' climate-worst' : '')}>
+                          <div className="climate-month-header">
+                            <span className="climate-month-name">{lang === 'fr' ? m.name_fr : m.name_en}</span>
+                            <span className="climate-season-emoji">{seasonEmoji}</span>
+                          </div>
+                          <div className="climate-temp-bar-container" title={lang === 'fr' ? `Température: ${temp}°C` : `Temperature: ${temp}°C`}>
+                            <div className="climate-temp-bar" style={{ height: tempPct + '%' }}>
+                              <span className="climate-temp-label">{temp != null ? temp + '°' : '—'}</span>
+                            </div>
+                          </div>
+                          <div className="climate-precip-bar-container" title={lang === 'fr' ? `Précipitations: ${precip}mm` : `Precipitation: ${precip}mm`}>
+                            <div className="climate-precip-bar" style={{ height: precipPct + '%' }}>
+                              <span className="climate-precip-label">{precip != null ? precip + 'mm' : '—'}</span>
+                            </div>
+                          </div>
+                          {isBest && <span className="climate-badge climate-badge-best" title={lang === 'fr' ? 'Mois le plus chaud' : 'Hottest month'}>🔥</span>}
+                          {isDriest && <span className="climate-badge climate-badge-dry" title={lang === 'fr' ? 'Mois le plus sec' : 'Driest month'}>💧</span>}
+                          {isWettest && <span className="climate-badge climate-badge-wet" title={lang === 'fr' ? 'Mois le plus pluvieux' : 'Wettest month'}>🌧️</span>}
+                          {isWorst && <span className="climate-badge climate-badge-cold" title={lang === 'fr' ? 'Mois le plus froid' : 'Coldest month'}>🥶</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {climateData.summary && (
+                    <div className="climate-summary">
+                      <span>
+                        {lang === 'fr'
+                          ? `🌡️ ${climateData.summary.avg_temp}°C en moyenne · 💧 ${climateData.summary.avg_precip}mm/mois`
+                          : `🌡️ ${climateData.summary.avg_temp}°C average · 💧 ${climateData.summary.avg_precip}mm/month`}
+                      </span>
+                    </div>
+                  )}
+                  <div className="climate-recommendation">
+                    {(() => {
+                      if (!climateData.summary) return null;
+                      const best = climateData.months.find(m => m.month === climateData.summary.best_month);
+                      const worst = climateData.months.find(m => m.month === climateData.summary.worst_month);
+                      if (!best || !worst) return null;
+                      const bestName = lang === 'fr' ? best.name_fr : best.name_en;
+                      const worstName = lang === 'fr' ? worst.name_fr : worst.name_en;
+                      return (
+                        <span>
+                          {lang === 'fr'
+                            ? `✅ Meilleure période : ${bestName} (${best.temp_mean}°C) · Éviter : ${worstName} (${worst.temp_mean}°C)`
+                            : `✅ Best time: ${bestName} (${best.temp_mean}°C) · Avoid: ${worstName} (${worst.temp_mean}°C)`}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </>
+              )}
             </div>
           )}
 

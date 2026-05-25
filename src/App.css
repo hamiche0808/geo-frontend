@@ -1015,6 +1015,191 @@ body.dark-mode .budget-detail-value {
   font-size: 0.85em;
 }
 
+/* Climat mensuel - Meilleure période de visite */
+.climate-section {
+  margin: 6px 0 14px;
+  background: #f5f8ff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid #d0d8f0;
+}
+body.dark-mode .climate-section {
+  background: #1a1a2e;
+  border-color: #3a3a5e;
+}
+.climate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+}
+.climate-source {
+  font-size: 0.7em;
+  color: #999;
+  font-weight: 400;
+}
+.climate-loading {
+  text-align: center;
+  color: #999;
+  font-size: 0.85em;
+  padding: 20px;
+}
+.climate-chart {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 0;
+  justify-content: center;
+}
+.climate-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.5);
+  transition: background 0.2s;
+  position: relative;
+}
+body.dark-mode .climate-month {
+  background: rgba(255,255,255,0.05);
+}
+.climate-month.climate-best {
+  background: #fff3e0;
+  box-shadow: 0 0 0 2px #ff9800;
+}
+body.dark-mode .climate-month.climate-best {
+  background: #3a2a10;
+  box-shadow: 0 0 0 2px #ff9800;
+}
+.climate-month.climate-worst {
+  background: #e3f2fd;
+  box-shadow: 0 0 0 2px #42a5f5;
+}
+body.dark-mode .climate-month.climate-worst {
+  background: #0a1a2e;
+  box-shadow: 0 0 0 2px #42a5f5;
+}
+.climate-month-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.climate-month-name {
+  font-size: 0.65em;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+body.dark-mode .climate-month-name {
+  color: #bbb;
+}
+.climate-season-emoji {
+  font-size: 0.8em;
+}
+.climate-temp-bar-container {
+  width: 20px;
+  height: 60px;
+  background: #f0f0f0;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  margin: 2px 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+body.dark-mode .climate-temp-bar-container {
+  background: #2a2a2a;
+}
+.climate-temp-bar {
+  width: 100%;
+  background: linear-gradient(to top, #ff6b6b, #ffa726);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+  position: relative;
+  min-height: 4px;
+}
+.climate-temp-label {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6em;
+  font-weight: 700;
+  color: #e65100;
+  white-space: nowrap;
+}
+.climate-precip-bar-container {
+  width: 20px;
+  height: 50px;
+  background: #e8f0fe;
+  border-radius: 0 0 4px 4px;
+  position: relative;
+  margin: 2px 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+body.dark-mode .climate-precip-bar-container {
+  background: #1a2a3a;
+}
+.climate-precip-bar {
+  width: 100%;
+  background: linear-gradient(to top, #42a5f5, #1e88e5);
+  border-radius: 0 0 4px 4px;
+  transition: height 0.5s ease;
+  position: relative;
+  min-height: 4px;
+}
+.climate-precip-label {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55em;
+  font-weight: 600;
+  color: #1565c0;
+  white-space: nowrap;
+}
+.climate-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 0.7em;
+  line-height: 1;
+}
+.climate-summary {
+  text-align: center;
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 8px;
+  padding: 6px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 8px;
+}
+body.dark-mode .climate-summary {
+  color: #aaa;
+  background: rgba(255,255,255,0.05);
+}
+.climate-recommendation {
+  text-align: center;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #2e7d32;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #e8f5e9;
+  border-radius: 8px;
+}
+body.dark-mode .climate-recommendation {
+  background: #1a3a1a;
+  color: #66bb6a;
+}
+
 .details {
   display: flex;
   gap: 8px;
