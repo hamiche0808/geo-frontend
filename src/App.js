@@ -1324,9 +1324,9 @@ function App() {
     if (!lat || !lon) return;
     setClimateLoading(true);
     try {
-      const resp = await apiPost(`${API}/api/climate?lat=${lat}&lon=${lon}`);
-      if (resp.data && resp.data.months) {
-        setClimateData(resp.data);
+      const data = await cachedGet(`${API}/api/climate`, { lat, lon });
+      if (data && data.months) {
+        setClimateData(data);
       }
     } catch { /* climat optionnel */ }
     setClimateLoading(false);
