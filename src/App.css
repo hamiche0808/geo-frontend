@@ -3932,9 +3932,9 @@ body.dark-mode .pattern-tile {
   color: inherit;
 }
 
-.App.pattern-topo > *,
-.App.pattern-coords > *,
-.App.pattern-adventure > * {
+.App.pattern-topo > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
+.App.pattern-coords > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
+.App.pattern-adventure > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay) {
   position: relative;
   z-index: 1;
 }
