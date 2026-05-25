@@ -3887,9 +3887,12 @@ body.dark-mode .pattern-tile {
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='currentColor' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='currentColor' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='currentColor' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='currentColor' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='currentColor' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='currentColor' opacity='0.2'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='%23999' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='%23999' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='%23999' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='%23999' opacity='0.2'/%3E%3C/svg%3E");
   background-size: 120px 120px;
+}
+body.dark-mode .App.pattern-topo::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M10 60 Q 30 20 50 50 T 90 60 T 120 50' fill='none' stroke='%23666' stroke-width='0.8'/%3E%3Cpath d='M0 90 Q 30 60 60 80 T 120 70' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Cpath d='M0 30 Q 30 50 60 20 T 120 40' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Cpath d='M20 10 T 40 30 T 70 10' fill='none' stroke='%23666' stroke-width='0.4'/%3E%3Ccircle cx='48' cy='48' r='3' fill='%23666' opacity='0.3'/%3E%3Ccircle cx='80' cy='55' r='2' fill='%23666' opacity='0.2'/%3E%3C/svg%3E");
 }
 .App.pattern-topo {
   position: relative;
@@ -3902,9 +3905,12 @@ body.dark-mode .pattern-tile {
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='currentColor' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='currentColor' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='currentColor' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='currentColor' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='currentColor' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='currentColor' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='currentColor'/%3E%3Ctext x='2' y='22' font-size='5' fill='currentColor' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='currentColor' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E");
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23999'/%3E%3Ctext x='2' y='22' font-size='5' fill='%23999' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='%23999' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E");
   background-size: 100px 100px;
+}
+body.dark-mode .App.pattern-coords::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cline x1='0' y1='25' x2='100' y2='25' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='0' y1='50' x2='100' y2='50' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='0' y1='75' x2='100' y2='75' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='25' y1='0' x2='25' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='50' y1='0' x2='50' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='75' y1='0' x2='75' y2='100' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23666'/%3E%3Ctext x='2' y='22' font-size='5' fill='%23666' opacity='0.5'%3E48%C2%B0N%3C/text%3E%3Ctext x='76' y='98' font-size='5' fill='%23666' opacity='0.5'%3E2%C2%B0E%3C/text%3E%3C/svg%3E");
 }
 .App.pattern-coords {
   position: relative;
@@ -3917,21 +3923,18 @@ body.dark-mode .pattern-tile {
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='currentColor' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='currentColor' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='currentColor' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='currentColor' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='currentColor' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='currentColor' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='currentColor' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='currentColor' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E");
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='%23999' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='%23999' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='%23999' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='%23999' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='%23999' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='%23999' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='%23999' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E");
   background-size: 80px 80px;
+}
+body.dark-mode .App.pattern-adventure::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='20' cy='20' r='5' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Cpath d='M20 15 L20 25 M15 20 L25 20' stroke='%23666' stroke-width='0.6'/%3E%3Ctext x='16' y='13' font-size='5' fill='%23666' opacity='0.4'%3EN%3C/text%3E%3Cpath d='M60 60 L66 50 L72 60' fill='none' stroke='%23666' stroke-width='0.6'/%3E%3Ccircle cx='66' cy='50' r='1.5' fill='%23666' opacity='0.4'/%3E%3Cpath d='M12 68 L18 56 L24 68' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Ccircle cx='18' cy='56' r='1.5' fill='%23666' opacity='0.4'/%3E%3Ctext x='54' y='26' font-size='7' fill='%23666' opacity='0.3'%3E%E2%9C%93%3C/text%3E%3C/svg%3E");
 }
 .App.pattern-adventure {
   position: relative;
 }
 
 /* Assurer que le contenu de l'app reste au-dessus du motif */
-.App.pattern-topo::before,
-.App.pattern-coords::before,
-.App.pattern-adventure::before {
-  color: inherit;
-}
-
 .App.pattern-topo > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
 .App.pattern-coords > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay),
 .App.pattern-adventure > :not(.legal-overlay):not(.modal-overlay):not(.qr-overlay) {
