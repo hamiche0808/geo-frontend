@@ -1612,11 +1612,11 @@ body.dark-mode .weather-fallback {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 12px 14px;
   background: var(--badge-bg);
   border-radius: 12px;
-  min-width: 90px;
+  min-width: 100px;
   text-align: center;
   font-size: 0.85em;
   transition: background 0.2s;
@@ -1634,8 +1634,9 @@ body.dark-mode .weather-fallback {
 }
 
 .forecast-icon {
-  font-size: 1.6em;
-  line-height: 1.2;
+  font-size: 2.4em;
+  line-height: 1.3;
+  margin: 4px 0;
 }
 
 .forecast-desc {
@@ -1661,6 +1662,47 @@ body.dark-mode .weather-fallback {
 .forecast-precip {
   font-size: 0.8em;
   color: var(--text-secondary);
+}
+
+.forecast-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+  margin-bottom: 2px;
+}
+
+.forecast-date {
+  font-size: 0.7em;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.forecast-temps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.forecast-temp-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+}
+
+.forecast-temp-label {
+  font-size: 0.65em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.forecast-temp-divider {
+  color: var(--border);
+  font-size: 0.8em;
+  opacity: 0.5;
 }
 
 .forecast-prob {

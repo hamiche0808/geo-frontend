@@ -16,16 +16,16 @@ export function getWeatherEmoji(code) {
 
 // ===== Déterminer si le temps est "beau" (extérieur) ou "mauvais" (intérieur) =====
 export function isGoodWeather(code) {
-  if (code === 0 || code === 1) return true;      // Ensoleillé, partiellement nuageux
-  if (code === 2) return true;                      // Partiellement nuageux
-  if (code === 3) return true;                      // Nuageux
-  if (code >= 45 && code <= 48) return false;       // Brouillard
-  if (code >= 51 && code <= 55) return false;       // Bruine
-  if (code >= 61 && code <= 65) return false;       // Pluie
-  if (code >= 71 && code <= 75) return false;       // Neige
-  if (code >= 80 && code <= 82) return false;       // Averses
-  if (code >= 95) return false;                     // Orage
-  return true; // Par défaut, on suppose beau temps
+  if (code === 0 || code === 1) return true;
+  if (code === 2) return true;
+  if (code === 3) return true;
+  if (code >= 45 && code <= 48) return false;
+  if (code >= 51 && code <= 55) return false;
+  if (code >= 61 && code <= 65) return false;
+  if (code >= 71 && code <= 75) return false;
+  if (code >= 80 && code <= 82) return false;
+  if (code >= 95) return false;
+  return true;
 }
 
 // ===== Activités intelligentes selon la météo =====
@@ -54,7 +54,7 @@ export function getSmartActivities(weatherCode) {
 export function getWeatherAnimationClass(code) {
   if (code === 0 || code === 1) return 'weather-anim-sunny';
   if (code === 2 || code === 3) return 'weather-anim-cloudy';
-  return ''; // Pas d'animation pour le mauvais temps
+  return '';
 }
 
 // ===== WMO codes description (affichage lisible) =====
@@ -72,16 +72,18 @@ export const WMO_DESCRIPTIONS = {
   95: "Orage", 96: "Orage avec grêle légère", 99: "Orage avec grêle forte"
 };
 
-// ===== Jours de la semaine en français =====
-const DAY_NAMES = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+// ===== Jours de la semaine (complets) =====
+const DAY_NAMES_FR_FULL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAY_NAMES_EN_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAY_ABBR_TO_INDEX = { 'Dim': 0, 'Lun': 1, 'Mar': 2, 'Mer': 3, 'Jeu': 4, 'Ven': 5, 'Sam': 6 };
 
 /**
- * WeatherWidget — Affiche la météo actuelle + prévisions 4 jours.
+ * WeatherWidget — Affiche la météo actuelle + prévisions 3 jours.
  * 
  * Props :
  *   weather     : objet retourné par /api/weather { current, daily }
  *   cityName    : nom de la ville (optionnel, pour le titre)
- *   lang        : 'fr' | 'en' (pour les labels, valeur par défaut 'fr')
+ *   lang        : 'fr' | 'en' (pour les labels)
  */
 export default function WeatherWidget({ weather, cityName, lang = 'fr' }) {
   if (!weather || !weather.current || weather.error) {
@@ -91,9 +93,29 @@ export default function WeatherWidget({ weather, cityName, lang = 'fr' }) {
   const { current, daily } = weather;
   const animClass = getWeatherAnimationClass(current.weathercode);
 
+  // Convertir l'abréviation du jour (ex: "Mar") en nom complet (ex: "Mardi")
+  // Le premier jour (idx=0) est "Demain" / "Tomorrow"
+  const getDayLabel = (dayAbbr, idx) => {
+    if (idx === 0) return lang === 'fr' ? 'Demain' : 'Tomorrow';
+    const idxFull = DAY_ABBR_TO_INDEX[dayAbbr];
+    if (idxFull !== undefined) {
+      return lang === 'fr' ? DAY_NAMES_FR_FULL[idxFull] : DAY_NAMES_EN_FULL[idxFull];
+    }
+    return dayAbbr || '';
+  };
+
+  // Obtenir le suffixe du jour (ex: "10" pour "10 mai")
+  const getDayDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.getDate().toString();
+    } catch { return ''; }
+  };
+
   return (
     <div className={`weather-widget ${animClass}`}>
-      {/* Météo actuelle */}
+      {/* ===== Météo actuelle ===== */}
       <div className="weather-info">
         <span className="weather-icon">{getWeatherEmoji(current.weathercode)}</span>
         <span className="weather-temp">{Math.round(current.temperature)}°C</span>
@@ -155,26 +177,50 @@ export default function WeatherWidget({ weather, cityName, lang = 'fr' }) {
         )}
       </div>
 
-      {/* Prévisions 4 jours */}
-      {daily && daily.length > 0 && (
+      {/* ===== Prévisions 3 jours (blocs clairs et aérés) ===== */}
+      {daily && daily.length > 1 && (
         <div className="forecast-bar">
-          {daily.slice(1).map((day, idx) => (
-            <div key={idx} className="forecast-day">
-              <span className="forecast-day-name">{day.day_name}</span>
-              <span className="forecast-icon">{getWeatherEmoji(day.weathercode)}</span>
-              <span className="forecast-desc">{day.description}</span>
-              <span className="forecast-temps">
-                <span className="forecast-max">{day.temp_max}°</span>
-                <span className="forecast-min">{day.temp_min}°</span>
-              </span>
-              <span className="forecast-precip">
-                💧{day.precipitation}mm
+          {daily.slice(1, 4).map((day, idx) => {
+            const dayName = getDayLabel(day.day_name, idx);
+            const dayDate = getDayDate(day.date);
+            return (
+              <div key={idx} className="forecast-day">
+                {/* En-tête : nom du jour + date */}
+                <div className="forecast-header">
+                  <span className="forecast-day-name">{dayName}</span>
+                  {dayDate && <span className="forecast-date">{dayDate}</span>}
+                </div>
+
+                {/* Émoji météo XL */}
+                <span className="forecast-icon">{getWeatherEmoji(day.weathercode)}</span>
+
+                {/* Description textuelle */}
+                <span className="forecast-desc">{day.description}</span>
+
+                {/* Températures min/max avec labels clairs */}
+                <div className="forecast-temps">
+                  <div className="forecast-temp-block">
+                    <span className="forecast-temp-label">
+                      {lang === 'fr' ? 'Min' : 'Min'}
+                    </span>
+                    <span className="forecast-min">{day.temp_min != null ? `${day.temp_min}°C` : '--'}</span>
+                  </div>
+                  <div className="forecast-temp-divider">|</div>
+                  <div className="forecast-temp-block">
+                    <span className="forecast-temp-label">
+                      {lang === 'fr' ? 'Max' : 'Max'}
+                    </span>
+                    <span className="forecast-max">{day.temp_max != null ? `${day.temp_max}°C` : '--'}</span>
+                  </div>
+                </div>
+
+                {/* Précipitations */}
                 {day.precipitation_probability != null && day.precipitation_probability > 0 && (
-                  <span className="forecast-prob"> ({day.precipitation_probability}%)</span>
+                  <span className="forecast-precip">🌧️ {day.precipitation_probability}%</span>
                 )}
-              </span>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
