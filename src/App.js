@@ -447,14 +447,12 @@ const TR = {
     search: 'Recherche', itinerary: 'Itineraire', settings: 'Parametres',
     fullscreen: 'Plein ecran', exitFullscreen: 'Reduire',
     mapLayer: 'Fond de carte', street: 'Route', satellite: 'Satellite', terrain: 'Relief',
-    searchPlaceholder: 'Code postal ou nom de ville...',
     noMapData: 'Effectuez une recherche', noMapDataDistance: 'Selectionnez deux villes',
   },
   en: {
     search: 'Search', itinerary: 'Route', settings: 'Settings',
     fullscreen: 'Full screen', exitFullscreen: 'Minimize',
     mapLayer: 'Map layer', street: 'Street', satellite: 'Satellite', terrain: 'Terrain',
-    searchPlaceholder: 'Postal code or city name...',
     noMapData: 'Search for a location', noMapDataDistance: 'Select two cities',
   }
 };
@@ -588,6 +586,85 @@ COUNTRIES.forEach(c => { COUNTRY_LOOKUP[c.code] = c; });
 function getCountryDisplay(code) {
   const found = COUNTRY_LOOKUP[code] || COUNTRY_LOOKUP[code.toUpperCase()];
   return found ? `${found.flag} ${found.name}` : (code || '');
+}
+
+// ===== Capitales des pays de notre liste (pour placeholder dynamique) =====
+// Format : "code postal + capitale" si connu, sinon juste "capitale"
+const COUNTRY_CAPITALS = {
+  FR: "75001 Paris",
+  BE: "1000 Bruxelles",
+  DE: "10115 Berlin",
+  IT: "00100 Rome",
+  ES: "28001 Madrid",
+  PT: "1000 Lisbonne",
+  NL: "1012 Amsterdam",
+  AT: "1010 Vienne",
+  GB: "SW1A Londres",
+  CH: "8001 Zurich",
+  PL: "00-001 Varsovie",
+  CZ: "110 00 Prague",
+  HU: "1051 Budapest",
+  RO: "010011 Bucarest",
+  BG: "1000 Sofia",
+  GR: "10431 Athènes",
+  IE: "D01 Dublin",
+  DK: "1050 Copenhague",
+  SE: "11120 Stockholm",
+  NO: "0150 Oslo",
+  FI: "00100 Helsinki",
+  SK: "81101 Bratislava",
+  SI: "1000 Ljubljana",
+  HR: "10000 Zagreb",
+  LT: "01100 Vilnius",
+  LV: "LV-1010 Riga",
+  EE: "10111 Tallinn",
+  LU: "L-1230 Luxembourg",
+  MT: "VLT La Valette",
+  IS: "101 Reykjavik",
+  US: "Washington D.C.",
+  CA: "Ottawa",
+  JP: "Tokyo",
+  CN: "Pékin",
+  IN: "New Delhi",
+  KR: "Séoul",
+  TR: "Ankara",
+  TH: "Bangkok",
+  AR: "Buenos Aires",
+  BR: "Brasília",
+  MX: "Mexico",
+  AU: "Canberra",
+  NZ: "Wellington",
+  DZ: "Alger",
+  MA: "Rabat",
+  TN: "Tunis",
+  EG: "Le Caire",
+  ZA: "Pretoria",
+  SN: "Dakar",
+  CI: "Yamoussoukro",
+  KE: "Nairobi",
+  IL: "Jérusalem",
+  SG: "Singapour",
+  HK: "Hong Kong",
+  MY: "Kuala Lumpur",
+  ID: "Jakarta",
+  PH: "Manille",
+  VN: "Hanoï",
+  CO: "Bogota",
+  CL: "Santiago",
+  PE: "Lima",
+  RU: "Moscou",
+  UA: "Kyiv",
+  RS: "Belgrade",
+  BA: "Sarajevo",
+  AL: "Tirana",
+  ME: "Podgorica",
+};
+
+function getPlaceholder(countryCode) {
+  const capital = COUNTRY_CAPITALS[countryCode];
+  if (capital) return capital;
+  // Fallback : texte générique
+  return 'Code postal ou nom de ville...';
 }
 
 // ===== Échantillon de villes pour le bouton "Ville au hasard" =====
@@ -2320,7 +2397,7 @@ function App() {
                 <input type="text" value={searchInput} onChange={handleInputChange}
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder={tr("searchPlaceholder", lang)} />
+                  placeholder={getPlaceholder(country)} />
                 {searchingDebounce && <span className="search-spinner">⏳ Recherche...</span>}
                 {showSuggestions && suggestions.length > 0 && (
                   <ul className="suggestions">
