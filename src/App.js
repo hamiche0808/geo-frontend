@@ -8,11 +8,12 @@ import WeatherWidget from './WeatherWidget';
 import ActivitiesWidget from './ActivitiesWidget';
 
 // ===== Axios personnalisé : User-Agent + cache session =====
+const GEOLOC_API_KEY = process.env.REACT_APP_GEOLOC_API_KEY || 'geoloc-app-key-2026';
 const API_CLIENT = axios.create({
   headers: {
     'User-Agent': 'GeoLocApp/5.0 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
-    'X-API-Key': 'geoloc-app-key-2026',
+    'X-API-Key': GEOLOC_API_KEY,
   },
   timeout: 60000
 });
@@ -147,7 +148,7 @@ const RAILWAY_CLIENT = axios.create({
   headers: {
     'User-Agent': 'GeoLocApp/5.0 (hamiche08.08@gmail.com)',
     'Accept': 'application/json',
-    'X-API-Key': 'geoloc-app-key-2026',
+    'X-API-Key': GEOLOC_API_KEY,
   },
   timeout: 3000
 });
@@ -581,6 +582,14 @@ const COUNTRIES = [
   { code: 'ZA', name: 'Afrique du Sud', flag: '🇿🇦' },
 ];
 
+// ===== Helper : convertir un code pays (FR) en drapeau + nom (🇫🇷 France) =====
+const COUNTRY_LOOKUP = {};
+COUNTRIES.forEach(c => { COUNTRY_LOOKUP[c.code] = c; });
+function getCountryDisplay(code) {
+  const found = COUNTRY_LOOKUP[code] || COUNTRY_LOOKUP[code.toUpperCase()];
+  return found ? `${found.flag} ${found.name}` : (code || '');
+}
+
 // ===== Échantillon de villes pour le bouton "Ville au hasard" =====
 const SAMPLE_CITIES = {
   FR: ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille', 'Rennes', 'Reims', 'Saint-Étienne', 'Le Havre', 'Toulon', 'Grenoble', 'Dijon', 'Angers', 'Nîmes', 'Villeurbanne'],
@@ -850,12 +859,12 @@ const CityInput = React.memo(function CityInput({ label, value, onChange, onSele
     } else { setSuggestions([]); setShow(false); setSearching(false); }
   };
 
-  // Formater l'affichage d'une suggestion avec code postal et pays
+  // Formater l'affichage d'une suggestion avec code postal et pays (drapeau + nom)
   const formatSuggestion = (s) => {
     const name = s.city || s.display_name?.split(',')[0] || '';
     const code = s.postal_code ? `(${s.postal_code})` : '';
-    const countryName = s.country || s.country_code || '';
-    return { name, code, countryName };
+    const countryDisplay = getCountryDisplay(s.country_code) || s.country || '';
+    return { name, code, countryName: countryDisplay };
   };
 
   return (
@@ -2194,23 +2203,29 @@ function App() {
     return Math.round(cost * 100) / 100;
   };
 
-  // ===== POIs (liens affiliés) =====
+  // ===== POIs (liens affiliés avec variables d'environnement) =====
   const getAffiliateLinks = (cityName, countryCode) => {
     const searchCity = encodeURIComponent(cityName || '');
+    const bookingAid = process.env.REACT_APP_BOOKING_AID || '';
+    const rentalcarsCode = process.env.REACT_APP_RENTALCARS_CODE || '';
+    const getyourguideId = process.env.REACT_APP_GETYOURGUIDE_ID || '';
+    const bookingParam = bookingAid ? `&aid=${bookingAid}` : '';
+    const rentalcarsParam = rentalcarsCode ? `?affiliateCode=${rentalcarsCode}` : '';
+    const getyourguideParam = getyourguideId ? `&partner_id=${getyourguideId}` : '';
     return [
       {
         name: '🏨 Hôtels',
-        url: `https://www.booking.com/searchresults.html?ss=${searchCity}`,
+        url: `https://www.booking.com/searchresults.html?ss=${searchCity}&lang=fr&currency=EUR${bookingParam}`,
         label: `Hôtels à ${cityName}`
       },
       {
         name: '🚗 Voitures',
-        url: `https://www.kayak.com/cars/${searchCity}`,
+        url: `https://www.rentalcars.com/${(countryCode || 'fr').toLowerCase()}/${searchCity}/${rentalcarsParam}`,
         label: `Location de voiture à ${cityName}`
       },
       {
         name: '🎟️ Activités',
-        url: `https://www.tripadvisor.com/Search?q=${searchCity}`,
+        url: `https://www.getyourguide.fr/s/?q=${searchCity}&currency=EUR${getyourguideParam}`,
         label: `Activités à ${cityName}`
       },
     ];
