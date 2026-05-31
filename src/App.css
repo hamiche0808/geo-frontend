@@ -1230,19 +1230,28 @@ body.dark-mode .climate-recommendation {
 }
 
 .btn-export {
-  padding: 8px 20px;
-  border: 2px solid #667eea;
-  background: white;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px;
+  min-width: 80px;
+  background: var(--badge-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.95em;
-  color: #667eea;
-  transition: all 0.3s;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--text);
+  transition: all 0.2s;
 }
 
 .btn-export:hover {
   background: #667eea;
   color: white;
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* ===== Résultat Distance ===== */
@@ -1418,6 +1427,8 @@ body.dark-mode .climate-recommendation {
     align-items: center;
   }
 
+  .btn-qr,
+  .btn-share,
   .btn-export {
     width: 100%;
     max-width: 250px;
@@ -1494,13 +1505,11 @@ body.dark-mode .leaflet-control-attribution { background: rgba(0,0,0,0.6); color
 body.dark-mode .detail-badge { background: #1f2a4a; color: #ccc; }
 body.dark-mode .coords { color: #888; }
 
-body.dark-mode .btn-export {
-  border-color: #7c8cf5;
-  color: #7c8cf5;
-}
 body.dark-mode .btn-export:hover {
   background: #7c8cf5;
+  border-color: #7c8cf5;
   color: #1a1a2e;
+  box-shadow: 0 4px 12px rgba(124, 140, 245, 0.3);
 }
 
 body.dark-mode .history-dropdown {
@@ -1670,17 +1679,28 @@ body.dark-mode .forecast-day:hover {
 
 /* Bouton partage */
 .btn-share {
-  padding: 8px 20px;
-  border: 2px solid #34a853;
-  background: white;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px;
+  min-width: 80px;
+  background: var(--badge-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.95em;
-  color: #34a853;
-  transition: all 0.3s;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--text);
+  transition: all 0.2s;
 }
-body.dark-mode .btn-share { background: transparent; }
-.btn-share:hover { background: #34a853; color: white; }
+.btn-share:hover {
+  background: #34a853;
+  color: white;
+  border-color: #34a853;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
 
 .btn-route-from-here {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -2364,21 +2384,28 @@ body.dark-mode .traffic-link {
 
 /* ===== QR Code ===== */
 .btn-qr {
-  padding: 8px 20px;
-  border: 2px solid #9b59b6;
-  background: white;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px;
+  min-width: 80px;
+  background: var(--badge-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.95em;
-  color: #9b59b6;
-  transition: all 0.3s;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--text);
+  transition: all 0.2s;
 }
-
-body.dark-mode .btn-qr { background: transparent; }
 
 .btn-qr:hover {
   background: #9b59b6;
   color: white;
+  border-color: #9b59b6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
 }
 
 .qr-section {
