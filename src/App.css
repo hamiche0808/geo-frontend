@@ -3689,19 +3689,35 @@ body.dark-mode .chat-msg-model .chat-msg-bubble {
 @media (max-width: 480px) {
   .chat-input-area {
     gap: 4px;
-    padding: 8px 6px;
+    padding: 8px 4px;
   }
   .chat-input {
     padding: 8px 10px;
     font-size: 0.85em;
-    min-width: 40px; /* Évite que l'input disparaisse */
+    min-width: 30px; /* minimum pour que l'input existe encore */
   }
   .chat-send-btn,
   .chat-mic-btn {
     width: 36px;
     height: 36px;
-    font-size: 0.95em;
+    font-size: 0.9em;
     flex-shrink: 0;
+  }
+}
+@media (max-width: 380px) {
+  .chat-input-area {
+    padding: 6px 2px;
+    gap: 3px;
+  }
+  .chat-send-btn,
+  .chat-mic-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8em;
+  }
+  .chat-input {
+    padding: 6px 8px;
+    font-size: 0.8em;
   }
 }
 .chat-input {
