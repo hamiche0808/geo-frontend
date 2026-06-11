@@ -1616,19 +1616,22 @@ function App() {
     return APP_URL;
   };
 
-  // ===== Miniature ville (Wikipedia) =====
+  // ===== Miniature ville (Wikipedia → backend fallback) =====
+  const [cityImageFallbackUrl, setCityImageFallbackUrl] = useState(null); // URL du fallback (backend)
   useEffect(() => {
-    if (!location?.city) { setCityImage(null); setCityImageLoading(false); setFallbackImgError(false); return; }
+    if (!location?.city) { setCityImage(null); setCityImageLoading(false); setFallbackImgError(false); setCityImageFallbackUrl(null); return; }
     setFallbackImgError(false);
+    setCityImageFallbackUrl(null);
     setCityImageLoading(true);
     const city = location.city;
     const country = location.country || 'France';
+    const lang = location.country_code === 'FR' ? 'fr' : 'en';
     // Essayer Wikipedia en français puis en anglais
     const fetchImage = async () => {
-      for (const lang of ['fr', 'en']) {
+      for (const tryLang of ['fr', 'en']) {
         try {
           const resp = await fetch(
-            `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(city)}&prop=pageimages&format=json&pithumbsize=300&origin=*`
+            `https://${tryLang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(city)}&prop=pageimages&format=json&pithumbsize=300&origin=*`
           );
           const data = await resp.json();
           const pages = data?.query?.pages;
@@ -1642,6 +1645,15 @@ function App() {
           }
         } catch { /* ignore */ }
       }
+      // Fallback via le backend (Wikimedia Commons → Pexels si configuré)
+      try {
+        const resp = await protectedAx.get('/api/city-image', {
+          params: { city, country, lang }
+        });
+        if (resp.data?.url) {
+          setCityImageFallbackUrl(resp.data.url);
+        }
+      } catch { /* fallback échoué aussi */ }
       setCityImage(null);
       setCityImageLoading(false);
     };
@@ -2708,10 +2720,12 @@ function App() {
               </a>
             ) : fallbackImgError ? (
               <div className="city-thumbnail-fallback">🏙️</div>
-            ) : (
+            ) : cityImageFallbackUrl ? (
               <div className="city-thumbnail-fallback">
-                <img src={`https://source.unsplash.com/featured/80x80/?${encodeURIComponent(location.country || 'landscape')},landscape`} alt={location.country || ''} className="city-thumbnail-fallback-img" loading="lazy" onError={() => setFallbackImgError(true)} />
+                <img src={cityImageFallbackUrl} alt={location.city} className="city-thumbnail-fallback-img" loading="lazy" onError={() => setFallbackImgError(true)} />
               </div>
+            ) : (
+              <div className="city-thumbnail-fallback">🏙️</div>
             )}
             <div className="city-info">
               {location.display_name ? (
