@@ -1130,6 +1130,7 @@ function App() {
   const [chatStarted, setChatStarted] = useState(false);
   const [chatListening, setChatListening] = useState(false);
   const chatRecognitionRef = useRef(null);
+  const [guideLang, setGuideLang] = useState(lang === 'fr' ? 'fr' : 'en'); // Langue du guide IA
 
   const [pwaInstallAvailable, setPwaInstallAvailable] = useState(false);
   const [updateCheckMsg, setUpdateCheckMsg] = useState(null); // 'checking' | 'uptodate' | 'found' | null
@@ -1490,7 +1491,7 @@ function App() {
       const resp = await apiPost(`${API}/api/ai/chat`, {
         city: location.city,
         country_code: location.country_code,
-        lang: lang,
+        lang: guideLang,
         messages: updatedMessages,
         context: chatContext,
       });
@@ -1581,7 +1582,7 @@ function App() {
       }
     } catch { /* ignore */ }
     // Sinon, démarrer une nouvelle conversation
-    const firstQuestion = lang === 'fr'
+    const firstQuestion = guideLang === 'fr'
       ? `Quels sont les meilleurs endroits à visiter à ${location.city} et quelle spécialité locale goûter ?`
       : `What are the best places to visit in ${location.city} and what local specialty should I try?`;
     sendChatMessage(firstQuestion);
@@ -3102,8 +3103,26 @@ function App() {
           {/* Chat Guide Touristiqu IA conversationnel */}
           {location?.country_code && !chatStarted && (
             <div className="ai-guide-section">
+              <div className="ai-guide-lang-selector">
+                {[
+                  { code: 'fr', label: '🇫🇷' },
+                  { code: 'en', label: '🇬🇧' },
+                  { code: 'es', label: '🇪🇸' },
+                  { code: 'de', label: '🇩🇪' },
+                  { code: 'it', label: '🇮🇹' },
+                ].map(l => (
+                  <button
+                    key={l.code}
+                    className={`ai-guide-lang-btn${guideLang === l.code ? ' active' : ''}`}
+                    onClick={() => setGuideLang(l.code)}
+                    title={l.code === 'fr' ? 'Français' : l.code === 'en' ? 'English' : l.code === 'es' ? 'Español' : l.code === 'de' ? 'Deutsch' : 'Italiano'}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
               <button className="ai-guide-btn" onClick={startChat} disabled={chatLoading}>
-                {chatLoading ? '⏳ Démarrage...' : '🤖 Mon guide touristique IA'}
+                {chatLoading ? '⏳ Démarrage...' : '🤖 ' + (guideLang === 'fr' ? 'Guide IA' : guideLang === 'en' ? 'AI Guide' : guideLang === 'es' ? 'Guía IA' : guideLang === 'de' ? 'KI-Reiseführer' : 'Guida IA')}
               </button>
             </div>
           )}
