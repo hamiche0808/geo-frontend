@@ -1617,9 +1617,23 @@ body.dark-mode .weather-fallback {
   background: var(--badge-bg);
   border-radius: 12px;
   min-width: 100px;
+  flex: 1;
   text-align: center;
   font-size: 0.85em;
   transition: background 0.2s;
+}
+@media (max-width: 480px) {
+  .forecast-day {
+    padding: 10px 8px;
+    min-width: 80px;
+    font-size: 0.78em;
+  }
+  .forecast-icon {
+    font-size: 1.8em;
+  }
+  .forecast-bar {
+    gap: 5px;
+  }
 }
 
 .forecast-day:hover {
